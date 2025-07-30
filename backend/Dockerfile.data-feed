@@ -1,0 +1,65 @@
+# Crypto-0DTE-System Data Feed Service Dockerfile
+
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    gcc \
+    g++ \
+    git \
+    libpq-dev \
+    libffi-dev \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install TA-Lib (Technical Analysis Library)
+RUN curl -L http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz | tar xz && \
+    cd ta-lib && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf ta-lib
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /var/log/crypto-0dte && \
+    mkdir -p /app/data
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash crypto && \
+    chown -R crypto:crypto /app && \
+    chown -R crypto:crypto /var/log/crypto-0dte
+
+# Switch to non-root user
+USER crypto
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python -c "import redis; r = redis.Redis(host='redis', port=6379); r.ping()" || exit 1
+
+# Default command - run data feed service
+CMD ["python", "-m", "app.services.data_feed_service"]
+
