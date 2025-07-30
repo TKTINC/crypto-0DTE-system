@@ -1,0 +1,307 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # DATABASE SERVICES
+  # =============================================================================
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: crypto-0dte-postgres
+    environment:
+      POSTGRES_DB: crypto_0dte_db
+      POSTGRES_USER: crypto_user
+      POSTGRES_PASSWORD: crypto_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/app/scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: crypto-0dte-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: crypto-0dte-influxdb
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: crypto_password
+      DOCKER_INFLUXDB_INIT_ORG: crypto-0dte
+      DOCKER_INFLUXDB_INIT_BUCKET: market_data
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: crypto-0dte-super-secret-token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # BACKEND SERVICES
+  # =============================================================================
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crypto-0dte-backend
+    environment:
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_0dte_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=crypto-0dte-super-secret-token
+      - INFLUXDB_ORG=crypto-0dte
+      - INFLUXDB_BUCKET=market_data
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/crypto-0dte
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Data feed service for real-time market data
+  data-feed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.data-feed
+    container_name: crypto-0dte-data-feed
+    environment:
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_0dte_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=crypto-0dte-super-secret-token
+      - INFLUXDB_ORG=crypto-0dte
+      - INFLUXDB_BUCKET=market_data
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/crypto-0dte
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # Signal generation service
+  signal-generator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.signal-generator
+    container_name: crypto-0dte-signal-generator
+    environment:
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_0dte_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=crypto-0dte-super-secret-token
+      - INFLUXDB_ORG=crypto-0dte
+      - INFLUXDB_BUCKET=market_data
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/crypto-0dte
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+      - backend
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # Celery worker for background tasks
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crypto-0dte-celery-worker
+    environment:
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_0dte_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=crypto-0dte-super-secret-token
+      - INFLUXDB_ORG=crypto-0dte
+      - INFLUXDB_BUCKET=market_data
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/crypto-0dte
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+    command: celery -A app.celery_app worker --loglevel=info
+
+  # Celery beat for scheduled tasks
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crypto-0dte-celery-beat
+    environment:
+      - DATABASE_URL=postgresql://crypto_user:crypto_password@postgres:5432/crypto_0dte_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=crypto-0dte-super-secret-token
+      - INFLUXDB_ORG=crypto-0dte
+      - INFLUXDB_BUCKET=market_data
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/crypto-0dte
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+    command: celery -A app.celery_app beat --loglevel=info
+
+  # =============================================================================
+  # FRONTEND SERVICE
+  # =============================================================================
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crypto-0dte-frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000/ws
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # MONITORING SERVICES
+  # =============================================================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: crypto-0dte-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: crypto-0dte-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=crypto_admin
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # DEVELOPMENT TOOLS
+  # =============================================================================
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: crypto-0dte-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@crypto-0dte.com
+      PGADMIN_DEFAULT_PASSWORD: crypto_admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: crypto-0dte-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - crypto-0dte-network
+    restart: unless-stopped
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+
+networks:
+  crypto-0dte-network:
+    driver: bridge
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  influxdb_data:
+    driver: local
+  influxdb_config:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
