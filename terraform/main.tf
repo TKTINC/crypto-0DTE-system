@@ -751,10 +751,6 @@ resource "aws_iam_role_policy" "ecs_ssm_policy" {
   })
 }
 
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
 
 
 # =============================================================================
