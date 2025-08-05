@@ -3,10 +3,10 @@
 # =============================================================================
 # WEB FRAMEWORK
 # =============================================================================
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
+fastapi>=0.104.0,<1.0.0
+uvicorn[standard]>=0.24.0,<1.0.0
+pydantic>=2.5.0,<3.0.0
+pydantic-settings>=2.1.0,<3.0.0
 
 # =============================================================================
 # DATABASE & ORM
@@ -199,7 +199,7 @@ supervisor==4.2.5
 # SPECIFIC CRYPTO TRADING LIBRARIES
 # =============================================================================
 # Market data analysis
-mplfinance>=0.12.9
+mplfinance==0.12.10b0  # Latest available version
 plotly==5.17.0
 
 # Risk management
@@ -207,8 +207,8 @@ plotly==5.17.0
 # pyfolio - Not actively maintained, custom implementation needed
 
 # Portfolio optimization
-cvxpy==1.4.1
-pypfopt==1.5.5
+cvxpy>=1.4.0,<2.0.0
+pypfopt>=1.5.0,<2.0.0
 
 # =============================================================================
 # WEBSOCKET & REAL-TIME DATA
