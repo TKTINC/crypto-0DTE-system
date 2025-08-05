@@ -189,8 +189,8 @@ class ComplianceLog(Base):
     request_id = Column(String(100), nullable=True)  # For request tracking
     session_id = Column(String(100), nullable=True)
     
-    # Metadata
-    metadata = Column(JSON, nullable=True)  # Additional context data
+    # Additional Data
+    additional_data = Column(JSON, nullable=True)  # Additional context data
     
     # IP and User Agent (for audit trail)
     ip_address = Column(String(45), nullable=True)  # IPv6 compatible
