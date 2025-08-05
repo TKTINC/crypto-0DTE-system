@@ -679,6 +679,20 @@ resource "aws_ssm_parameter" "delta_exchange_api_key" {
   }
 }
 
+resource "aws_ssm_parameter" "delta_exchange_secret_key" {
+  name  = "/${var.project_name}/delta_exchange_secret_key"
+  type  = "SecureString"
+  value = "placeholder_secret"
+  
+  tags = {
+    Name = "${var.project_name}-delta-exchange-secret-key"
+  }
+  
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "openai_api_key" {
   name  = "/${var.project_name}/openai_api_key"
   type  = "SecureString"
@@ -784,7 +798,7 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           name  = "REDIS_URL"
-          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.configuration_endpoint_address}:6379"
         },
         {
           name  = "ENVIRONMENT"
@@ -880,7 +894,7 @@ resource "aws_ecs_task_definition" "data_feed" {
         },
         {
           name  = "REDIS_URL"
-          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.configuration_endpoint_address}:6379"
         }
       ]
       secrets = [
@@ -928,7 +942,7 @@ resource "aws_ecs_task_definition" "signal_generator" {
         },
         {
           name  = "REDIS_URL"
-          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.configuration_endpoint_address}:6379"
         }
       ]
       secrets = [
