@@ -146,16 +146,17 @@ fi
 
 log_step "STEP 3: REBUILD DOCKER IMAGES WITH MODEL FIXES"
 
-# Function to build and push image
-build_and_push_image() {
+# Function to build and push image with specific Dockerfile
+build_and_push_image_with_dockerfile() {
     local service_name=$1
     local directory=$2
+    local dockerfile=$3
     
-    log_info "Building $service_name image..."
+    log_info "Building $service_name image using $dockerfile..."
     cd $directory
     
     # Build with no cache to ensure new model files are included
-    docker build --no-cache -t crypto-0dte-system-$service_name .
+    docker build --no-cache -f $dockerfile -t crypto-0dte-system-$service_name .
     
     if [ $? -ne 0 ]; then
         log_error "Failed to build $service_name image"
@@ -179,10 +180,10 @@ build_and_push_image() {
     cd ..
 }
 
-# Build all three images
-build_and_push_image "backend" "backend"
-build_and_push_image "data-feed" "data-feed"
-build_and_push_image "signal-generator" "signal-generator"
+# Build all three images (all from backend directory with different Dockerfiles)
+build_and_push_image_with_dockerfile "backend" "backend" "Dockerfile"
+build_and_push_image_with_dockerfile "data-feed" "backend" "Dockerfile.data-feed"
+build_and_push_image_with_dockerfile "signal-generator" "backend" "Dockerfile.signal-generator"
 
 log_success "All Docker images rebuilt and pushed with model fixes"
 
