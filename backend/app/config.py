@@ -7,7 +7,8 @@ Loads configuration from environment variables and .env files.
 
 import os
 from typing import List, Optional, Dict, Any
-from pydantic import BaseSettings, validator, Field
+from pydantic_settings import BaseSettings
+from pydantic import validator, Field
 from functools import lru_cache
 
 

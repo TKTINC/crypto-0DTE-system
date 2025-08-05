@@ -295,7 +295,7 @@ resource "aws_lb_target_group" "backend" {
 }
 
 # Load Balancer Listeners
-resource "aws_lb_listener" "frontend" {
+resource "aws_lb_listener" "main" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
   protocol          = "HTTP"
@@ -306,18 +306,51 @@ resource "aws_lb_listener" "frontend" {
   }
 }
 
-resource "aws_lb_listener_rule" "backend" {
-  listener_arn = aws_lb_listener.frontend.arn
+# Backend API routing rules
+resource "aws_lb_listener_rule" "backend_api" {
+  listener_arn = aws_lb_listener.main.arn
   priority     = 100
-  
+
   action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
   }
-  
+
   condition {
     path_pattern {
-      values = ["/api/*", "/docs", "/health"]
+      values = ["/api/*"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_health" {
+  listener_arn = aws_lb_listener.main.arn
+  priority     = 101
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/health"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_docs" {
+  listener_arn = aws_lb_listener.main.arn
+  priority     = 102
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/docs"]
     }
   }
 }
@@ -662,4 +695,440 @@ resource "aws_ssm_parameter" "openai_api_key" {
 
 # ECS Task Definitions will be created in separate files
 # This keeps the main.tf file manageable
+
+
+
+# =============================================================================
+# IAM ROLES FOR ECS
+# =============================================================================
+
+# ECS Task Execution Role
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "${var.project_name}-ecs-execution-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+  tags = var.tags
+}
+
+# Attach ECS Task Execution Role Policy
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+# Add SSM Parameter access for API keys
+resource "aws_iam_role_policy" "ecs_ssm_policy" {
+  name = "${var.project_name}-ecs-ssm-policy"
+  role = aws_iam_role.ecs_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+          "ssm:GetParametersByPath"
+        ]
+        Resource = [
+          "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# =============================================================================
+# CLOUDWATCH LOG GROUPS
+# =============================================================================
+
+resource "aws_cloudwatch_log_group" "backend" {
+  name              = "/ecs/${var.project_name}/backend"
+  retention_in_days = 7
+  
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "frontend" {
+  name              = "/ecs/${var.project_name}/frontend"
+  retention_in_days = 7
+  
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "data_feed" {
+  name              = "/ecs/${var.project_name}/data-feed"
+  retention_in_days = 7
+  
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "signal_generator" {
+  name              = "/ecs/${var.project_name}/signal-generator"
+  retention_in_days = 7
+  
+  tags = var.tags
+}
+
+# =============================================================================
+# SSM PARAMETERS FOR API KEYS
+# =============================================================================
+
+resource "aws_ssm_parameter" "openai_api_key" {
+  name  = "/${var.project_name}/openai_api_key"
+  type  = "SecureString"
+  value = "placeholder-will-be-updated-manually"
+  
+  tags = var.tags
+  
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "delta_exchange_api_key" {
+  name  = "/${var.project_name}/delta_exchange_api_key"
+  type  = "SecureString"
+  value = "placeholder-will-be-updated-manually"
+  
+  tags = var.tags
+  
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "delta_exchange_secret_key" {
+  name  = "/${var.project_name}/delta_exchange_secret_key"
+  type  = "SecureString"
+  value = "placeholder-will-be-updated-manually"
+  
+  tags = var.tags
+  
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+
+# =============================================================================
+# ECS TASK DEFINITIONS
+# =============================================================================
+
+# Backend Task Definition
+resource "aws_ecs_task_definition" "backend" {
+  family                   = "${var.project_name}-backend"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "backend"
+      image = "${aws_ecr_repository.backend.repository_url}:latest"
+      portMappings = [
+        {
+          containerPort = 8000
+          protocol      = "tcp"
+        }
+      ]
+      essential = true
+      environment = [
+        {
+          name  = "DATABASE_URL"
+          value = "postgresql://postgres:${random_password.db_password.result}@${aws_db_instance.main.endpoint}:5432/${replace(var.project_name, "-", "_")}"
+        },
+        {
+          name  = "REDIS_URL"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+        },
+        {
+          name  = "ENVIRONMENT"
+          value = "production"
+        }
+      ]
+      secrets = [
+        {
+          name      = "OPENAI_API_KEY"
+          valueFrom = aws_ssm_parameter.openai_api_key.name
+        },
+        {
+          name      = "DELTA_EXCHANGE_API_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_api_key.name
+        },
+        {
+          name      = "DELTA_EXCHANGE_SECRET_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_secret_key.name
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.backend.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+  
+  tags = var.tags
+}
+
+# Frontend Task Definition
+resource "aws_ecs_task_definition" "frontend" {
+  family                   = "${var.project_name}-frontend"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 512
+  memory                   = 1024
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "frontend"
+      image = "${aws_ecr_repository.frontend.repository_url}:latest"
+      portMappings = [
+        {
+          containerPort = 3000
+          protocol      = "tcp"
+        }
+      ]
+      essential = true
+      environment = [
+        {
+          name  = "REACT_APP_API_URL"
+          value = "http://${aws_lb.main.dns_name}/api"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.frontend.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+  
+  tags = var.tags
+}
+
+# Data Feed Task Definition
+resource "aws_ecs_task_definition" "data_feed" {
+  family                   = "${var.project_name}-data-feed"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 512
+  memory                   = 1024
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "data-feed"
+      image = "${aws_ecr_repository.data_feed.repository_url}:latest"
+      essential = true
+      environment = [
+        {
+          name  = "DATABASE_URL"
+          value = "postgresql://postgres:${random_password.db_password.result}@${aws_db_instance.main.endpoint}:5432/${replace(var.project_name, "-", "_")}"
+        },
+        {
+          name  = "REDIS_URL"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+        }
+      ]
+      secrets = [
+        {
+          name      = "DELTA_EXCHANGE_API_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_api_key.name
+        },
+        {
+          name      = "DELTA_EXCHANGE_SECRET_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_secret_key.name
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.data_feed.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+  
+  tags = var.tags
+}
+
+# Signal Generator Task Definition
+resource "aws_ecs_task_definition" "signal_generator" {
+  family                   = "${var.project_name}-signal-generator"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 512
+  memory                   = 1024
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "signal-generator"
+      image = "${aws_ecr_repository.signal_generator.repository_url}:latest"
+      essential = true
+      environment = [
+        {
+          name  = "DATABASE_URL"
+          value = "postgresql://postgres:${random_password.db_password.result}@${aws_db_instance.main.endpoint}:5432/${replace(var.project_name, "-", "_")}"
+        },
+        {
+          name  = "REDIS_URL"
+          value = "redis://:${random_password.redis_password.result}@${aws_elasticache_replication_group.main.primary_endpoint}:6379"
+        }
+      ]
+      secrets = [
+        {
+          name      = "OPENAI_API_KEY"
+          valueFrom = aws_ssm_parameter.openai_api_key.name
+        },
+        {
+          name      = "DELTA_EXCHANGE_API_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_api_key.name
+        },
+        {
+          name      = "DELTA_EXCHANGE_SECRET_KEY"
+          valueFrom = aws_ssm_parameter.delta_exchange_secret_key.name
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.signal_generator.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+  
+  tags = var.tags
+}
+
+# =============================================================================
+# ECS SERVICES
+# =============================================================================
+
+# Backend Service
+resource "aws_ecs_service" "backend" {
+  name            = "${var.project_name}-backend"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.backend.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend.arn
+    container_name   = "backend"
+    container_port   = 8000
+  }
+
+  depends_on = [
+    aws_lb_listener.main,
+    aws_iam_role_policy_attachment.ecs_execution_role_policy
+  ]
+  
+  tags = var.tags
+}
+
+# Frontend Service
+resource "aws_ecs_service" "frontend" {
+  name            = "${var.project_name}-frontend"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.frontend.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.frontend.arn
+    container_name   = "frontend"
+    container_port   = 3000
+  }
+
+  depends_on = [
+    aws_lb_listener.main,
+    aws_iam_role_policy_attachment.ecs_execution_role_policy
+  ]
+  
+  tags = var.tags
+}
+
+# Data Feed Service
+resource "aws_ecs_service" "data_feed" {
+  name            = "${var.project_name}-data-feed"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.data_feed.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.ecs_execution_role_policy
+  ]
+  
+  tags = var.tags
+}
+
+# Signal Generator Service
+resource "aws_ecs_service" "signal_generator" {
+  name            = "${var.project_name}-signal-generator"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.signal_generator.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.ecs_execution_role_policy
+  ]
+  
+  tags = var.tags
+}
 
