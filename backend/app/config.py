@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     
     # PostgreSQL
     DATABASE_URL: str = Field(
-        default="postgresql://user:password@localhost:5432/database",
+        default="postgresql://crypto_user:crypto_password@localhost:5432/crypto_0dte_local",
         env="DATABASE_URL"
     )
     
