@@ -4,6 +4,12 @@ from sqlalchemy import pool
 from alembic import context
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env.local file
+env_file = os.path.join(os.path.dirname(__file__), '..', '.env.local')
+if os.path.exists(env_file):
+    load_dotenv(env_file)
 
 # Add the app directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))

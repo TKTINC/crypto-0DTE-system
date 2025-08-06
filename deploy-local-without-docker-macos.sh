@@ -407,6 +407,41 @@ if [ ! -f "alembic.ini" ]; then
     print_info "Initializing Alembic..."
     alembic init alembic
     print_status "Alembic initialized"
+    
+    # Fix alembic.ini configuration issues
+    print_info "Fixing Alembic configuration..."
+    
+    # Fix version_num_format
+    sed -i '' 's/version_num_format = %04d/version_num_format = %%04d/g' alembic.ini
+    
+    # Fix database URL
+    sed -i '' 's|sqlalchemy.url = driver://user:pass@localhost/dbname|sqlalchemy.url = postgresql://crypto_user:crypto_password@localhost:5432/crypto_0dte_local|g' alembic.ini
+    
+    # Fix formatter section
+    sed -i '' 's/format = %(levelname)-5.5s \[%(name)s\] %(message)s/format = %%(levelname)-5.5s [%%(name)s] %%(message)s/g' alembic.ini
+    sed -i '' 's/datefmt = %H:%M:%S/datefmt = %%H:%%M:%%S/g' alembic.ini
+    
+    print_status "Alembic configuration fixed"
+else
+    # Fix existing alembic.ini if it has issues
+    print_info "Checking and fixing existing Alembic configuration..."
+    
+    # Check if fixes are needed
+    if grep -q "version_num_format = %04d" alembic.ini; then
+        sed -i '' 's/version_num_format = %04d/version_num_format = %%04d/g' alembic.ini
+        print_status "Fixed version_num_format"
+    fi
+    
+    if grep -q "sqlalchemy.url = driver://user:pass@localhost/dbname" alembic.ini; then
+        sed -i '' 's|sqlalchemy.url = driver://user:pass@localhost/dbname|sqlalchemy.url = postgresql://crypto_user:crypto_password@localhost:5432/crypto_0dte_local|g' alembic.ini
+        print_status "Fixed database URL"
+    fi
+    
+    if grep -q "format = %(levelname)" alembic.ini; then
+        sed -i '' 's/format = %(levelname)-5.5s \[%(name)s\] %(message)s/format = %%(levelname)-5.5s [%%(name)s] %%(message)s/g' alembic.ini
+        sed -i '' 's/datefmt = %H:%M:%S/datefmt = %%H:%%M:%%S/g' alembic.ini
+        print_status "Fixed formatter section"
+    fi
 fi
 
 # Create initial migration if needed
