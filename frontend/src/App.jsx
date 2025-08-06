@@ -1,92 +1,34 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { TrendingUp, TrendingDown, Activity, DollarSign, Bitcoin, Zap, Brain, Target, AlertTriangle, BarChart3 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Activity, DollarSign, Bitcoin, Zap, Brain, Target, AlertTriangle, BarChart3, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { Progress } from '@/components/ui/progress.jsx'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
+import { useRealTimeData, useMarketData } from './hooks/useRealTimeData'
+import AutonomousMonitor from './components/AutonomousMonitor'
 import './App.css'
-
-// Mock data for demonstration
-const mockPriceData = [
-  { time: '09:00', btc: 45000, eth: 3200 },
-  { time: '09:30', btc: 45200, eth: 3220 },
-  { time: '10:00', btc: 45100, eth: 3210 },
-  { time: '10:30', btc: 45300, eth: 3240 },
-  { time: '11:00', btc: 45250, eth: 3235 },
-  { time: '11:30', btc: 45400, eth: 3250 },
-  { time: '12:00', btc: 45350, eth: 3245 }
-]
-
-const mockSignals = [
-  {
-    id: 1,
-    symbol: 'BTCUSDT',
-    type: 'BUY',
-    strategy: 'BTC Lightning Scalp',
-    confidence: 87,
-    entry: 45250,
-    target: 45612,
-    stopLoss: 45070,
-    timestamp: '2024-01-15 11:45:23',
-    status: 'active',
-    reasoning: 'Strong upward momentum (0.024) with volume confirmation (2.3x)'
-  },
-  {
-    id: 2,
-    symbol: 'ETHUSDT',
-    type: 'BUY',
-    strategy: 'ETH DeFi Correlation',
-    confidence: 79,
-    entry: 3245,
-    target: 3326,
-    stopLoss: 3196,
-    timestamp: '2024-01-15 11:30:15',
-    status: 'active',
-    reasoning: 'Strong DeFi ecosystem growth: TVL+8.2%, DEX volume+15.3%'
-  },
-  {
-    id: 3,
-    symbol: 'BTCUSDT',
-    type: 'SELL',
-    strategy: 'Funding Rate Arbitrage',
-    confidence: 72,
-    entry: 45180,
-    target: 44998,
-    stopLoss: 45361,
-    timestamp: '2024-01-15 10:15:42',
-    status: 'completed',
-    reasoning: 'High funding rate (0.0125%) - short to collect funding'
-  }
-]
-
-const mockPortfolio = {
-  totalValue: 125750,
-  dailyPnL: 3250,
-  dailyPnLPercent: 2.65,
-  positions: [
-    { symbol: 'BTCUSDT', size: 0.85, value: 38462, pnl: 1250, pnlPercent: 3.36 },
-    { symbol: 'ETHUSDT', size: 12.5, value: 40625, pnl: 875, pnlPercent: 2.20 },
-    { symbol: 'CASH', size: 1, value: 46663, pnl: 0, pnlPercent: 0 }
-  ]
-}
-
-const mockPerformance = [
-  { date: '2024-01-08', value: 100000, signals: 8, winRate: 75 },
-  { date: '2024-01-09', value: 102300, signals: 12, winRate: 83 },
-  { date: '2024-01-10', value: 104100, signals: 10, winRate: 70 },
-  { date: '2024-01-11', value: 106800, signals: 15, winRate: 87 },
-  { date: '2024-01-12', value: 109200, signals: 11, winRate: 82 },
-  { date: '2024-01-13', value: 112500, signals: 13, winRate: 85 },
-  { date: '2024-01-14', value: 115800, signals: 9, winRate: 78 },
-  { date: '2024-01-15', value: 125750, signals: 14, winRate: 86 }
-]
 
 function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeTab, setActiveTab] = useState('overview')
+  
+  // Real-time data hooks
+  const {
+    systemHealth,
+    marketData,
+    signals,
+    portfolio,
+    trades,
+    autonomous,
+    connectionStatus,
+    loading,
+    error,
+    lastUpdated,
+    refreshData
+  } = useRealTimeData(30000) // Update every 30 seconds
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -94,7 +36,8 @@ function Dashboard() {
   }, [])
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-IN', {
+    if (!value && value !== 0) return '$0'
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
@@ -103,8 +46,35 @@ function Dashboard() {
   }
 
   const formatPercent = (value) => {
+    if (!value && value !== 0) return '0.00%'
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
   }
+
+  // Transform market data for charts
+  const transformMarketDataForChart = (data) => {
+    if (!data || !Array.isArray(data)) return []
+    return data.slice(-24).map((item, index) => ({
+      time: new Date(item.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      price: item.close,
+      volume: item.volume
+    }))
+  }
+
+  const btcChartData = transformMarketDataForChart(marketData.BTC)
+  const ethChartData = transformMarketDataForChart(marketData.ETH)
+
+  // Get latest prices
+  const btcPrice = marketData.BTC?.[marketData.BTC.length - 1]?.close || 0
+  const ethPrice = marketData.ETH?.[marketData.ETH.length - 1]?.close || 0
+
+  // Calculate price changes (simplified)
+  const btcChange = marketData.BTC?.length >= 2 ? 
+    ((marketData.BTC[marketData.BTC.length - 1]?.close - marketData.BTC[marketData.BTC.length - 2]?.close) / marketData.BTC[marketData.BTC.length - 2]?.close * 100) : 0
+  const ethChange = marketData.ETH?.length >= 2 ? 
+    ((marketData.ETH[marketData.ETH.length - 1]?.close - marketData.ETH[marketData.ETH.length - 2]?.close) / marketData.ETH[marketData.ETH.length - 2]?.close * 100) : 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -119,35 +89,88 @@ function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">Crypto-0DTE-System</h1>
-                <p className="text-sm text-slate-400">AI-Powered BTC/ETH Trading</p>
+                <p className="text-sm text-slate-400">AI-Powered Autonomous Trading</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Connection Status */}
+              <div className="text-right">
+                <p className="text-sm text-slate-400">Backend</p>
+                <div className="flex items-center space-x-2">
+                  {connectionStatus.backend ? (
+                    <>
+                      <Wifi className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-medium text-green-400">CONNECTED</span>
+                    </>
+                  ) : (
+                    <>
+                      <WifiOff className="h-4 w-4 text-red-500" />
+                      <span className="text-sm font-medium text-red-400">DISCONNECTED</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* System Status */}
               <div className="text-right">
                 <p className="text-sm text-slate-400">System Status</p>
                 <div className="flex items-center space-x-2">
-                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-400">ACTIVE</span>
+                  <div className={`h-2 w-2 rounded-full ${systemHealth?.status === 'healthy' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                  <span className={`text-sm font-medium ${systemHealth?.status === 'healthy' ? 'text-green-400' : 'text-red-400'}`}>
+                    {systemHealth?.status?.toUpperCase() || 'UNKNOWN'}
+                  </span>
                 </div>
               </div>
+
+              {/* Refresh Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshData}
+                disabled={loading}
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+
+              {/* Current Time */}
               <div className="text-right">
                 <p className="text-sm text-slate-400">Current Time</p>
                 <p className="text-sm font-medium text-white">
-                  {currentTime.toLocaleTimeString('en-IN')}
+                  {currentTime.toLocaleTimeString('en-US')}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Last Updated */}
+          {lastUpdated && (
+            <div className="mt-2 text-xs text-slate-500">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mt-2 p-2 bg-red-900/50 border border-red-700 rounded text-red-300 text-sm">
+              <AlertTriangle className="h-4 w-4 inline mr-2" />
+              {error}
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
+          <TabsList className="grid w-full grid-cols-6 bg-slate-800 border-slate-700">
             <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="autonomous" className="data-[state=active]:bg-purple-600">
+              <Activity className="h-4 w-4 mr-2" />
+              Autonomous
             </TabsTrigger>
             <TabsTrigger value="signals" className="data-[state=active]:bg-purple-600">
               <Brain className="h-4 w-4 mr-2" />
@@ -177,10 +200,15 @@ function Dashboard() {
                   <DollarSign className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{formatCurrency(mockPortfolio.totalValue)}</div>
-                  <p className="text-xs text-green-400 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {formatPercent(mockPortfolio.dailyPnLPercent)} today
+                  <div className="text-2xl font-bold text-white">
+                    {formatCurrency(portfolio?.total_value || 0)}
+                  </div>
+                  <p className={`text-xs flex items-center ${(portfolio?.daily_pnl_percent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(portfolio?.daily_pnl_percent || 0) >= 0 ? 
+                      <TrendingUp className="h-3 w-3 mr-1" /> : 
+                      <TrendingDown className="h-3 w-3 mr-1" />
+                    }
+                    {formatPercent(portfolio?.daily_pnl_percent || 0)} today
                   </p>
                 </CardContent>
               </Card>
@@ -188,12 +216,17 @@ function Dashboard() {
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-slate-200">Daily P&L</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  {(portfolio?.daily_pnl || 0) >= 0 ? 
+                    <TrendingUp className="h-4 w-4 text-green-500" /> : 
+                    <TrendingDown className="h-4 w-4 text-red-500" />
+                  }
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-400">+{formatCurrency(mockPortfolio.dailyPnL)}</div>
+                  <div className={`text-2xl font-bold ${(portfolio?.daily_pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(portfolio?.daily_pnl || 0) >= 0 ? '+' : ''}{formatCurrency(portfolio?.daily_pnl || 0)}
+                  </div>
                   <p className="text-xs text-slate-400">
-                    14 signals executed
+                    {signals?.length || 0} signals executed
                   </p>
                 </CardContent>
               </Card>
@@ -204,9 +237,11 @@ function Dashboard() {
                   <Target className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">86%</div>
+                  <div className="text-2xl font-bold text-white">
+                    {portfolio?.win_rate ? `${portfolio.win_rate}%` : 'N/A'}
+                  </div>
                   <p className="text-xs text-blue-400">
-                    12/14 profitable trades
+                    {portfolio?.profitable_trades || 0}/{portfolio?.total_trades || 0} profitable trades
                   </p>
                 </CardContent>
               </Card>
@@ -217,8 +252,19 @@ function Dashboard() {
                   <Brain className="h-4 w-4 text-purple-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">83%</div>
-                  <Progress value={83} className="mt-2 h-2" />
+                  <div className="text-2xl font-bold text-white">
+                    {signals?.length > 0 ? 
+                      `${Math.round(signals.reduce((acc, signal) => acc + (signal.confidence || 0), 0) / signals.length)}%` : 
+                      'N/A'
+                    }
+                  </div>
+                  <Progress 
+                    value={signals?.length > 0 ? 
+                      signals.reduce((acc, signal) => acc + (signal.confidence || 0), 0) / signals.length : 
+                      0
+                    } 
+                    className="mt-2 h-2" 
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -232,38 +278,48 @@ function Dashboard() {
                     BTC/USDT
                   </CardTitle>
                   <CardDescription className="text-slate-400">
-                    Current: $45,350 (+0.8%)
+                    Current: ${btcPrice.toLocaleString()} ({formatPercent(btcChange)})
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={mockPriceData}>
-                      <defs>
-                        <linearGradient id="btcGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="time" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1f2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="btc" 
-                        stroke="#f97316" 
-                        fillOpacity={1} 
-                        fill="url(#btcGradient)" 
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {btcChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={btcChartData}>
+                        <defs>
+                          <linearGradient id="btcGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="time" stroke="#9ca3af" />
+                        <YAxis stroke="#9ca3af" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1f2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="price" 
+                          stroke="#f97316" 
+                          fillOpacity={1} 
+                          fill="url(#btcGradient)" 
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[200px]">
+                      <div className="text-center">
+                        <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <p className="text-slate-400">No market data available</p>
+                        <p className="text-xs text-slate-500">Check API connection</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -274,38 +330,48 @@ function Dashboard() {
                     ETH/USDT
                   </CardTitle>
                   <CardDescription className="text-slate-400">
-                    Current: $3,245 (+1.4%)
+                    Current: ${ethPrice.toLocaleString()} ({formatPercent(ethChange)})
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={mockPriceData}>
-                      <defs>
-                        <linearGradient id="ethGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="time" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1f2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="eth" 
-                        stroke="#3b82f6" 
-                        fillOpacity={1} 
-                        fill="url(#ethGradient)" 
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {ethChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={ethChartData}>
+                        <defs>
+                          <linearGradient id="ethGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="time" stroke="#9ca3af" />
+                        <YAxis stroke="#9ca3af" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1f2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="price" 
+                          stroke="#3b82f6" 
+                          fillOpacity={1} 
+                          fill="url(#ethGradient)" 
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[200px]">
+                      <div className="text-center">
+                        <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <p className="text-slate-400">No market data available</p>
+                        <p className="text-xs text-slate-500">Check API connection</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -320,29 +386,46 @@ function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockSignals.slice(0, 3).map((signal) => (
-                    <div key={signal.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <Badge 
-                          variant={signal.type === 'BUY' ? 'default' : 'destructive'}
-                          className={signal.type === 'BUY' ? 'bg-green-600' : 'bg-red-600'}
-                        >
-                          {signal.type}
-                        </Badge>
-                        <div>
-                          <p className="font-medium text-white">{signal.symbol}</p>
-                          <p className="text-sm text-slate-400">{signal.strategy}</p>
+                  {signals && signals.length > 0 ? (
+                    signals.slice(0, 3).map((signal, index) => (
+                      <div key={signal.id || index} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <Badge 
+                            variant={signal.type === 'BUY' ? 'default' : 'destructive'}
+                            className={signal.type === 'BUY' ? 'bg-green-600' : 'bg-red-600'}
+                          >
+                            {signal.type || signal.side}
+                          </Badge>
+                          <div>
+                            <p className="font-medium text-white">{signal.symbol}</p>
+                            <p className="text-sm text-slate-400">{signal.strategy || 'AI Strategy'}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-white">{signal.confidence || 0}% confidence</p>
+                          <p className="text-sm text-slate-400">
+                            Entry: ${signal.entry_price || signal.price || 'N/A'}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-white">{signal.confidence}% confidence</p>
-                        <p className="text-sm text-slate-400">Entry: ${signal.entry}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Brain className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                      <p className="text-slate-400">No recent signals available</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {connectionStatus.backend ? 'AI signal generation may be inactive' : 'Check backend connection'}
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Autonomous System Monitoring Tab */}
+          <TabsContent value="autonomous" className="space-y-6">
+            <AutonomousMonitor />
           </TabsContent>
 
           {/* AI Signals Tab */}
