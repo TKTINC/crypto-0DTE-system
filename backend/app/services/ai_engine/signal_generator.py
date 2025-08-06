@@ -16,12 +16,25 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
-import tensorflow as tf
+# Optional AI/ML imports - gracefully handle missing dependencies
+try:
+    import tensorflow as tf
+    HAS_TENSORFLOW = True
+except ImportError:
+    tf = None
+    HAS_TENSORFLOW = False
+
+try:
+    from transformers import pipeline
+    HAS_TRANSFORMERS = True
+except ImportError:
+    pipeline = None
+    HAS_TRANSFORMERS = False
+
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.model_selection import TimeSeriesSplit
 import ta
-from transformers import pipeline
 
 from app.config import settings
 from app.database import get_db_session, redis_manager, influxdb_manager
@@ -979,4 +992,8 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+# Alias for backward compatibility
+SignalGeneratorService = AISignalGenerator
 
