@@ -67,6 +67,42 @@ class CryptoPrice(Base):
     )
 
 
+class OHLCV(Base):
+    """OHLCV (Open, High, Low, Close, Volume) candlestick data"""
+    
+    __tablename__ = "ohlcv_data"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    symbol = Column(String(20), nullable=False, index=True)
+    exchange = Column(String(50), nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    timeframe = Column(String(10), nullable=False, index=True)  # 1m, 5m, 15m, 1h, 4h, 1d
+    
+    # OHLCV data
+    open = Column(Numeric(20, 8), nullable=False)
+    high = Column(Numeric(20, 8), nullable=False)
+    low = Column(Numeric(20, 8), nullable=False)
+    close = Column(Numeric(20, 8), nullable=False)
+    volume = Column(Numeric(20, 8), nullable=False)
+    
+    # Additional metrics
+    vwap = Column(Numeric(20, 8))  # Volume Weighted Average Price
+    trades_count = Column(Integer)
+    quote_volume = Column(Numeric(20, 8))  # Volume in quote currency
+    
+    # Technical indicators (can be calculated and stored)
+    sma_20 = Column(Numeric(20, 8))  # 20-period Simple Moving Average
+    ema_20 = Column(Numeric(20, 8))  # 20-period Exponential Moving Average
+    rsi_14 = Column(Numeric(5, 2))   # 14-period RSI
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        Index('idx_ohlcv_symbol_timeframe_timestamp', 'symbol', 'timeframe', 'timestamp'),
+        Index('idx_ohlcv_exchange_symbol_timeframe', 'exchange', 'symbol', 'timeframe'),
+    )
+
+
 class OrderBook(Base):
     """Order book data"""
     
