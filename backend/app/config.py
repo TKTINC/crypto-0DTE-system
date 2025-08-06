@@ -250,6 +250,45 @@ class Settings(BaseSettings):
             return [token.strip() for token in v.split(",")]
         return v
     
+    @validator("JWT_SECRET_KEY")
+    def validate_jwt_secret(cls, v):
+        """Validate JWT secret key for production security"""
+        if not v:
+            if os.getenv("ENVIRONMENT", "development") == "production":
+                raise ValueError("JWT_SECRET_KEY is required in production")
+            return "development-only-secret-key-not-for-production-use"
+        
+        if len(v) < 32:
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters for security")
+        
+        return v
+    
+    @validator("DATABASE_URL")
+    def validate_database_url(cls, v):
+        """Validate database URL format"""
+        if not v or v == "postgresql://user:password@localhost:5432/database":
+            if os.getenv("ENVIRONMENT", "development") == "production":
+                raise ValueError("DATABASE_URL must be configured for production")
+        
+        if not v.startswith(("postgresql://", "postgres://")):
+            raise ValueError("DATABASE_URL must be a PostgreSQL connection string")
+        
+        return v
+    
+    @validator("DELTA_API_KEY")
+    def validate_delta_api_key(cls, v):
+        """Validate Delta Exchange API key"""
+        if not v and os.getenv("ENVIRONMENT", "development") == "production":
+            raise ValueError("DELTA_API_KEY is required for production trading")
+        return v
+    
+    @validator("DELTA_API_SECRET")
+    def validate_delta_api_secret(cls, v):
+        """Validate Delta Exchange API secret"""
+        if not v and os.getenv("ENVIRONMENT", "development") == "production":
+            raise ValueError("DELTA_API_SECRET is required for production trading")
+        return v
+    
     # =============================================================================
     # COMPUTED PROPERTIES
     # =============================================================================
