@@ -561,3 +561,8 @@ class DeltaExchangeConnector:
         else:
             return f"{base}_{quote}"
 
+
+
+# Alias for backward compatibility
+DeltaExchangeService = DeltaExchangeConnector
+
