@@ -19,6 +19,27 @@ class HealthService:
         self.start_time = time.time()
         self.health_checks = {}
     
+    async def initialize(self):
+        """Initialize the health service"""
+        logger.info("Initializing HealthService...")
+        
+        # Perform initial health checks
+        try:
+            # Test database connectivity
+            db_health = await self.check_database_health()
+            self.health_checks['database'] = db_health
+            
+            # Test Redis connectivity  
+            redis_health = await self.check_redis_health()
+            self.health_checks['redis'] = redis_health
+            
+            logger.info("HealthService initialized successfully")
+            
+        except Exception as e:
+            logger.warning(f"Some health checks failed during initialization: {e}")
+            # Don't fail initialization if health checks fail
+            pass
+    
     async def check_database_health(self) -> Dict[str, Any]:
         """Check database connectivity"""
         try:
