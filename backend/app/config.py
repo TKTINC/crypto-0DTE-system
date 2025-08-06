@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     
     # PostgreSQL
     DATABASE_URL: str = Field(
-        default="postgresql://crypto_user:crypto_password@localhost:5432/crypto_0dte_db",
+        default="postgresql://user:password@localhost:5432/database",
         env="DATABASE_URL"
     )
     
@@ -41,8 +41,8 @@ class Settings(BaseSettings):
     
     # InfluxDB
     INFLUXDB_URL: str = Field(default="http://localhost:8086", env="INFLUXDB_URL")
-    INFLUXDB_TOKEN: str = Field(default="crypto-0dte-token", env="INFLUXDB_TOKEN")
-    INFLUXDB_ORG: str = Field(default="crypto-0dte", env="INFLUXDB_ORG")
+    INFLUXDB_TOKEN: str = Field(default="", env="INFLUXDB_TOKEN")
+    INFLUXDB_ORG: str = Field(default="", env="INFLUXDB_ORG")
     INFLUXDB_BUCKET: str = Field(default="market_data", env="INFLUXDB_BUCKET")
     
     # =============================================================================
@@ -184,19 +184,19 @@ class Settings(BaseSettings):
     # =============================================================================
     
     # JWT tokens
-    JWT_SECRET_KEY: str = Field(default="crypto-0dte-super-secret-key", env="JWT_SECRET_KEY")
+    JWT_SECRET_KEY: str = Field(default="", env="JWT_SECRET_KEY")
     JWT_ALGORITHM: str = Field(default="HS256", env="JWT_ALGORITHM")
     JWT_EXPIRATION_HOURS: int = Field(default=24, env="JWT_EXPIRATION_HOURS")
     
     # API security
     API_RATE_LIMIT: int = Field(default=1000, env="API_RATE_LIMIT")  # per minute
     API_CORS_ORIGINS: str = Field(
-        default="http://localhost:3000,https://crypto-0dte.tktinc.com",
+        default="http://localhost:3000",
         env="API_CORS_ORIGINS"
     )
     
     # Encryption
-    ENCRYPTION_KEY: str = Field(default="crypto-0dte-encryption-key-32ch", env="ENCRYPTION_KEY")
+    ENCRYPTION_KEY: str = Field(default="", env="ENCRYPTION_KEY")
     
     # =============================================================================
     # PERFORMANCE TUNING

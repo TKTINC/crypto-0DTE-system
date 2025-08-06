@@ -20,7 +20,7 @@ import uvicorn
 from app.config import settings
 from app.database import engine, get_db
 from app.models import Base
-from app.api.v1 import market_data, signals, portfolio, trading, compliance
+from app.api.v1 import market_data, signals, portfolio, trading, compliance, auth
 from app.services.websocket_manager import WebSocketManager
 from app.services.health_service import HealthService
 from app.utils.logging_config import setup_logging
@@ -72,9 +72,9 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
+    allow_origins=settings.API_CORS_ORIGINS if isinstance(settings.API_CORS_ORIGINS, list) else [settings.API_CORS_ORIGINS],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -132,6 +132,12 @@ async def liveness_check():
 # =============================================================================
 
 # Include API routers
+app.include_router(
+    auth.router,
+    prefix="/api/v1/auth",
+    tags=["Authentication"]
+)
+
 app.include_router(
     market_data.router,
     prefix="/api/v1/market-data",
