@@ -44,10 +44,11 @@ class HealthService:
         """Check database connectivity"""
         try:
             from app.database import AsyncSessionLocal
+            from sqlalchemy import text
             
             # Use async session for database health check
             async with AsyncSessionLocal() as session:
-                result = await session.execute("SELECT 1")
+                result = await session.execute(text("SELECT 1"))
                 result.fetchone()
             
             return {
