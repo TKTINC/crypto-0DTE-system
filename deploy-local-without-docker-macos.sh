@@ -526,38 +526,92 @@ cd "$BACKEND_DIR"
 
 # Kill any existing backend processes
 print_info "Stopping any existing backend processes..."
+
+# More aggressive process termination
 pkill -f "python.*app.main" 2>/dev/null || true
 pkill -f "uvicorn" 2>/dev/null || true
-sleep 5
+pkill -9 -f "python.*app.main" 2>/dev/null || true
+
+# Wait longer for processes to fully terminate
+sleep 8
 
 # Force kill any remaining processes on port 8000
 pids=$(lsof -ti:8000 2>/dev/null || true)
 if [ ! -z "$pids" ]; then
     print_info "Force killing remaining processes on port 8000..."
     echo "$pids" | xargs kill -9 2>/dev/null || true
-    sleep 2
+    sleep 3
 fi
+
+# Remove any existing PID file
+rm -f "$LOG_DIR/backend.pid" 2>/dev/null || true
+
+# Final verification that port 8000 is completely free
+for i in {1..10}; do
+    if ! lsof -i:8000 >/dev/null 2>&1; then
+        break
+    fi
+    print_info "Waiting for port 8000 to be free... (attempt $i/10)"
+    sleep 2
+done
 
 # Verify port 8000 is free before starting
 if lsof -i:8000 >/dev/null 2>&1; then
-    print_error "Port 8000 is still in use. Cannot start backend."
-    print_info "Check processes: lsof -i:8000"
+    print_error "Port 8000 is still in use after cleanup. Cannot start backend."
+    print_info "Remaining processes on port 8000:"
+    lsof -i:8000 || true
+    print_info "Please manually kill these processes and try again."
     exit 1
 fi
 
-# Start backend service in background
-print_info "Starting backend service..."
-nohup python -m app.main > "$LOG_DIR/backend.log" 2>&1 &
+# Create a startup script to ensure single process
+cat > "$LOG_DIR/start_backend.sh" << 'EOF'
+#!/bin/bash
+cd "$(dirname "$0")/../backend"
+
+# Check if another instance is already starting
+LOCK_FILE="../logs/backend.lock"
+PID_FILE="../logs/backend.pid"
+
+# Create lock file atomically
+if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
+    echo "Another backend instance is starting. Exiting."
+    exit 1
+fi
+
+# Cleanup function
+cleanup() {
+    rm -f "$LOCK_FILE" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Start the backend
+exec python -m app.main
+EOF
+
+chmod +x "$LOG_DIR/start_backend.sh"
+
+# Start backend service with single-instance protection
+print_info "Starting backend service with single-instance protection..."
+nohup "$LOG_DIR/start_backend.sh" > "$LOG_DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo $BACKEND_PID > "$LOG_DIR/backend.pid"
 
+# Wait a moment for startup
+sleep 5
+
 # Verify only one process is running
-sleep 3
-process_count=$(lsof -ti:8000 2>/dev/null | wc -l)
-if [ "$process_count" -ne 1 ]; then
-    print_warning "Expected 1 backend process, found $process_count"
+process_count=$(lsof -ti:8000 2>/dev/null | wc -l | tr -d ' ')
+if [ "$process_count" -eq 1 ]; then
+    print_success "✓ Single backend process confirmed (PID: $BACKEND_PID)"
+elif [ "$process_count" -eq 0 ]; then
+    print_error "✗ No backend process found. Check logs: tail -f $LOG_DIR/backend.log"
+    exit 1
+else
+    print_warning "⚠ Multiple backend processes detected: $process_count"
     print_info "Processes on port 8000:"
     lsof -i:8000 || true
+    print_info "This may cause API conflicts. Consider restarting deployment."
 fi
 
 # Wait for backend to be ready
