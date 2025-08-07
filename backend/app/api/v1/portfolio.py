@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 
-router = APIRouter(prefix="/portfolio", tags=["portfolio"])
+router = APIRouter(tags=["portfolio"])
 
 # Pydantic models for API responses
 class PositionResponse(BaseModel):

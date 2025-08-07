@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 
-router = APIRouter(prefix="/autonomous", tags=["autonomous"])
+router = APIRouter(tags=["autonomous"])
 
 # Pydantic models for API responses
 class AutonomousStatusResponse(BaseModel):

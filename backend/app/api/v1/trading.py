@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 
-router = APIRouter(prefix="/trading", tags=["trading"])
+router = APIRouter(tags=["trading"])
 
 # Pydantic models for API responses
 class TradeResponse(BaseModel):

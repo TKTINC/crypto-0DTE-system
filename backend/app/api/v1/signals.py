@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 
-router = APIRouter(prefix="/signals", tags=["signals"])
+router = APIRouter(tags=["signals"])
 
 # Pydantic models for API responses
 class SignalResponse(BaseModel):

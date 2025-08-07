@@ -14,7 +14,7 @@ import time
 
 from app.database import get_db
 
-router = APIRouter(prefix="/monitoring", tags=["monitoring"])
+router = APIRouter(tags=["monitoring"])
 
 # Pydantic models for API responses
 class SystemMetricsResponse(BaseModel):
