@@ -259,8 +259,23 @@ main() {
     echo "🔑 Crypto-0DTE API Keys Configuration"
     echo "===================================="
     echo -e "${NC}"
-    echo "This script helps you configure API keys for autonomous trading."
+    echo "This standalone utility allows you to update API keys for an existing deployment."
+    echo "For new deployments, use the integrated deployment script instead:"
+    echo "  ./deploy-local-without-docker-macos.sh"
     echo ""
+    
+    # Check if backend directory exists
+    if [ ! -d "backend" ]; then
+        print_error "Backend directory not found. Please run this script from the project root."
+        exit 1
+    fi
+    
+    # Check if .env.local exists
+    if [ ! -f "backend/.env.local" ]; then
+        print_error "Backend .env.local file not found. Please run the deployment script first:"
+        print_info "  ./deploy-local-without-docker-macos.sh"
+        exit 1
+    fi
     
     # Check current configuration
     check_current_config
@@ -272,22 +287,19 @@ main() {
     # Test connections
     test_api_connections
     
-    # Restart backend
-    restart_backend
-    
     # Final summary
     print_header "📋 Configuration Summary"
-    print_info "API configuration completed!"
+    print_success "API keys have been updated in backend/.env.local"
     print_info ""
-    print_info "Next steps:"
-    print_info "  1. Run: ./validate-autonomous-system.sh"
-    print_info "  2. Run: ./monitor-autonomous-trading.sh"
-    print_info "  3. Check the frontend at: http://localhost:3000"
+    print_info "To apply the changes, restart your backend service:"
+    print_info "  1. Stop current backend: pkill -f 'python.*app.main'"
+    print_info "  2. Start backend: cd backend && python -m app.main"
+    print_info "  3. Or redeploy: ./deploy-local-without-docker-macos.sh"
     print_info ""
-    print_info "For autonomous trading to work, ensure:"
-    print_info "  • Both API keys are properly configured"
-    print_info "  • Backend is running and healthy"
-    print_info "  • Database and Redis are accessible"
+    print_info "Next steps after restart:"
+    print_info "  • Run: ./validate-autonomous-system.sh"
+    print_info "  • Run: ./monitor-autonomous-trading.sh"
+    print_info "  • Check the frontend at: http://localhost:3000"
     echo ""
 }
 

@@ -318,6 +318,80 @@ print_status "Backend dependencies installed"
 
 echo ""
 
+# Phase 4.5: API Key Configuration
+echo -e "${BLUE}🔑 Phase 4.5: API Key Configuration${NC}"
+echo "======================================"
+
+print_info "Configuring API keys for live trading and AI signals..."
+echo ""
+
+# Delta Exchange API Configuration
+echo -e "${CYAN}🏦 Delta Exchange API Configuration${NC}"
+echo "-----------------------------------"
+print_info "Delta Exchange provides cryptocurrency trading and market data."
+print_info "For testnet trading, create an account at: https://testnet.delta.exchange/"
+echo ""
+
+read -p "Do you have Delta Exchange testnet API credentials? (y/n): " has_delta_keys
+
+if [ "$has_delta_keys" = "y" ] || [ "$has_delta_keys" = "Y" ]; then
+    echo ""
+    print_info "Please enter your Delta Exchange testnet API credentials:"
+    read -p "API Key: " delta_api_key
+    read -s -p "API Secret: " delta_api_secret
+    echo ""
+    
+    if [ ! -z "$delta_api_key" ] && [ ! -z "$delta_api_secret" ]; then
+        DELTA_EXCHANGE_API_KEY="$delta_api_key"
+        DELTA_EXCHANGE_API_SECRET="$delta_api_secret"
+        print_success "Delta Exchange API credentials configured"
+    else
+        print_warning "Empty credentials provided, using placeholder values"
+        DELTA_EXCHANGE_API_KEY="your-testnet-api-key"
+        DELTA_EXCHANGE_API_SECRET="your-testnet-api-secret"
+    fi
+else
+    print_info "Using placeholder values. You can configure real keys later with:"
+    print_info "  ./configure-api-keys.sh"
+    DELTA_EXCHANGE_API_KEY="your-testnet-api-key"
+    DELTA_EXCHANGE_API_SECRET="your-testnet-api-secret"
+fi
+
+echo ""
+
+# OpenAI API Configuration
+echo -e "${CYAN}🧠 OpenAI API Configuration${NC}"
+echo "-----------------------------"
+print_info "OpenAI API is used for AI-powered trading signal generation."
+print_info "Get your API key at: https://platform.openai.com/api-keys"
+echo ""
+
+read -p "Do you have an OpenAI API key? (y/n): " has_openai_key
+
+if [ "$has_openai_key" = "y" ] || [ "$has_openai_key" = "Y" ]; then
+    echo ""
+    print_info "Please enter your OpenAI API key:"
+    read -s -p "OpenAI API Key (starts with sk-): " openai_api_key
+    echo ""
+    
+    if [ ! -z "$openai_api_key" ]; then
+        OPENAI_API_KEY="$openai_api_key"
+        print_success "OpenAI API key configured"
+    else
+        print_warning "Empty API key provided, using placeholder value"
+        OPENAI_API_KEY="your-openai-api-key"
+    fi
+else
+    print_info "Using placeholder value. You can configure real key later with:"
+    print_info "  ./configure-api-keys.sh"
+    OPENAI_API_KEY="your-openai-api-key"
+fi
+
+echo ""
+print_status "API key configuration completed"
+
+echo ""
+
 # Phase 5: Environment Configuration
 echo -e "${BLUE}🔐 Phase 5: Environment Configuration${NC}"
 echo "====================================="
@@ -342,13 +416,13 @@ HOST=0.0.0.0
 PORT=8000
 
 # Delta Exchange Configuration (Testnet)
-DELTA_EXCHANGE_API_KEY=your-testnet-api-key
-DELTA_EXCHANGE_API_SECRET=your-testnet-api-secret
+DELTA_EXCHANGE_API_KEY=$DELTA_EXCHANGE_API_KEY
+DELTA_EXCHANGE_API_SECRET=$DELTA_EXCHANGE_API_SECRET
 DELTA_EXCHANGE_BASE_URL=https://testnet-api.delta.exchange
 DELTA_EXCHANGE_TESTNET=true
 
 # OpenAI Configuration
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=$OPENAI_API_KEY
 OPENAI_API_BASE=https://api.openai.com/v1
 
 # Logging Configuration
@@ -362,6 +436,23 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 EOF
 
 print_status "Backend environment configuration created"
+
+# Display configured API status
+echo ""
+print_info "API Configuration Summary:"
+if [ "$DELTA_EXCHANGE_API_KEY" != "your-testnet-api-key" ]; then
+    print_success "✓ Delta Exchange API: Configured with real credentials"
+else
+    print_warning "⚠ Delta Exchange API: Using placeholder (configure later)"
+fi
+
+if [ "$OPENAI_API_KEY" != "your-openai-api-key" ]; then
+    print_success "✓ OpenAI API: Configured with real credentials"
+else
+    print_warning "⚠ OpenAI API: Using placeholder (configure later)"
+fi
+
+echo ""
 
 # Create frontend environment file
 print_info "Creating frontend environment configuration..."
