@@ -326,7 +326,7 @@ echo "====================================="
 print_info "Creating backend environment configuration..."
 cat > "$BACKEND_DIR/.env.local" << EOF
 # Database Configuration
-DATABASE_URL=postgresql://crypto_user:crypto_password@localhost:5432/crypto_0dte_local
+DATABASE_URL=postgresql+asyncpg://crypto_user:crypto_password@localhost:5432/crypto_0dte_local
 
 # Redis Configuration
 REDIS_URL=redis://localhost:6379/0
