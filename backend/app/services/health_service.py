@@ -161,6 +161,20 @@ class HealthService:
             }
         }
     
+    async def is_ready(self) -> bool:
+        """Check if the service is ready to handle requests"""
+        try:
+            # Check critical dependencies
+            db_health = await self.check_database_health()
+            
+            # Service is ready if database is healthy
+            # You can add more critical checks here
+            return db_health.get("status") == "healthy"
+            
+        except Exception as e:
+            logger.error(f"Readiness check failed: {e}")
+            return False
+    
     def _format_uptime(self, seconds: float) -> str:
         """Format uptime in human-readable format"""
         days = int(seconds // 86400)
