@@ -11,6 +11,56 @@ import { useRealTimeData } from './hooks/useRealTimeData'
 import AutonomousMonitor from './components/AutonomousMonitor'
 import './App.css'
 
+// Mock data for development (fallback when API data is not available)
+const mockSignals = [
+  {
+    id: 1,
+    symbol: 'BTCUSDT',
+    type: 'BUY',
+    strategy: 'AI-RSI',
+    confidence: 85,
+    price: 43250,
+    entry: 43250,
+    target: 44500,
+    stopLoss: 42000,
+    status: 'active',
+    reasoning: 'RSI oversold condition with bullish divergence detected. Strong support at current levels.',
+    timestamp: new Date().toLocaleString()
+  },
+  {
+    id: 2,
+    symbol: 'ETHUSDT',
+    type: 'SELL',
+    strategy: 'AI-MACD',
+    confidence: 78,
+    price: 2650,
+    entry: 2650,
+    target: 2550,
+    stopLoss: 2720,
+    status: 'active',
+    reasoning: 'MACD bearish crossover with declining volume. Resistance at 2700 level.',
+    timestamp: new Date().toLocaleString()
+  }
+]
+
+const mockPortfolio = {
+  positions: [
+    { symbol: 'BTCUSDT', size: 0.5, value: 21625, pnl: 1250 },
+    { symbol: 'ETHUSDT', size: 2.0, value: 5300, pnl: -150 }
+  ]
+}
+
+const mockPerformance = [
+  { date: '12/01', pnl: 1200, signals: 15, winRate: 73 },
+  { date: '12/02', pnl: 850, signals: 12, winRate: 75 },
+  { date: '12/03', pnl: -200, signals: 18, winRate: 67 },
+  { date: '12/04', pnl: 1500, signals: 14, winRate: 79 },
+  { date: '12/05', pnl: 950, signals: 16, winRate: 81 },
+  { date: '12/06', pnl: 1100, signals: 13, winRate: 77 },
+  { date: '12/07', pnl: 750, signals: 11, winRate: 82 },
+  { date: '12/08', pnl: 1350, signals: 17, winRate: 85 }
+]
+
 function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeTab, setActiveTab] = useState('overview')
@@ -444,7 +494,7 @@ function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockSignals.map((signal) => (
+                      {(signals && signals.length > 0 ? signals : mockSignals).map((signal) => (
                         <div key={signal.id} className="p-4 bg-slate-700 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-3">
@@ -579,7 +629,7 @@ function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockPortfolio.positions.map((position, index) => (
+                    {(portfolio?.positions || mockPortfolio.positions).map((position, index) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className={`h-3 w-3 rounded-full ${
