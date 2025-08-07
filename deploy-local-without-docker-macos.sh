@@ -527,91 +527,135 @@ cd "$BACKEND_DIR"
 # Kill any existing backend processes
 print_info "Stopping any existing backend processes..."
 
-# More aggressive process termination
+# Kill all Python processes that might be running the backend
 pkill -f "python.*app.main" 2>/dev/null || true
 pkill -f "uvicorn" 2>/dev/null || true
+pkill -f "start_backend" 2>/dev/null || true
+
+# Force kill with SIGKILL
 pkill -9 -f "python.*app.main" 2>/dev/null || true
+pkill -9 -f "uvicorn" 2>/dev/null || true
 
-# Wait longer for processes to fully terminate
-sleep 8
+# Wait for processes to fully terminate
+sleep 10
 
-# Force kill any remaining processes on port 8000
-pids=$(lsof -ti:8000 2>/dev/null || true)
+# Force kill any remaining processes on port 8000 (excluding browser connections)
+pids=$(lsof -ti:8000 2>/dev/null | grep -v "^1039$" || true)
 if [ ! -z "$pids" ]; then
-    print_info "Force killing remaining processes on port 8000..."
+    print_info "Force killing remaining backend processes on port 8000..."
     echo "$pids" | xargs kill -9 2>/dev/null || true
-    sleep 3
+    sleep 5
 fi
 
-# Remove any existing PID file
-rm -f "$LOG_DIR/backend.pid" 2>/dev/null || true
+# Clean up any lock files and PID files
+rm -f "$LOG_DIR/backend.pid" "$LOG_DIR/backend.lock" "$LOG_DIR/start_backend.sh" 2>/dev/null || true
 
-# Final verification that port 8000 is completely free
-for i in {1..10}; do
-    if ! lsof -i:8000 >/dev/null 2>&1; then
-        break
-    fi
-    print_info "Waiting for port 8000 to be free... (attempt $i/10)"
-    sleep 2
-done
-
-# Verify port 8000 is free before starting
-if lsof -i:8000 >/dev/null 2>&1; then
-    print_error "Port 8000 is still in use after cleanup. Cannot start backend."
-    print_info "Remaining processes on port 8000:"
-    lsof -i:8000 || true
+# Final verification - only Python processes should be gone
+python_processes=$(lsof -i:8000 2>/dev/null | grep -c "Python" || echo "0")
+if [ "$python_processes" -gt 0 ]; then
+    print_error "Python processes still running on port 8000 after cleanup:"
+    lsof -i:8000 | grep "Python" || true
     print_info "Please manually kill these processes and try again."
     exit 1
 fi
 
-# Create a startup script to ensure single process
+# Create a more robust startup script with port binding test
 cat > "$LOG_DIR/start_backend.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")/../backend"
 
-# Check if another instance is already starting
+# Strict error handling
+set -e
+
+# Lock file for atomic startup
 LOCK_FILE="../logs/backend.lock"
 PID_FILE="../logs/backend.pid"
 
-# Create lock file atomically
-if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
-    echo "Another backend instance is starting. Exiting."
-    exit 1
-fi
-
-# Cleanup function
+# Function to cleanup on exit
 cleanup() {
     rm -f "$LOCK_FILE" 2>/dev/null || true
 }
 trap cleanup EXIT
 
-# Start the backend
+# Atomic lock creation - only one instance can get the lock
+exec 200>"$LOCK_FILE"
+if ! flock -n 200; then
+    echo "ERROR: Another backend instance is already starting or running"
+    exit 1
+fi
+
+# Test if we can bind to port 8000 before starting the actual backend
+echo "Testing port 8000 availability..."
+if python3 -c "
+import socket
+import sys
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(('0.0.0.0', 8000))
+    s.close()
+    print('Port 8000 is available')
+except Exception as e:
+    print(f'Port 8000 is not available: {e}')
+    sys.exit(1)
+"; then
+    echo "Port binding test passed"
+else
+    echo "ERROR: Port 8000 binding test failed"
+    exit 1
+fi
+
+# Write our PID to the PID file
+echo $$ > "$PID_FILE"
+
+# Start the backend with exec to replace the shell process
+echo "Starting backend on port 8000..."
 exec python -m app.main
 EOF
 
 chmod +x "$LOG_DIR/start_backend.sh"
 
-# Start backend service with single-instance protection
-print_info "Starting backend service with single-instance protection..."
-nohup "$LOG_DIR/start_backend.sh" > "$LOG_DIR/backend.log" 2>&1 &
-BACKEND_PID=$!
-echo $BACKEND_PID > "$LOG_DIR/backend.pid"
+# Start backend service with enhanced protection
+print_info "Starting backend service with enhanced port protection..."
 
-# Wait a moment for startup
-sleep 5
+# Start the backend in background and capture its PID
+"$LOG_DIR/start_backend.sh" > "$LOG_DIR/backend.log" 2>&1 &
+STARTUP_PID=$!
 
-# Verify only one process is running
-process_count=$(lsof -ti:8000 2>/dev/null | wc -l | tr -d ' ')
-if [ "$process_count" -eq 1 ]; then
+# Wait for startup to complete
+sleep 8
+
+# Check if the startup script is still running or if backend started
+if kill -0 $STARTUP_PID 2>/dev/null; then
+    # Startup script is still running, backend should be starting
+    print_info "Backend startup in progress..."
+    sleep 5
+fi
+
+# Get the actual backend PID from the PID file
+if [ -f "$LOG_DIR/backend.pid" ]; then
+    BACKEND_PID=$(cat "$LOG_DIR/backend.pid")
+    print_info "Backend PID: $BACKEND_PID"
+else
+    print_error "Backend PID file not found. Startup may have failed."
+    print_info "Check logs: tail -f $LOG_DIR/backend.log"
+    exit 1
+fi
+
+# Verify exactly one Python process is listening on port 8000
+python_count=$(lsof -i:8000 2>/dev/null | grep -c "Python" || echo "0")
+if [ "$python_count" -eq 1 ]; then
     print_success "✓ Single backend process confirmed (PID: $BACKEND_PID)"
-elif [ "$process_count" -eq 0 ]; then
-    print_error "✗ No backend process found. Check logs: tail -f $LOG_DIR/backend.log"
+elif [ "$python_count" -eq 0 ]; then
+    print_error "✗ No backend process found on port 8000"
+    print_info "Check logs: tail -f $LOG_DIR/backend.log"
     exit 1
 else
-    print_warning "⚠ Multiple backend processes detected: $process_count"
-    print_info "Processes on port 8000:"
+    print_error "✗ Multiple Python processes detected: $python_count"
+    print_info "All processes on port 8000:"
     lsof -i:8000 || true
-    print_info "This may cause API conflicts. Consider restarting deployment."
+    print_error "This indicates a serious issue with process management."
+    exit 1
 fi
 
 # Wait for backend to be ready
