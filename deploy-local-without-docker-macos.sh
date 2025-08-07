@@ -322,69 +322,40 @@ echo ""
 echo -e "${BLUE}🔑 Phase 4.5: API Key Configuration${NC}"
 echo "======================================"
 
-print_info "Configuring API keys for live trading and AI signals..."
-echo ""
+CONFIG_FILE="$PROJECT_ROOT/config/api-keys.conf"
 
-# Delta Exchange API Configuration
-echo -e "${CYAN}🏦 Delta Exchange API Configuration${NC}"
-echo "-----------------------------------"
-print_info "Delta Exchange provides cryptocurrency trading and market data."
-print_info "For testnet trading, create an account at: https://testnet.delta.exchange/"
-echo ""
+print_info "Loading API keys from persistent configuration..."
 
-read -p "Do you have Delta Exchange testnet API credentials? (y/n): " has_delta_keys
-
-if [ "$has_delta_keys" = "y" ] || [ "$has_delta_keys" = "Y" ]; then
-    echo ""
-    print_info "Please enter your Delta Exchange testnet API credentials:"
-    read -p "API Key: " delta_api_key
-    read -s -p "API Secret: " delta_api_secret
-    echo ""
+# Check if persistent config exists
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+    print_success "Loaded API keys from $CONFIG_FILE"
     
-    if [ ! -z "$delta_api_key" ] && [ ! -z "$delta_api_secret" ]; then
-        DELTA_EXCHANGE_API_KEY="$delta_api_key"
-        DELTA_EXCHANGE_API_SECRET="$delta_api_secret"
-        print_success "Delta Exchange API credentials configured"
+    # Display configuration status
+    echo ""
+    print_info "API Configuration Status:"
+    if [ "$DELTA_CONFIGURED" = "true" ] && [ "$DELTA_EXCHANGE_API_KEY" != "your-testnet-api-key" ]; then
+        print_success "✓ Delta Exchange API: Configured"
     else
-        print_warning "Empty credentials provided, using placeholder values"
-        DELTA_EXCHANGE_API_KEY="your-testnet-api-key"
-        DELTA_EXCHANGE_API_SECRET="your-testnet-api-secret"
+        print_warning "⚠ Delta Exchange API: Using placeholder"
+    fi
+    
+    if [ "$OPENAI_CONFIGURED" = "true" ] && [ "$OPENAI_API_KEY" != "your-openai-api-key" ]; then
+        print_success "✓ OpenAI API: Configured"
+    else
+        print_warning "⚠ OpenAI API: Using placeholder"
     fi
 else
-    print_info "Using placeholder values. You can configure real keys later with:"
-    print_info "  ./configure-api-keys.sh"
+    print_warning "No persistent API configuration found"
+    print_info "Using placeholder values for this deployment"
+    print_info "To configure real API keys, run: ./setup-api-keys.sh"
+    
+    # Set placeholder values
     DELTA_EXCHANGE_API_KEY="your-testnet-api-key"
     DELTA_EXCHANGE_API_SECRET="your-testnet-api-secret"
-fi
-
-echo ""
-
-# OpenAI API Configuration
-echo -e "${CYAN}🧠 OpenAI API Configuration${NC}"
-echo "-----------------------------"
-print_info "OpenAI API is used for AI-powered trading signal generation."
-print_info "Get your API key at: https://platform.openai.com/api-keys"
-echo ""
-
-read -p "Do you have an OpenAI API key? (y/n): " has_openai_key
-
-if [ "$has_openai_key" = "y" ] || [ "$has_openai_key" = "Y" ]; then
-    echo ""
-    print_info "Please enter your OpenAI API key:"
-    read -s -p "OpenAI API Key (starts with sk-): " openai_api_key
-    echo ""
-    
-    if [ ! -z "$openai_api_key" ]; then
-        OPENAI_API_KEY="$openai_api_key"
-        print_success "OpenAI API key configured"
-    else
-        print_warning "Empty API key provided, using placeholder value"
-        OPENAI_API_KEY="your-openai-api-key"
-    fi
-else
-    print_info "Using placeholder value. You can configure real key later with:"
-    print_info "  ./configure-api-keys.sh"
     OPENAI_API_KEY="your-openai-api-key"
+    DELTA_CONFIGURED=false
+    OPENAI_CONFIGURED=false
 fi
 
 echo ""
@@ -436,21 +407,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 EOF
 
 print_status "Backend environment configuration created"
-
-# Display configured API status
-echo ""
-print_info "API Configuration Summary:"
-if [ "$DELTA_EXCHANGE_API_KEY" != "your-testnet-api-key" ]; then
-    print_success "✓ Delta Exchange API: Configured with real credentials"
-else
-    print_warning "⚠ Delta Exchange API: Using placeholder (configure later)"
-fi
-
-if [ "$OPENAI_API_KEY" != "your-openai-api-key" ]; then
-    print_success "✓ OpenAI API: Configured with real credentials"
-else
-    print_warning "⚠ OpenAI API: Using placeholder (configure later)"
-fi
 
 echo ""
 
