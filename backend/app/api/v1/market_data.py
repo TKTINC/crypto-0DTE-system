@@ -5,6 +5,7 @@ Provides real-time and historical market data from Delta Exchange
 and other cryptocurrency exchanges.
 """
 
+import logging
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,7 +14,8 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.market_data import MarketData, OHLCV, OrderBook
-from app.services.exchanges.delta_exchange import DeltaExchangeService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/market-data", tags=["market-data"])
 
@@ -97,7 +99,46 @@ async def get_ohlcv_data_query(
 ):
     """Get OHLCV (candlestick) data for a symbol using query parameters"""
     try:
-        # Calculate start time based on limit and interval
+        # Try to get real data from Delta Exchange
+        try:
+            from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+            
+            async with DeltaExchangeConnector() as delta:
+                # Convert symbol format (BTC-USDT -> BTCUSDT for Delta)
+                delta_symbol = symbol.replace('-', '')
+                
+                # Convert timeframe to Delta format
+                resolution_map = {
+                    "1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "1D"
+                }
+                resolution = resolution_map.get(timeframe, "60")
+                
+                # Get candles from Delta Exchange
+                candles = await delta.get_candles(
+                    symbol=delta_symbol,
+                    resolution=resolution
+                )
+                
+                if candles and len(candles) > 0:
+                    # Convert Delta Exchange format to our format
+                    ohlcv_data = []
+                    for candle in candles[-limit:]:  # Get last 'limit' candles
+                        ohlcv_data.append(OHLCVResponse(
+                            symbol=symbol,
+                            open=float(candle.get('open', 0)),
+                            high=float(candle.get('high', 0)),
+                            low=float(candle.get('low', 0)),
+                            close=float(candle.get('close', 0)),
+                            volume=float(candle.get('volume', 0)),
+                            timestamp=datetime.fromtimestamp(candle.get('time', 0) / 1000)
+                        ))
+                    
+                    return ohlcv_data
+                    
+        except Exception as delta_error:
+            logger.warning(f"Delta Exchange API failed: {delta_error}, falling back to mock data")
+        
+        # Fallback to mock data for development
         interval_minutes = {
             "1m": 1, "5m": 5, "15m": 15, "1h": 60, "4h": 240, "1d": 1440
         }
@@ -105,21 +146,6 @@ async def get_ohlcv_data_query(
         if timeframe not in interval_minutes:
             raise HTTPException(status_code=400, detail="Invalid timeframe")
         
-        start_time = datetime.utcnow() - timedelta(
-            minutes=interval_minutes[timeframe] * limit
-        )
-        
-        # Query database
-        ohlcv_data = db.query(OHLCV).filter(
-            OHLCV.symbol == symbol,
-            OHLCV.interval == timeframe,
-            OHLCV.timestamp >= start_time
-        ).order_by(OHLCV.timestamp.desc()).limit(limit).all()
-        
-        if ohlcv_data:
-            return [OHLCVResponse.from_orm(candle) for candle in ohlcv_data]
-        
-        # If not in database, return mock data for development
         mock_data = []
         for i in range(limit):
             timestamp = datetime.utcnow() - timedelta(minutes=interval_minutes[timeframe] * i)

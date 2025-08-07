@@ -202,8 +202,28 @@ restart_backend() {
     
     if [ "$restart_backend" = "y" ] || [ "$restart_backend" = "Y" ]; then
         print_info "Stopping existing backend processes..."
+        
+        # Kill all Python backend processes more thoroughly
         pkill -f "python.*app.main" 2>/dev/null || true
-        sleep 2
+        pkill -f "uvicorn" 2>/dev/null || true
+        
+        # Wait longer for processes to terminate
+        sleep 5
+        
+        # Force kill any remaining processes on port 8000
+        local pids=$(lsof -ti:8000 2>/dev/null || true)
+        if [ ! -z "$pids" ]; then
+            print_info "Force killing remaining processes on port 8000..."
+            echo "$pids" | xargs kill -9 2>/dev/null || true
+            sleep 2
+        fi
+        
+        # Verify port 8000 is free
+        if lsof -i:8000 >/dev/null 2>&1; then
+            print_error "Port 8000 is still in use. Please manually kill processes and try again."
+            print_info "Check processes: lsof -i:8000"
+            return 1
+        fi
         
         print_info "Starting backend..."
         cd backend
@@ -218,6 +238,14 @@ restart_backend() {
         for i in {1..30}; do
             if curl -s http://localhost:8000/health >/dev/null 2>&1; then
                 print_success "Backend is ready!"
+                
+                # Verify only one process is running
+                local process_count=$(lsof -ti:8000 2>/dev/null | wc -l)
+                if [ "$process_count" -eq 1 ]; then
+                    print_success "Single backend process confirmed"
+                else
+                    print_warning "Multiple processes detected on port 8000: $process_count"
+                fi
                 break
             fi
             sleep 1

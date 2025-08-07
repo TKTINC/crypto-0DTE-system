@@ -480,13 +480,38 @@ cd "$BACKEND_DIR"
 # Kill any existing backend processes
 print_info "Stopping any existing backend processes..."
 pkill -f "python.*app.main" 2>/dev/null || true
-sleep 2
+pkill -f "uvicorn" 2>/dev/null || true
+sleep 5
+
+# Force kill any remaining processes on port 8000
+pids=$(lsof -ti:8000 2>/dev/null || true)
+if [ ! -z "$pids" ]; then
+    print_info "Force killing remaining processes on port 8000..."
+    echo "$pids" | xargs kill -9 2>/dev/null || true
+    sleep 2
+fi
+
+# Verify port 8000 is free before starting
+if lsof -i:8000 >/dev/null 2>&1; then
+    print_error "Port 8000 is still in use. Cannot start backend."
+    print_info "Check processes: lsof -i:8000"
+    exit 1
+fi
 
 # Start backend service in background
 print_info "Starting backend service..."
 nohup python -m app.main > "$LOG_DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo $BACKEND_PID > "$LOG_DIR/backend.pid"
+
+# Verify only one process is running
+sleep 3
+process_count=$(lsof -ti:8000 2>/dev/null | wc -l)
+if [ "$process_count" -ne 1 ]; then
+    print_warning "Expected 1 backend process, found $process_count"
+    print_info "Processes on port 8000:"
+    lsof -i:8000 || true
+fi
 
 # Wait for backend to be ready
 wait_for_service localhost 8000 "Backend API"
