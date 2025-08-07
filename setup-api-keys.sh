@@ -80,7 +80,7 @@ DELTA_CONFIGURED=$DELTA_CONFIGURED
 OPENAI_CONFIGURED=$OPENAI_CONFIGURED
 
 # Last Updated
-LAST_UPDATED=$(date '+%Y-%m-%d %H:%M:%S')
+LAST_UPDATED="$(date '+%Y-%m-%d %H:%M:%S')"
 EOF
     chmod 600 "$CONFIG_FILE"
     print_success "Configuration saved to $CONFIG_FILE"
