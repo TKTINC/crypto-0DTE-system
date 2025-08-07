@@ -45,6 +45,10 @@ print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
 # Function to check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
