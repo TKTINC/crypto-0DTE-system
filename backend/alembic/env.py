@@ -37,8 +37,9 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    """Get database URL from environment variables"""
-    return settings.DATABASE_URL
+    """Get database URL from environment variables (sync version for Alembic)"""
+    # Use the sync version of the database URL for Alembic migrations
+    return settings.database_url_sync
 
 
 def run_migrations_offline() -> None:
