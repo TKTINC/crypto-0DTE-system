@@ -20,7 +20,7 @@ import uvicorn
 from app.config import settings
 from app.database import engine, get_db
 from app.models import Base
-from app.api.v1 import market_data, signals, portfolio, trading, compliance, auth
+from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring
 from app.services.websocket_manager import WebSocketManager
 from app.services.health_service import HealthService
 from app.utils.logging_config import setup_logging
@@ -133,12 +133,6 @@ async def liveness_check():
 
 # Include API routers
 app.include_router(
-    auth.router,
-    prefix="/api/v1/auth",
-    tags=["Authentication"]
-)
-
-app.include_router(
     market_data.router,
     prefix="/api/v1/market-data",
     tags=["Market Data"]
@@ -163,9 +157,15 @@ app.include_router(
 )
 
 app.include_router(
-    compliance.router,
-    prefix="/api/v1/compliance",
-    tags=["Indian Regulatory Compliance"]
+    autonomous.router,
+    prefix="/api/v1/autonomous",
+    tags=["Autonomous Trading"]
+)
+
+app.include_router(
+    monitoring.router,
+    prefix="/api/v1/monitoring",
+    tags=["System Monitoring"]
 )
 
 

@@ -88,6 +88,58 @@ async def get_current_price(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch price: {str(e)}")
 
+@router.get("/ohlcv", response_model=List[OHLCVResponse])
+async def get_ohlcv_data_query(
+    symbol: str = Query(..., description="Trading symbol (e.g., BTC-USDT)"),
+    timeframe: str = Query("1h", description="Time interval (1m, 5m, 15m, 1h, 4h, 1d)"),
+    limit: int = Query(100, description="Number of candles to return"),
+    db: Session = Depends(get_db)
+):
+    """Get OHLCV (candlestick) data for a symbol using query parameters"""
+    try:
+        # Calculate start time based on limit and interval
+        interval_minutes = {
+            "1m": 1, "5m": 5, "15m": 15, "1h": 60, "4h": 240, "1d": 1440
+        }
+        
+        if timeframe not in interval_minutes:
+            raise HTTPException(status_code=400, detail="Invalid timeframe")
+        
+        start_time = datetime.utcnow() - timedelta(
+            minutes=interval_minutes[timeframe] * limit
+        )
+        
+        # Query database
+        ohlcv_data = db.query(OHLCV).filter(
+            OHLCV.symbol == symbol,
+            OHLCV.interval == timeframe,
+            OHLCV.timestamp >= start_time
+        ).order_by(OHLCV.timestamp.desc()).limit(limit).all()
+        
+        if ohlcv_data:
+            return [OHLCVResponse.from_orm(candle) for candle in ohlcv_data]
+        
+        # If not in database, return mock data for development
+        mock_data = []
+        for i in range(limit):
+            timestamp = datetime.utcnow() - timedelta(minutes=interval_minutes[timeframe] * i)
+            base_price = 43000 if 'BTC' in symbol else 2600
+            price_variation = base_price * 0.02 * (0.5 - (i % 10) / 10)
+            
+            mock_data.append(OHLCVResponse(
+                symbol=symbol,
+                open=base_price + price_variation,
+                high=base_price + price_variation + base_price * 0.01,
+                low=base_price + price_variation - base_price * 0.01,
+                close=base_price + price_variation + base_price * 0.005,
+                volume=1000 + (i * 50),
+                timestamp=timestamp
+            ))
+        
+        return mock_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch OHLCV data: {str(e)}")
+
 @router.get("/ohlcv/{symbol}", response_model=List[OHLCVResponse])
 async def get_ohlcv_data(
     symbol: str,
