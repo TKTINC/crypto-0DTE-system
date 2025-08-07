@@ -322,12 +322,13 @@ if __name__ == "__main__":
     # Get port from environment variable (Railway sets this)
     port = int(os.getenv("PORT", 8000))
     
-    # Run the application
+    # Run the application with single process (no reload to prevent duplicates)
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=port,
-        reload=settings.DEBUG,
+        reload=False,  # Disabled to prevent multiple worker processes
+        workers=1,     # Explicitly set to 1 worker
         log_level="info" if not settings.DEBUG else "debug"
     )
 
