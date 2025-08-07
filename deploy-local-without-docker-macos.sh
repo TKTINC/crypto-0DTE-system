@@ -551,7 +551,7 @@ fi
 rm -f "$LOG_DIR/backend.pid" "$LOG_DIR/backend.lock" "$LOG_DIR/start_backend.sh" 2>/dev/null || true
 
 # Final verification - only Python processes should be gone
-python_processes=$(lsof -i:8000 2>/dev/null | grep -c "Python" || echo "0")
+python_processes=$(lsof -i:8000 2>/dev/null | grep "Python" | wc -l | tr -d ' ')
 if [ "$python_processes" -gt 0 ]; then
     print_error "Python processes still running on port 8000 after cleanup:"
     lsof -i:8000 | grep "Python" || true
@@ -559,7 +559,7 @@ if [ "$python_processes" -gt 0 ]; then
     exit 1
 fi
 
-# Create a more robust startup script with port binding test
+# Create a macOS-compatible startup script with port binding test
 cat > "$LOG_DIR/start_backend.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")/../backend"
@@ -567,19 +567,18 @@ cd "$(dirname "$0")/../backend"
 # Strict error handling
 set -e
 
-# Lock file for atomic startup
+# Lock file for atomic startup (macOS compatible)
 LOCK_FILE="../logs/backend.lock"
 PID_FILE="../logs/backend.pid"
 
 # Function to cleanup on exit
 cleanup() {
-    rm -f "$LOCK_FILE" 2>/dev/null || true
+    rmdir "$LOCK_FILE" 2>/dev/null || true
 }
 trap cleanup EXIT
 
-# Atomic lock creation - only one instance can get the lock
-exec 200>"$LOCK_FILE"
-if ! flock -n 200; then
+# macOS-compatible atomic lock creation using mkdir
+if ! mkdir "$LOCK_FILE" 2>/dev/null; then
     echo "ERROR: Another backend instance is already starting or running"
     exit 1
 fi
@@ -643,7 +642,7 @@ else
 fi
 
 # Verify exactly one Python process is listening on port 8000
-python_count=$(lsof -i:8000 2>/dev/null | grep -c "Python" || echo "0")
+python_count=$(lsof -i:8000 2>/dev/null | grep "Python" | wc -l | tr -d ' ')
 if [ "$python_count" -eq 1 ]; then
     print_success "✓ Single backend process confirmed (PID: $BACKEND_PID)"
 elif [ "$python_count" -eq 0 ]; then
