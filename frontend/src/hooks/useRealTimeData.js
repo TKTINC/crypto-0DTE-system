@@ -164,6 +164,11 @@ export const useAutonomousMonitoring = () => {
           lastSignal: recentSignals.status === 'fulfilled' ? recentSignals.value?.[0] : null,
           count: recentSignals.status === 'fulfilled' ? recentSignals.value?.length || 0 : 0
         },
+        marketDataFlow: {
+          active: true, // Assume active if we're getting data
+          lastUpdate: new Date().toISOString(),
+          rate: 60 // Mock rate for now
+        },
         tradingActivity: {
           active: recentTrades.status === 'fulfilled' && recentTrades.value?.length > 0,
           lastTrade: recentTrades.status === 'fulfilled' ? recentTrades.value?.[0] : null,

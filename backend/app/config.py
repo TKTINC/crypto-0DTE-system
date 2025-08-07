@@ -62,6 +62,7 @@ class Settings(BaseSettings):
     # Delta Exchange API Configuration (FIXED - Updated field mapping)
     DELTA_API_KEY: str = Field(default="", env="DELTA_EXCHANGE_API_KEY")
     DELTA_API_SECRET: str = Field(default="", env="DELTA_EXCHANGE_API_SECRET")
+    DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
     DELTA_EXCHANGE_API_KEY: str = ""
     DELTA_EXCHANGE_API_SECRET: str = ""
     DELTA_EXCHANGE_BASE_URL: str = "https://testnet-api.delta.exchange"
