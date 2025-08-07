@@ -43,11 +43,11 @@ class HealthService:
     async def check_database_health(self) -> Dict[str, Any]:
         """Check database connectivity"""
         try:
-            from app.database import engine
+            from app.database import AsyncSessionLocal
             
-            # Simple connection test
-            with engine.connect() as connection:
-                result = connection.execute("SELECT 1")
+            # Use async session for database health check
+            async with AsyncSessionLocal() as session:
+                result = await session.execute("SELECT 1")
                 result.fetchone()
             
             return {
