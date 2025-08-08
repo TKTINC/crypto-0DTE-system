@@ -112,7 +112,7 @@ class Trade(Base):
     # Strategy and metadata
     strategy_name = Column(String(100), nullable=True)
     strategy_version = Column(String(20), nullable=True)
-    metadata = Column(Text, nullable=True)  # JSON string for additional data
+    trade_metadata = Column(Text, nullable=True)  # JSON string for additional data
     
     # Flags
     is_paper_trade = Column(Boolean, nullable=False, default=True)
@@ -183,7 +183,7 @@ class Trade(Base):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "strategy_name": self.strategy_name,
             "strategy_version": self.strategy_version,
-            "metadata": self.metadata,
+            "trade_metadata": self.trade_metadata,
             "is_paper_trade": self.is_paper_trade,
             "is_autonomous": self.is_autonomous,
             "is_open": self.is_open,
