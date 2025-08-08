@@ -58,7 +58,7 @@ class ExitReason(str, Enum):
 class Trade(Base):
     """Trade model for storing trade execution details"""
     
-    __tablename__ = "trades"
+    __tablename__ = "autonomous_trades"
     
     # Primary identification
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -196,7 +196,7 @@ class Trade(Base):
 class Position(Base):
     """Position model for tracking open positions"""
     
-    __tablename__ = "positions"
+    __tablename__ = "autonomous_positions"
     
     # Primary identification
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -222,7 +222,7 @@ class Position(Base):
     max_loss = Column(Numeric(20, 8), nullable=True, default=0)
     
     # Position metadata
-    trade_id = Column(String(50), ForeignKey('trades.trade_id'), nullable=False, index=True)
+    trade_id = Column(String(50), ForeignKey('autonomous_trades.trade_id'), nullable=False, index=True)
     strategy_name = Column(String(100), nullable=True)
     risk_amount = Column(Numeric(20, 8), nullable=True)
     
