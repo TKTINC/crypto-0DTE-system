@@ -135,50 +135,49 @@ async def get_portfolio_status(db: Session = Depends(get_db)):
                 positions=positions,
                 cash_balance=4000.0
             )
-                value=21625,
-                pnl=1250,
-                pnlPercent=6.1,
-                entry_price=40750,
-                current_price=43250
-            ),
-            PositionResponse(
-                symbol="ETHUSDT",
-                size=2.0,
-                value=5300,
-                pnl=-150,
-                pnlPercent=-2.8,
-                entry_price=2725,
-                current_price=2650
-            )
-        ]
-        
-        total_value = sum(pos.value for pos in positions)
-        total_pnl = sum(pos.pnl for pos in positions)
-        
-        return PortfolioStatusResponse(
-            total_value=total_value + 5000,  # Include cash
-            total_pnl=total_pnl,
-            total_pnl_percent=(total_pnl / (total_value - total_pnl)) * 100,
-            positions=positions,
-            cash_balance=5000
-        )
+            
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch portfolio status: {str(e)}")
+        logger.error(f"Portfolio status error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get portfolio status: {str(e)}")
 
 @router.get("/summary", response_model=PortfolioSummaryResponse)
 async def get_portfolio_summary(db: Session = Depends(get_db)):
     """Get portfolio performance summary"""
     try:
+        # Mock summary data for development
         return PortfolioSummaryResponse(
-            total_value=31925,
-            daily_pnl=450,
-            weekly_pnl=1100,
-            monthly_pnl=2750,
-            win_rate=73.5,
-            sharpe_ratio=1.85
+            total_value=25000.0,
+            daily_pnl=156.0,
+            weekly_pnl=890.0,
+            monthly_pnl=2340.0,
+            win_rate=68.5,
+            sharpe_ratio=1.42
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch portfolio summary: {str(e)}")
+        logger.error(f"Portfolio summary error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get portfolio summary: {str(e)}")
+
+@router.get("/performance")
+async def get_portfolio_performance(db: Session = Depends(get_db)):
+    """Get portfolio performance metrics"""
+    try:
+        # Mock performance data for development
+        return {
+            "total_return": 12.5,
+            "daily_return": 0.8,
+            "weekly_return": 3.2,
+            "monthly_return": 8.7,
+            "sharpe_ratio": 1.42,
+            "max_drawdown": -5.2,
+            "win_rate": 68.5,
+            "profit_factor": 1.85,
+            "total_trades": 156,
+            "winning_trades": 107,
+            "losing_trades": 49
+        }
+    except Exception as e:
+        logger.error(f"Portfolio performance error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get portfolio performance: {str(e)}")
 
 @router.get("/history")
 async def get_portfolio_history(
