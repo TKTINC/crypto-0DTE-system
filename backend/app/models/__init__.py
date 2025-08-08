@@ -24,6 +24,14 @@ from .trade import (
     ExitReason
 )
 
+from .order import (
+    Order,
+    OrderExecution,
+    OrderStatus,
+    OrderSide,
+    TimeInForce
+)
+
 __all__ = [
     "Base",
     "MarketData",
@@ -50,6 +58,12 @@ __all__ = [
     "TradeStatus",
     "TradeType",
     "OrderType",
-    "ExitReason"
+    "ExitReason",
+    # Order models
+    "Order",
+    "OrderExecution",
+    "OrderStatus", 
+    "OrderSide",
+    "TimeInForce"
 ]
 
