@@ -222,11 +222,14 @@ class DeltaExchangeConnector:
         # Delta Exchange uses v2 API and requires product_id
         # First get the product_id for the symbol
         try:
-            products = await self._make_request("GET", "/v2/products")
+            products_response = await self._make_request("GET", "/v2/products")
             product_id = None
             
+            # Handle the response format: {"result": [...], "success": true}
+            products = products_response.get('result', []) if isinstance(products_response, dict) else products_response
+            
             # Find the product_id for the symbol (e.g., BTCUSDT)
-            for product in products.get('result', []):
+            for product in products:
                 if product.get('symbol') == symbol:
                     product_id = product.get('id')
                     break
@@ -241,12 +244,13 @@ class DeltaExchangeConnector:
                 }
                 mapped_symbol = symbol_map.get(symbol, symbol)
                 
-                for product in products.get('result', []):
+                for product in products:
                     if product.get('symbol') == mapped_symbol and product.get('contract_type') == 'perpetual_futures':
                         product_id = product.get('id')
                         break
             
             if not product_id:
+                logger.warning(f"Product not found for symbol: {symbol}. Available symbols: {[p.get('symbol') for p in products[:5]]}")
                 raise DeltaExchangeError(f"Product not found for symbol: {symbol}")
             
             params = {
@@ -259,7 +263,13 @@ class DeltaExchangeConnector:
             if end:
                 params["end"] = end
             
-            return await self._make_request("GET", "/v2/chart/history", params=params)
+            chart_response = await self._make_request("GET", "/v2/chart/history", params=params)
+            
+            # Handle chart response format
+            if isinstance(chart_response, dict):
+                return chart_response.get('result', chart_response)
+            else:
+                return chart_response
             
         except Exception as e:
             logger.error(f"Failed to get candles for {symbol}: {e}")
