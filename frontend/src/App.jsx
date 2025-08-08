@@ -100,17 +100,44 @@ function Dashboard() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
   }
 
-  // Transform market data for charts
+  // Enhanced transform market data for charts with better dynamics
   const transformMarketDataForChart = (data) => {
     if (!data || !Array.isArray(data)) return []
-    return data.slice(-24).map((item, index) => ({
-      time: new Date(item.timestamp).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }),
-      price: item.close,
-      volume: item.volume
-    }))
+    
+    // Take last 24 data points and enhance them for better visualization
+    const recentData = data.slice(-24)
+    
+    return recentData.map((item, index) => {
+      const timestamp = new Date(item.timestamp || item.time)
+      const price = parseFloat(item.close || item.price || 0)
+      const volume = parseFloat(item.volume || 0)
+      
+      // Add smoothing and trend indicators for better visual dynamics
+      let smoothedPrice = price
+      if (index > 0 && recentData[index - 1]) {
+        const prevPrice = parseFloat(recentData[index - 1].close || recentData[index - 1].price || 0)
+        smoothedPrice = (price + prevPrice) / 2
+      }
+      
+      return {
+        time: timestamp.toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false
+        }),
+        price: price,
+        smoothedPrice: smoothedPrice,
+        volume: volume,
+        open: parseFloat(item.open || price),
+        high: parseFloat(item.high || price),
+        low: parseFloat(item.low || price),
+        close: price,
+        // Add trend indicator for color coding
+        trend: index > 0 && recentData[index - 1] ? 
+          (price > parseFloat(recentData[index - 1].close || recentData[index - 1].price || 0) ? 'up' : 'down') : 
+          'neutral'
+      }
+    })
   }
 
   const btcChartData = transformMarketDataForChart(marketData.BTC)
@@ -337,27 +364,42 @@ function Dashboard() {
                       <AreaChart data={btcChartData}>
                         <defs>
                           <linearGradient id="btcGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#f97316" stopOpacity={0.05}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="time" stroke="#9ca3af" />
-                        <YAxis stroke="#9ca3af" />
+                        <CartesianGrid strokeDasharray="2 2" stroke="#374151" opacity={0.3} />
+                        <XAxis 
+                          dataKey="time" 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          interval="preserveStartEnd"
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          domain={['dataMin - 100', 'dataMax + 100']}
+                          tickFormatter={(value) => `$${value.toLocaleString()}`}
+                        />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1f2937', 
                             border: '1px solid #374151',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            color: '#fff'
                           }}
+                          formatter={(value, name) => [`$${value.toLocaleString()}`, 'Price']}
+                          labelFormatter={(label) => `Time: ${label}`}
                         />
                         <Area 
                           type="monotone" 
-                          dataKey="price" 
+                          dataKey="smoothedPrice" 
                           stroke="#f97316" 
                           fillOpacity={1} 
                           fill="url(#btcGradient)" 
-                          strokeWidth={2}
+                          strokeWidth={2.5}
+                          dot={{ fill: '#f97316', strokeWidth: 0, r: 1 }}
+                          activeDot={{ r: 4, stroke: '#f97316', strokeWidth: 2, fill: '#fff' }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -389,27 +431,42 @@ function Dashboard() {
                       <AreaChart data={ethChartData}>
                         <defs>
                           <linearGradient id="ethGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="time" stroke="#9ca3af" />
-                        <YAxis stroke="#9ca3af" />
+                        <CartesianGrid strokeDasharray="2 2" stroke="#374151" opacity={0.3} />
+                        <XAxis 
+                          dataKey="time" 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          interval="preserveStartEnd"
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          fontSize={10}
+                          domain={['dataMin - 50', 'dataMax + 50']}
+                          tickFormatter={(value) => `$${value.toLocaleString()}`}
+                        />
                         <Tooltip 
                           contentStyle={{ 
                             backgroundColor: '#1f2937', 
                             border: '1px solid #374151',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            color: '#fff'
                           }}
+                          formatter={(value, name) => [`$${value.toLocaleString()}`, 'Price']}
+                          labelFormatter={(label) => `Time: ${label}`}
                         />
                         <Area 
                           type="monotone" 
-                          dataKey="price" 
+                          dataKey="smoothedPrice" 
                           stroke="#3b82f6" 
                           fillOpacity={1} 
                           fill="url(#ethGradient)" 
-                          strokeWidth={2}
+                          strokeWidth={2.5}
+                          dot={{ fill: '#3b82f6', strokeWidth: 0, r: 1 }}
+                          activeDot={{ r: 4, stroke: '#3b82f6', strokeWidth: 2, fill: '#fff' }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>

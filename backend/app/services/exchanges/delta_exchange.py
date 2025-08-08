@@ -244,10 +244,25 @@ class DeltaExchangeConnector:
                 }
                 mapped_symbol = symbol_map.get(symbol, symbol)
                 
+                # First try exact match for perpetual futures
                 for product in products:
                     if product.get('symbol') == mapped_symbol and product.get('contract_type') == 'perpetual_futures':
                         product_id = product.get('id')
+                        logger.info(f"Found perpetual futures for {symbol}: {mapped_symbol} (ID: {product_id})")
                         break
+                
+                # If no perpetual futures found, try spot market as fallback
+                if not product_id:
+                    spot_symbol_map = {
+                        'ETH-USDT': 'ETH_USDT',
+                        'BTC-USDT': 'BTC_USDT'
+                    }
+                    spot_symbol = spot_symbol_map.get(symbol, symbol)
+                    for product in products:
+                        if product.get('symbol') == spot_symbol and product.get('contract_type') == 'spot':
+                            product_id = product.get('id')
+                            logger.info(f"Using spot market for {symbol}: {spot_symbol} (ID: {product_id})")
+                            break
             
             if not product_id:
                 logger.warning(f"Product not found for symbol: {symbol}. Available symbols: {[p.get('symbol') for p in products[:5]]}")
