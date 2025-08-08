@@ -23,6 +23,13 @@ from app.models import Base
 from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring
 from app.services.websocket_manager import WebSocketManager
 from app.services.health_service import HealthService
+
+# Import autonomous trading services
+from app.services.autonomous_trading_orchestrator import AutonomousTradingOrchestrator
+from app.services.trade_execution_engine import TradeExecutionEngine
+from app.services.position_manager import PositionManager
+from app.services.risk_manager import RiskManager
+
 from app.utils.logging_config import setup_logging
 
 # Setup logging
@@ -35,10 +42,18 @@ websocket_manager = WebSocketManager()
 # Health service
 health_service = HealthService()
 
+# Global autonomous trading services
+autonomous_orchestrator = None
+trade_execution_engine = None
+position_manager = None
+risk_manager = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
+    global autonomous_orchestrator, trade_execution_engine, position_manager, risk_manager
+    
     # Startup
     logger.info("Starting Crypto-0DTE-System...")
     
@@ -49,12 +64,68 @@ async def lifespan(app: FastAPI):
     # Initialize services
     await health_service.initialize()
     
+    # Initialize autonomous trading services
+    try:
+        logger.info("🤖 Initializing Autonomous Trading System...")
+        
+        # Initialize core services
+        risk_manager = RiskManager()
+        await risk_manager.initialize()
+        logger.info("✅ Risk Manager initialized")
+        
+        position_manager = PositionManager()
+        await position_manager.initialize()
+        logger.info("✅ Position Manager initialized")
+        
+        trade_execution_engine = TradeExecutionEngine()
+        await trade_execution_engine.initialize()
+        logger.info("✅ Trade Execution Engine initialized")
+        
+        autonomous_orchestrator = AutonomousTradingOrchestrator(
+            risk_manager=risk_manager,
+            position_manager=position_manager,
+            trade_execution_engine=trade_execution_engine
+        )
+        await autonomous_orchestrator.initialize()
+        logger.info("✅ Autonomous Trading Orchestrator initialized")
+        
+        # Start autonomous trading
+        await autonomous_orchestrator.start()
+        logger.info("🚀 Autonomous Trading System ACTIVE")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Autonomous Trading System: {e}")
+        # Continue without autonomous trading
+    
     logger.info("Crypto-0DTE-System started successfully")
     
     yield
     
     # Shutdown
     logger.info("Shutting down Crypto-0DTE-System...")
+    
+    # Shutdown autonomous trading services
+    try:
+        if autonomous_orchestrator:
+            await autonomous_orchestrator.stop()
+            await autonomous_orchestrator.cleanup()
+            logger.info("✅ Autonomous Trading Orchestrator stopped")
+        
+        if trade_execution_engine:
+            await trade_execution_engine.cleanup()
+            logger.info("✅ Trade Execution Engine stopped")
+        
+        if position_manager:
+            await position_manager.cleanup()
+            logger.info("✅ Position Manager stopped")
+        
+        if risk_manager:
+            await risk_manager.cleanup()
+            logger.info("✅ Risk Manager stopped")
+            
+    except Exception as e:
+        logger.error(f"Error shutting down autonomous services: {e}")
+    
     await health_service.cleanup()
     logger.info("Crypto-0DTE-System shutdown complete")
 
@@ -265,6 +336,154 @@ async def system_metrics():
     except Exception as e:
         logger.error(f"Failed to get system metrics: {e}")
         raise HTTPException(status_code=500, detail="Failed to get metrics")
+
+
+# =============================================================================
+# AUTONOMOUS TRADING ENDPOINTS
+# =============================================================================
+
+@app.get("/api/v1/autonomous/orchestrator/status")
+async def get_orchestrator_status():
+    """Get autonomous trading orchestrator status"""
+    try:
+        if autonomous_orchestrator:
+            status = await autonomous_orchestrator.get_status()
+            return status
+        else:
+            return {
+                "status": "INACTIVE",
+                "message": "Autonomous trading orchestrator not initialized",
+                "timestamp": "N/A"
+            }
+    except Exception as e:
+        logger.error(f"Failed to get orchestrator status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get orchestrator status")
+
+
+@app.post("/api/v1/autonomous/orchestrator/start")
+async def start_orchestrator():
+    """Start the autonomous trading orchestrator"""
+    try:
+        if autonomous_orchestrator:
+            await autonomous_orchestrator.start()
+            return {"message": "Autonomous trading orchestrator started", "status": "ACTIVE"}
+        else:
+            raise HTTPException(status_code=503, detail="Orchestrator not initialized")
+    except Exception as e:
+        logger.error(f"Failed to start orchestrator: {e}")
+        raise HTTPException(status_code=500, detail="Failed to start orchestrator")
+
+
+@app.post("/api/v1/autonomous/orchestrator/stop")
+async def stop_orchestrator():
+    """Stop the autonomous trading orchestrator"""
+    try:
+        if autonomous_orchestrator:
+            await autonomous_orchestrator.stop()
+            return {"message": "Autonomous trading orchestrator stopped", "status": "STOPPED"}
+        else:
+            raise HTTPException(status_code=503, detail="Orchestrator not initialized")
+    except Exception as e:
+        logger.error(f"Failed to stop orchestrator: {e}")
+        raise HTTPException(status_code=500, detail="Failed to stop orchestrator")
+
+
+@app.get("/api/v1/autonomous/risk/summary")
+async def get_risk_summary():
+    """Get comprehensive risk summary"""
+    try:
+        if risk_manager:
+            summary = await risk_manager.get_risk_summary()
+            return summary
+        else:
+            raise HTTPException(status_code=503, detail="Risk manager not initialized")
+    except Exception as e:
+        logger.error(f"Failed to get risk summary: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get risk summary")
+
+
+@app.get("/api/v1/autonomous/positions/analytics/{trade_id}")
+async def get_position_analytics(trade_id: str):
+    """Get analytics for a specific position"""
+    try:
+        if position_manager:
+            analytics = await position_manager.get_position_analytics(trade_id)
+            return analytics
+        else:
+            raise HTTPException(status_code=503, detail="Position manager not initialized")
+    except Exception as e:
+        logger.error(f"Failed to get position analytics: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get position analytics")
+
+
+@app.get("/api/v1/autonomous/positions/states")
+async def get_all_position_states():
+    """Get all position states for monitoring"""
+    try:
+        if position_manager:
+            states = await position_manager.get_all_position_states()
+            return states
+        else:
+            raise HTTPException(status_code=503, detail="Position manager not initialized")
+    except Exception as e:
+        logger.error(f"Failed to get position states: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get position states")
+
+
+@app.post("/api/v1/autonomous/positions/{trade_id}/force-exit")
+async def force_exit_position(trade_id: str, reason: str = "Manual"):
+    """Force exit a position"""
+    try:
+        if position_manager:
+            result = await position_manager.force_exit_position(trade_id, reason)
+            return result
+        else:
+            raise HTTPException(status_code=503, detail="Position manager not initialized")
+    except Exception as e:
+        logger.error(f"Failed to force exit position: {e}")
+        raise HTTPException(status_code=500, detail="Failed to force exit position")
+
+
+@app.get("/api/v1/autonomous/execution/status")
+async def get_execution_status():
+    """Get trade execution engine status"""
+    try:
+        if trade_execution_engine:
+            status = await trade_execution_engine.get_execution_status()
+            return status
+        else:
+            raise HTTPException(status_code=503, detail="Trade execution engine not initialized")
+    except Exception as e:
+        logger.error(f"Failed to get execution status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get execution status")
+
+
+@app.get("/api/v1/autonomous/execution/queue")
+async def get_execution_queue():
+    """Get current execution queue"""
+    try:
+        if trade_execution_engine:
+            queue = await trade_execution_engine.get_execution_queue()
+            return queue
+        else:
+            raise HTTPException(status_code=503, detail="Trade execution engine not initialized")
+    except Exception as e:
+        logger.error(f"Failed to get execution queue: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get execution queue")
+
+
+@app.post("/api/v1/autonomous/risk/emergency-shutdown")
+async def emergency_risk_shutdown():
+    """Emergency risk shutdown - stop all trading"""
+    try:
+        if risk_manager:
+            result = await risk_manager.emergency_risk_shutdown()
+            return result
+        else:
+            raise HTTPException(status_code=503, detail="Risk manager not initialized")
+    except Exception as e:
+        logger.error(f"Failed to execute emergency shutdown: {e}")
+        raise HTTPException(status_code=500, detail="Failed to execute emergency shutdown")
 
 
 # =============================================================================
