@@ -99,6 +99,24 @@ class ApiService {
     return this.apiCall('/api/v1/trading/performance');
   }
 
+  // Performance Metrics
+  async getPerformanceMetrics() {
+    return this.apiCall('/api/v1/portfolio/performance');
+  }
+
+  async getSystemMetrics() {
+    return this.apiCall('/api/v1/monitoring/system-metrics');
+  }
+
+  // Connection Testing
+  async testDeltaConnection() {
+    return this.apiCall('/api/v1/market-data/test-connection');
+  }
+
+  async testOpenAIConnection() {
+    return this.apiCall('/api/v1/signals/test-ai-connection');
+  }
+
   // Autonomous System Monitoring
   async getAutonomousStatus() {
     return this.apiCall('/api/v1/autonomous/status');

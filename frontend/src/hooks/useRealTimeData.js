@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import apiService from '../services/api';
 
 // Custom hook for managing real-time data updates
@@ -10,6 +10,8 @@ export const useRealTimeData = (updateInterval = 30000) => {
     portfolio: null,
     trades: [],
     autonomous: null,
+    performance: null,
+    systemMetrics: null,
     loading: true,
     error: null,
     lastUpdated: null
@@ -24,14 +26,22 @@ export const useRealTimeData = (updateInterval = 30000) => {
   const intervalRef = useRef(null);
   const mountedRef = useRef(true);
 
-  // Fetch all dashboard data
+  // Fetch all dashboard data with enhanced performance metrics
   const fetchDashboardData = useCallback(async () => {
     try {
       const dashboardData = await apiService.getAllDashboardData();
       
+      // Fetch additional performance data
+      const [performanceData, systemMetrics] = await Promise.allSettled([
+        apiService.getPerformanceMetrics(),
+        apiService.getSystemMetrics()
+      ]);
+      
       if (mountedRef.current) {
         setData(prevData => ({
           ...dashboardData,
+          performance: performanceData.status === 'fulfilled' ? performanceData.value : null,
+          systemMetrics: systemMetrics.status === 'fulfilled' ? systemMetrics.value : null,
           loading: false,
           error: null,
           lastUpdated: new Date()
