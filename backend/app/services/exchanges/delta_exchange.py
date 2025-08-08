@@ -253,23 +253,50 @@ class DeltaExchangeConnector:
                 logger.warning(f"Product not found for symbol: {symbol}. Available symbols: {[p.get('symbol') for p in products[:5]]}")
                 raise DeltaExchangeError(f"Product not found for symbol: {symbol}")
             
+            # Set default time range if not provided (last 24 hours)
+            import time
+            if not end:
+                end = int(time.time())
+            if not start:
+                start = end - 86400  # 24 hours ago
+            
             params = {
                 "symbol": symbol,
                 "product_id": product_id,
-                "resolution": resolution
+                "resolution": resolution,
+                "from": start,
+                "to": end
             }
-            if start:
-                params["start"] = start
-            if end:
-                params["end"] = end
             
             chart_response = await self._make_request("GET", "/v2/chart/history", params=params)
             
-            # Handle chart response format
-            if isinstance(chart_response, dict):
-                return chart_response.get('result', chart_response)
+            # Handle chart response format - Delta Exchange returns TradingView format
+            if isinstance(chart_response, dict) and chart_response.get('success'):
+                result = chart_response.get('result', {})
+                
+                # Convert TradingView format to our format
+                times = result.get('t', [])
+                opens = result.get('o', [])
+                highs = result.get('h', [])
+                lows = result.get('l', [])
+                closes = result.get('c', [])
+                volumes = result.get('v', [])
+                
+                candles = []
+                for i in range(len(times)):
+                    candles.append({
+                        'time': times[i] * 1000,  # Convert to milliseconds
+                        'open': opens[i] if i < len(opens) else 0,
+                        'high': highs[i] if i < len(highs) else 0,
+                        'low': lows[i] if i < len(lows) else 0,
+                        'close': closes[i] if i < len(closes) else 0,
+                        'volume': volumes[i] if i < len(volumes) else 0
+                    })
+                
+                return candles
             else:
-                return chart_response
+                logger.warning(f"Unexpected chart response format: {chart_response}")
+                return []
             
         except Exception as e:
             logger.error(f"Failed to get candles for {symbol}: {e}")
