@@ -271,8 +271,13 @@ class DeltaExchangeConnector:
             chart_response = await self._make_request("GET", "/v2/chart/history", params=params)
             
             # Handle chart response format - Delta Exchange returns TradingView format
-            if isinstance(chart_response, dict) and chart_response.get('success'):
-                result = chart_response.get('result', {})
+            if isinstance(chart_response, dict):
+                # Check if it's the wrapped format with 'result'
+                if 'result' in chart_response and chart_response.get('success'):
+                    result = chart_response.get('result', {})
+                else:
+                    # Direct TradingView format response
+                    result = chart_response
                 
                 # Convert TradingView format to our format
                 times = result.get('t', [])
@@ -281,6 +286,11 @@ class DeltaExchangeConnector:
                 lows = result.get('l', [])
                 closes = result.get('c', [])
                 volumes = result.get('v', [])
+                
+                # Check if we have valid data
+                if not times or result.get('s') != 'ok':
+                    logger.warning(f"No valid chart data for {symbol}: {result}")
+                    return []
                 
                 candles = []
                 for i in range(len(times)):
@@ -293,9 +303,10 @@ class DeltaExchangeConnector:
                         'volume': volumes[i] if i < len(volumes) else 0
                     })
                 
+                logger.info(f"Successfully retrieved {len(candles)} candles for {symbol}")
                 return candles
             else:
-                logger.warning(f"Unexpected chart response format: {chart_response}")
+                logger.warning(f"Unexpected chart response type: {type(chart_response)}")
                 return []
             
         except Exception as e:
