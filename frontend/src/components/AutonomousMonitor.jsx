@@ -386,6 +386,7 @@ const AutonomousMonitor = () => {
                 <p className="text-slate-400">No recent autonomous activity detected</p>
                 <p className="text-xs text-slate-500 mt-1">System is monitoring markets and waiting for trading opportunities</p>
               </div>
+            )}
           </div>
         </CardContent>
       </Card>
