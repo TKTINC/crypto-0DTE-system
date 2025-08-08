@@ -199,12 +199,12 @@ class DeltaExchangeConnector:
     
     async def get_ticker(self, symbol: str) -> Dict[str, Any]:
         """Get ticker data for symbol"""
-        return await self._make_request("GET", f"/tickers/{symbol}")
+        return await self._make_request("GET", f"/v2/tickers/{symbol}")
     
     async def get_orderbook(self, symbol: str, depth: int = 20) -> Dict[str, Any]:
         """Get order book for symbol"""
         params = {"depth": depth}
-        return await self._make_request("GET", f"/orderbook/{symbol}", params=params)
+        return await self._make_request("GET", f"/v2/l2orderbook/{symbol}", params=params)
     
     async def get_trades(self, symbol: str, limit: int = 100) -> List[Dict[str, Any]]:
         """Get recent trades for symbol"""
@@ -219,13 +219,51 @@ class DeltaExchangeConnector:
         end: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """Get candlestick data"""
-        params = {"resolution": resolution}
-        if start:
-            params["start"] = start
-        if end:
-            params["end"] = end
-        
-        return await self._make_request("GET", f"/chart/history", params=params)
+        # Delta Exchange uses v2 API and requires product_id
+        # First get the product_id for the symbol
+        try:
+            products = await self._make_request("GET", "/v2/products")
+            product_id = None
+            
+            # Find the product_id for the symbol (e.g., BTCUSDT)
+            for product in products.get('result', []):
+                if product.get('symbol') == symbol:
+                    product_id = product.get('id')
+                    break
+            
+            if not product_id:
+                # Try common perpetual contract symbols
+                symbol_map = {
+                    'BTCUSDT': 'BTCUSDT',
+                    'BTC-USDT': 'BTCUSDT', 
+                    'ETHUSDT': 'ETHUSDT',
+                    'ETH-USDT': 'ETHUSDT'
+                }
+                mapped_symbol = symbol_map.get(symbol, symbol)
+                
+                for product in products.get('result', []):
+                    if product.get('symbol') == mapped_symbol and product.get('contract_type') == 'perpetual_futures':
+                        product_id = product.get('id')
+                        break
+            
+            if not product_id:
+                raise DeltaExchangeError(f"Product not found for symbol: {symbol}")
+            
+            params = {
+                "symbol": symbol,
+                "product_id": product_id,
+                "resolution": resolution
+            }
+            if start:
+                params["start"] = start
+            if end:
+                params["end"] = end
+            
+            return await self._make_request("GET", "/v2/chart/history", params=params)
+            
+        except Exception as e:
+            logger.error(f"Failed to get candles for {symbol}: {e}")
+            raise DeltaExchangeError(f"Failed to get candles: {e}")
     
     async def get_funding_rate(self, symbol: str) -> Dict[str, Any]:
         """Get funding rate for perpetual contract"""
