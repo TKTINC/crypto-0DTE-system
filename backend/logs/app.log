@@ -9549,3 +9549,12 @@ pip install python-multipart
 2025-08-07 03:52:09,298 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
 2025-08-07 03:52:30,770 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
 2025-08-07 03:52:30,770 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-08 10:30:51,046 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-08 10:30:51,046 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-08 10:31:24,588 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-08 10:31:24,588 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-08 10:31:35,051 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-08 10:31:35,051 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-08 10:31:42,887 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-08 10:31:42,887 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-08 10:31:42,905 [INFO] app.main [main.py:58]: Starting Crypto-0DTE-System...

@@ -7,8 +7,8 @@ SQLAlchemy models for the Crypto-0DTE-System database.
 from app.database import Base
 
 # Import all models to ensure they are registered with SQLAlchemy
-from .market_data import MarketData, CryptoPrice, OrderBook, Trade
-from .signal import Signal, SignalExecution, SignalPerformance
+from .market_data import MarketData, CryptoPrice, OrderBook
+from .signal import Signal, SignalExecution, SignalPerformance, SignalType, SignalStatus, RiskLevel
 from .portfolio import Portfolio, Position, Transaction
 from .user import User, UserProfile, UserSettings
 from .compliance import TaxRecord, TDSRecord, ComplianceLog
@@ -20,7 +20,6 @@ from .trade import (
     Position as AutonomousPosition,
     TradeStatus, 
     TradeType, 
-    OrderType, 
     ExitReason
 )
 
@@ -28,6 +27,7 @@ from .order import (
     Order,
     OrderExecution,
     OrderStatus,
+    OrderType,
     OrderSide,
     TimeInForce
 )
@@ -37,10 +37,12 @@ __all__ = [
     "MarketData",
     "CryptoPrice", 
     "OrderBook",
-    "Trade",
     "Signal",
     "SignalExecution",
     "SignalPerformance",
+    "SignalType",
+    "SignalStatus", 
+    "RiskLevel",
     "Portfolio",
     "Position",
     "Transaction",
@@ -57,12 +59,12 @@ __all__ = [
     "AutonomousPosition", 
     "TradeStatus",
     "TradeType",
-    "OrderType",
     "ExitReason",
     # Order models
     "Order",
     "OrderExecution",
-    "OrderStatus", 
+    "OrderStatus",
+    "OrderType", 
     "OrderSide",
     "TimeInForce"
 ]

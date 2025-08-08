@@ -41,6 +41,14 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3001"
     ]
     
+    # Trusted Host Configuration
+    ALLOWED_HOSTS: List[str] = [
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",
+        "*.localhost"
+    ]
+    
     # Database Configuration (PostgreSQL Only)
     DATABASE_URL: str = "postgresql+asyncpg://crypto_user:crypto_password@localhost:5432/crypto_0dte_local"
     DATABASE_POOL_SIZE: int = 10

@@ -4,10 +4,34 @@ Signal Models for Crypto-0DTE-System
 SQLAlchemy models for trading signals, executions, and performance tracking.
 """
 
+from enum import Enum
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, Text, ForeignKey
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
+
+
+class SignalType(str, Enum):
+    """Signal type enumeration"""
+    BUY = "BUY"
+    SELL = "SELL"
+    HOLD = "HOLD"
+
+
+class SignalStatus(str, Enum):
+    """Signal status enumeration"""
+    ACTIVE = "ACTIVE"
+    EXECUTED = "EXECUTED"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
+
+
+class RiskLevel(str, Enum):
+    """Risk level enumeration"""
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
 
 
 class Signal(Base):
@@ -18,7 +42,7 @@ class Signal(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     symbol = Column(String(20), nullable=False, index=True)  # e.g., "BTC-USDT"
-    signal_type = Column(String(10), nullable=False)  # "BUY", "SELL", "HOLD"
+    signal_type = Column(ENUM(SignalType), nullable=False)  # BUY, SELL, HOLD
     confidence = Column(Float, nullable=False)  # 0.0 to 1.0
     target_price = Column(Float, nullable=True)
     stop_loss = Column(Float, nullable=True)
@@ -27,14 +51,14 @@ class Signal(Base):
     # AI Analysis
     ai_reasoning = Column(Text, nullable=True)
     market_conditions = Column(Text, nullable=True)
-    risk_assessment = Column(String(20), nullable=True)  # "LOW", "MEDIUM", "HIGH"
+    risk_assessment = Column(ENUM(RiskLevel), nullable=True)  # LOW, MEDIUM, HIGH
     
     # Timing
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     expires_at = Column(DateTime(timezone=True), nullable=True)
     
     # Status
-    status = Column(String(20), default="ACTIVE")  # "ACTIVE", "EXECUTED", "EXPIRED", "CANCELLED"
+    status = Column(ENUM(SignalStatus), default=SignalStatus.ACTIVE)  # ACTIVE, EXECUTED, EXPIRED, CANCELLED
     is_active = Column(Boolean, default=True)
     
     # Relationships
