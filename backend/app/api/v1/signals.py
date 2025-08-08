@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import openai
-import os
+from openai import OpenAI
 import logging
 
 from app.database import get_db
@@ -22,8 +21,8 @@ router = APIRouter(tags=["signals"])
 # Get settings instance
 settings = Settings()
 
-# Configure OpenAI
-openai.api_key = settings.OPENAI_API_KEY
+# Configure OpenAI client
+openai_client = OpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
 
 # Pydantic models for API responses
 class SignalResponse(BaseModel):
@@ -145,8 +144,8 @@ async def generate_signal(
         
         try:
             # Call OpenAI API
-            if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip():
-                response = openai.ChatCompletion.create(
+            if openai_client and settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip():
+                response = openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a professional cryptocurrency trading AI assistant. Always respond with valid JSON."},
@@ -212,7 +211,7 @@ async def generate_signal(
 async def test_ai_connection():
     """Test AI service connection"""
     try:
-        if not settings.OPENAI_API_KEY or not settings.OPENAI_API_KEY.strip():
+        if not openai_client or not settings.OPENAI_API_KEY or not settings.OPENAI_API_KEY.strip():
             return {
                 "status": "error",
                 "error": "OpenAI API key not configured",
@@ -220,7 +219,7 @@ async def test_ai_connection():
             }
         
         # Test OpenAI connection with a simple request
-        response = openai.ChatCompletion.create(
+        response = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": "Test connection. Respond with 'OK'."}],
             max_tokens=10
