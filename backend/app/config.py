@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     DELTA_API_KEY: str = Field(default="", env="DELTA_EXCHANGE_API_KEY")
     DELTA_API_SECRET: str = Field(default="", env="DELTA_EXCHANGE_API_SECRET")
     DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
+    DELTA_BASE_URL: str = Field(default="https://testnet-api.delta.exchange", env="DELTA_EXCHANGE_BASE_URL")
+    DELTA_WEBSOCKET_URL: str = Field(default="wss://testnet-socket.delta.exchange", env="DELTA_WEBSOCKET_URL")
     DELTA_EXCHANGE_API_KEY: str = ""
     DELTA_EXCHANGE_API_SECRET: str = ""
     DELTA_EXCHANGE_BASE_URL: str = "https://testnet-api.delta.exchange"
