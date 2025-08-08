@@ -12,9 +12,14 @@ from pydantic import BaseModel
 import logging
 
 from app.database import get_db
+from app.config import Settings
+from app.services.exchanges.delta_exchange import DeltaExchangeConnector
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["portfolio"])
+
+# Get settings instance
+settings = Settings()
 
 # Pydantic models for API responses
 class PositionResponse(BaseModel):
@@ -43,17 +48,11 @@ class PortfolioSummaryResponse(BaseModel):
     
 @router.get("/status", response_model=PortfolioStatusResponse)
 async def get_portfolio_status(db: Session = Depends(get_db)):
-    """Get current portfolio status and positions from Delta Exchange"""
+    """Get current portfolio status and positions"""
     try:
-        from app.services.exchanges.delta_exchange import DeltaExchangeConnector
-        from app.config import get_settings
-        
-        settings = get_settings()
-        
         # Try to get real portfolio data from Delta Exchange
         try:
-            delta_connector = DeltaExchangeConnector(settings)
-            
+            delta_connector = DeltaExchangeConnector(settings) 
             # Get account balance and positions
             balance_data = await delta_connector.get_account_balance()
             positions_data = await delta_connector.get_positions()

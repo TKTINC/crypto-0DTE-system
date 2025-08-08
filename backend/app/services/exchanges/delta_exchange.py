@@ -255,14 +255,25 @@ class DeltaExchangeConnector:
                 if not product_id:
                     spot_symbol_map = {
                         'ETH-USDT': 'ETH_USDT',
-                        'BTC-USDT': 'BTC_USDT'
+                        'ETHUSDT': 'ETH_USDT',
+                        'BTC-USDT': 'BTC_USDT',
+                        'BTCUSDT': 'BTC_USDT'
                     }
                     spot_symbol = spot_symbol_map.get(symbol, symbol)
                     for product in products:
-                        if product.get('symbol') == spot_symbol and product.get('contract_type') == 'spot':
+                        if product.get('symbol') == spot_symbol:
                             product_id = product.get('id')
                             logger.info(f"Using spot market for {symbol}: {spot_symbol} (ID: {product_id})")
                             break
+                    
+                    # If still not found, try the exact symbol from our search results
+                    if not product_id and symbol in ['ETH-USDT', 'ETHUSDT']:
+                        # From our search, we found both ETH_USDT (ID: 2698) and ETHUSDT (ID: 1699)
+                        for product in products:
+                            if product.get('symbol') in ['ETH_USDT', 'ETHUSDT'] and product.get('state') == 'live':
+                                product_id = product.get('id')
+                                logger.info(f"Found ETH product: {product.get('symbol')} (ID: {product_id})")
+                                break
             
             if not product_id:
                 logger.warning(f"Product not found for symbol: {symbol}. Available symbols: {[p.get('symbol') for p in products[:5]]}")
