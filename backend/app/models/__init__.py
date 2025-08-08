@@ -14,6 +14,16 @@ from .user import User, UserProfile, UserSettings
 from .compliance import TaxRecord, TDSRecord, ComplianceLog
 from .risk_profile import RiskProfile, RiskMetrics
 
+# Import autonomous trading models
+from .trade import (
+    Trade as AutonomousTrade, 
+    Position as AutonomousPosition,
+    TradeStatus, 
+    TradeType, 
+    OrderType, 
+    ExitReason
+)
+
 __all__ = [
     "Base",
     "MarketData",
@@ -33,6 +43,13 @@ __all__ = [
     "TDSRecord",
     "ComplianceLog",
     "RiskProfile",
-    "RiskMetrics"
+    "RiskMetrics",
+    # Autonomous trading models
+    "AutonomousTrade",
+    "AutonomousPosition", 
+    "TradeStatus",
+    "TradeType",
+    "OrderType",
+    "ExitReason"
 ]
 
