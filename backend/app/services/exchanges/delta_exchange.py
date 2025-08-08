@@ -345,14 +345,38 @@ class DeltaExchangeConnector:
         """Get account information"""
         return await self._make_request("GET", "/account")
     
-    async def get_balances(self) -> List[Dict[str, Any]]:
-        """Get account balances"""
-        return await self._make_request("GET", "/wallet/balances")
+    async def get_account_balance(self) -> Dict[str, Any]:
+        """Get account balance information"""
+        try:
+            response = await self._make_request("GET", "/v2/wallet/balances")
+            if isinstance(response, dict) and 'result' in response:
+                balances = response.get('result', [])
+                # Find USDT balance for main account balance
+                for balance in balances:
+                    if balance.get('asset_symbol') == 'USDT':
+                        return {
+                            'available_balance': float(balance.get('available_balance', 0)),
+                            'total_balance': float(balance.get('balance', 0)),
+                            'currency': 'USDT'
+                        }
+                return {'available_balance': 0, 'total_balance': 0, 'currency': 'USDT'}
+            return {'available_balance': 0, 'total_balance': 0, 'currency': 'USDT'}
+        except Exception as e:
+            logger.error(f"Failed to get account balance: {e}")
+            return {'available_balance': 0, 'total_balance': 0, 'currency': 'USDT'}
     
-    async def get_positions(self) -> List[PositionResponse]:
+    async def get_positions(self) -> List[Dict[str, Any]]:
         """Get open positions"""
-        positions_data = await self._make_request("GET", "/positions")
-        return [PositionResponse(**pos) for pos in positions_data]
+        try:
+            response = await self._make_request("GET", "/v2/positions")
+            if isinstance(response, dict) and 'result' in response:
+                return response.get('result', [])
+            elif isinstance(response, list):
+                return response
+            return []
+        except Exception as e:
+            logger.error(f"Failed to get positions: {e}")
+            return []
     
     async def get_position(self, symbol: str) -> Optional[PositionResponse]:
         """Get specific position"""

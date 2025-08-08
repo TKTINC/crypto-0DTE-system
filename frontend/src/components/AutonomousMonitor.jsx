@@ -255,53 +255,137 @@ const AutonomousMonitor = () => {
         </Card>
       )}
 
-      {/* Recent Activity Log */}
+      {/* Recent Activity Log - Enhanced */}
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Clock className="h-5 w-5 text-cyan-500 mr-2" />
-            Recent Autonomous Activity
+          <CardTitle className="text-white flex items-center justify-between">
+            <div className="flex items-center">
+              <Clock className="h-5 w-5 text-cyan-500 mr-2" />
+              Recent Autonomous Activity
+            </div>
+            <Badge variant="outline" className="text-cyan-400 border-cyan-400">
+              Live Updates
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Signal Generation Activity */}
             {signalGeneration.lastSignal && (
-              <div className="flex items-center space-x-3 p-3 bg-slate-700 rounded">
-                <Brain className="h-4 w-4 text-purple-500" />
-                <div className="flex-1">
-                  <p className="text-sm text-white">
-                    Generated {signalGeneration.lastSignal.type} signal for {signalGeneration.lastSignal.symbol}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    Confidence: {signalGeneration.lastSignal.confidence}% • {formatTimeAgo(signalGeneration.lastSignal.created_at)}
-                  </p>
+              <div className="border border-slate-600 rounded-lg p-4 bg-slate-700/50">
+                <div className="flex items-start space-x-3">
+                  <Brain className="h-5 w-5 text-purple-500 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-white">AI Signal Generated</h4>
+                      <Badge 
+                        variant={signalGeneration.lastSignal.type === 'BUY' ? 'default' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {signalGeneration.lastSignal.type}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-slate-400">Symbol:</span>
+                        <span className="text-white ml-1">{signalGeneration.lastSignal.symbol}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Confidence:</span>
+                        <span className="text-white ml-1">{signalGeneration.lastSignal.confidence}%</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Entry Price:</span>
+                        <span className="text-white ml-1">${signalGeneration.lastSignal.entry_price?.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Target:</span>
+                        <span className="text-green-400 ml-1">${signalGeneration.lastSignal.target_price?.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-400">
+                      Strategy: {signalGeneration.lastSignal.strategy} • {formatTimeAgo(signalGeneration.lastSignal.created_at)}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* Trading Activity */}
             {tradingActivity.lastTrade && (
-              <div className="flex items-center space-x-3 p-3 bg-slate-700 rounded">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                <div className="flex-1">
-                  <p className="text-sm text-white">
-                    Executed {tradingActivity.lastTrade.side} trade for {tradingActivity.lastTrade.symbol}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    Size: {tradingActivity.lastTrade.quantity} • {formatTimeAgo(tradingActivity.lastTrade.timestamp)}
-                  </p>
+              <div className="border border-slate-600 rounded-lg p-4 bg-slate-700/50">
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="h-5 w-5 text-green-500 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-white">Trade Executed</h4>
+                      <Badge 
+                        variant={tradingActivity.lastTrade.side === 'buy' ? 'default' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {tradingActivity.lastTrade.side?.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-slate-400">Symbol:</span>
+                        <span className="text-white ml-1">{tradingActivity.lastTrade.symbol}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Quantity:</span>
+                        <span className="text-white ml-1">{tradingActivity.lastTrade.quantity}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Price:</span>
+                        <span className="text-white ml-1">${tradingActivity.lastTrade.price?.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Value:</span>
+                        <span className="text-white ml-1">${(tradingActivity.lastTrade.quantity * tradingActivity.lastTrade.price)?.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                      <span className="text-slate-400">
+                        Order ID: {tradingActivity.lastTrade.order_id} • {formatTimeAgo(tradingActivity.lastTrade.timestamp)}
+                      </span>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${tradingActivity.lastTrade.status === 'filled' ? 'text-green-400 border-green-400' : 'text-yellow-400 border-yellow-400'}`}
+                      >
+                        {tradingActivity.lastTrade.status?.toUpperCase()}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {!signalGeneration.lastSignal && !tradingActivity.lastTrade && (
+            {/* Market Data Activity */}
+            {marketDataFlow.lastUpdate && (
+              <div className="border border-slate-600 rounded-lg p-4 bg-slate-700/50">
+                <div className="flex items-start space-x-3">
+                  <BarChart3 className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-white">Market Data Update</h4>
+                      <Badge variant="outline" className="text-blue-400 border-blue-400 text-xs">
+                        {marketDataFlow.active ? 'ACTIVE' : 'INACTIVE'}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      Last update: {formatTimeAgo(marketDataFlow.lastUpdate)} • Rate: {marketDataFlow.rate || 'N/A'} updates/min
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!signalGeneration.lastSignal && !tradingActivity.lastTrade && !marketDataFlow.lastUpdate && (
               <div className="text-center py-8">
                 <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                 <p className="text-slate-400">No recent autonomous activity detected</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Check API configuration and system status
-                </p>
+                <p className="text-xs text-slate-500 mt-1">System is monitoring markets and waiting for trading opportunities</p>
               </div>
-            )}
           </div>
         </CardContent>
       </Card>
