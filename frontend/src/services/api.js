@@ -1,142 +1,130 @@
 // API Service for Crypto-0DTE System
-// Handles all communication with the backend
+// Handles all communication with the backend using the new API client
 
-const API_BASE_URL = 'http://localhost:8000';
+import apiClient from './apiClient.js';
 
 class ApiService {
   constructor() {
-    this.baseURL = API_BASE_URL;
-  }
-
-  // Generic API call method
-  async apiCall(endpoint, options = {}) {
-    try {
-      const url = `${this.baseURL}${endpoint}`;
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      });
-
-      if (!response.ok) {
-        throw new Error(`API call failed: ${response.status} ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`API call to ${endpoint} failed:`, error);
-      throw error;
-    }
+    this.client = apiClient;
   }
 
   // Health and System Status
   async getSystemHealth() {
-    return this.apiCall('/health');
+    return this.client.getHealthStatus();
   }
 
   async getSystemStatus() {
-    return this.apiCall('/api/v1/system/status');
+    return this.client.get('/api/v1/system/status');
   }
 
   // Market Data
   async getMarketData(symbol = 'BTC-USDT', limit = 100) {
-    return this.apiCall(`/api/v1/market-data/recent?symbol=${symbol}&limit=${limit}`);
+    return this.client.get('/api/v1/market-data/recent', {
+      params: { symbol, limit }
+    });
   }
 
   async getLiveMarketData(symbol = 'BTC-USDT') {
-    return this.apiCall(`/api/v1/market-data/live/${symbol}`);
+    return this.client.get(`/api/v1/market-data/live/${symbol}`);
   }
 
   async getOHLCVData(symbol = 'BTC-USDT', timeframe = '1h', limit = 24) {
-    return this.apiCall(`/api/v1/market-data/ohlcv?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`);
+    return this.client.getMarketData(symbol, timeframe, limit);
   }
 
   // AI Signals
   async getRecentSignals(limit = 10) {
-    return this.apiCall(`/api/v1/signals/recent?limit=${limit}`);
+    return this.client.getSignals(limit);
   }
 
   async getActiveSignals() {
-    return this.apiCall('/api/v1/signals/active');
+    return this.client.get('/api/v1/signals/active');
   }
 
   async getSignalPerformance() {
-    return this.apiCall('/api/v1/signals/performance');
+    return this.client.get('/api/v1/signals/performance');
   }
 
   async generateSignal(symbol, timeframe = '1h') {
-    return this.apiCall('/api/v1/signals/generate', {
-      method: 'POST',
-      body: JSON.stringify({ symbol, timeframe }),
-    });
+    return this.client.post('/api/v1/signals/generate', { symbol, timeframe });
   }
 
   // Portfolio
   async getPortfolioStatus() {
-    return this.apiCall('/api/v1/portfolio/status');
+    return this.client.getPortfolioStatus();
   }
 
   async getPortfolioSummary() {
-    return this.apiCall('/api/v1/portfolio/summary');
+    return this.client.get('/api/v1/portfolio/summary');
   }
 
   async getPortfolioHistory(days = 7) {
-    return this.apiCall(`/api/v1/portfolio/history?days=${days}`);
+    return this.client.get('/api/v1/portfolio/history', {
+      params: { days }
+    });
   }
 
   // Trading
   async getRecentTrades(limit = 20) {
-    return this.apiCall(`/api/v1/trading/recent?limit=${limit}`);
+    return this.client.getTrades(limit);
   }
 
   async getTradingActivity() {
-    return this.apiCall('/api/v1/trading/activity');
+    return this.client.get('/api/v1/trading/activity');
   }
 
   async getTradingPerformance() {
-    return this.apiCall('/api/v1/trading/performance');
+    return this.client.get('/api/v1/trading/performance');
   }
 
   // Performance Metrics
   async getPerformanceMetrics() {
-    return this.apiCall('/api/v1/portfolio/performance');
+    return this.client.get('/api/v1/portfolio/performance');
   }
 
   async getSystemMetrics() {
-    return this.apiCall('/api/v1/monitoring/system-metrics');
+    return this.client.getMetrics();
   }
 
   // Connection Testing
   async testDeltaConnection() {
-    return this.apiCall('/api/v1/market-data/test-connection');
+    return this.client.get('/api/v1/market-data/test-connection');
   }
 
   async testOpenAIConnection() {
-    return this.apiCall('/api/v1/signals/test-ai-connection');
+    return this.client.get('/api/v1/signals/test-ai-connection');
   }
 
   // Autonomous System Monitoring
   async getAutonomousStatus() {
-    return this.apiCall('/api/v1/autonomous/status');
-  }
-
-  async getSystemMetrics() {
-    return this.apiCall('/api/v1/monitoring/metrics');
+    return this.client.get('/api/v1/autonomous/status');
   }
 
   async getConnectionStatus() {
-    return this.apiCall('/api/v1/monitoring/connections');
+    return this.client.get('/api/v1/monitoring/connections');
   }
 
-  // API Connection Tests
-  async testDeltaConnection() {
-    return this.apiCall('/api/v1/market-data/test-connection');
+  // Environment Management
+  async getEnvironmentStatus() {
+    return this.client.getEnvironmentStatus();
   }
 
-  async testOpenAIConnection() {
-    return this.apiCall('/api/v1/signals/test-ai-connection');
+  async switchEnvironment(environment) {
+    return this.client.switchEnvironment(environment);
+  }
+
+  async emergencyStop() {
+    return this.client.emergencyStop();
+  }
+
+  // Orders Journal
+  async getOrdersJournal(params = {}) {
+    return this.client.getOrdersJournal(params);
+  }
+
+  // Real-time Metrics
+  async getRealTimeMetrics() {
+    return this.client.getRealTimeMetrics();
   }
 
   // Real-time data helpers
@@ -149,7 +137,8 @@ class ApiService {
         recentSignals,
         portfolioStatus,
         recentTrades,
-        autonomousStatus
+        autonomousStatus,
+        environmentStatus
       ] = await Promise.allSettled([
         this.getSystemHealth(),
         this.getOHLCVData('BTC-USDT'),
@@ -157,7 +146,8 @@ class ApiService {
         this.getRecentSignals(5),
         this.getPortfolioStatus(),
         this.getRecentTrades(10),
-        this.getAutonomousStatus()
+        this.getAutonomousStatus(),
+        this.getEnvironmentStatus()
       ]);
 
       return {
@@ -169,7 +159,8 @@ class ApiService {
         signals: recentSignals.status === 'fulfilled' ? recentSignals.value : [],
         portfolio: portfolioStatus.status === 'fulfilled' ? portfolioStatus.value : null,
         trades: recentTrades.status === 'fulfilled' ? recentTrades.value : [],
-        autonomous: autonomousStatus.status === 'fulfilled' ? autonomousStatus.value : null
+        autonomous: autonomousStatus.status === 'fulfilled' ? autonomousStatus.value : null,
+        environment: environmentStatus.status === 'fulfilled' ? environmentStatus.value : null
       };
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -179,7 +170,8 @@ class ApiService {
         signals: [],
         portfolio: null,
         trades: [],
-        autonomous: null
+        autonomous: null,
+        environment: null
       };
     }
   }
@@ -211,6 +203,11 @@ export const {
   getConnectionStatus,
   testDeltaConnection,
   testOpenAIConnection,
-  getAllDashboardData
+  getAllDashboardData,
+  getEnvironmentStatus,
+  switchEnvironment,
+  emergencyStop,
+  getOrdersJournal,
+  getRealTimeMetrics
 } = apiService;
 

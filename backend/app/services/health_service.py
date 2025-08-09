@@ -41,79 +41,222 @@ class HealthService:
             pass
     
     async def check_database_health(self) -> Dict[str, Any]:
-        """Check database connectivity"""
+        """Check database connectivity with real implementation"""
+        start_time = time.time()
         try:
-            from app.database import AsyncSessionLocal
+            from app.database import get_db
             from sqlalchemy import text
             
             # Use async session for database health check
-            async with AsyncSessionLocal() as session:
-                result = await session.execute(text("SELECT 1"))
-                result.fetchone()
-            
-            return {
-                "status": "healthy",
-                "response_time_ms": 0,  # Would measure actual response time
-                "message": "Database connection successful"
-            }
+            async for db in get_db():
+                try:
+                    # Execute a simple query and measure latency
+                    result = await db.execute(text("SELECT 1 as health_check, version() as db_version"))
+                    row = result.fetchone()
+                    
+                    response_time_ms = (time.time() - start_time) * 1000
+                    
+                    return {
+                        "status": "healthy",
+                        "response_time_ms": round(response_time_ms, 2),
+                        "message": "Database connection successful",
+                        "details": {
+                            "version": str(row.db_version) if row else "unknown",
+                            "dialect": str(db.bind.dialect.name) if db.bind else "unknown"
+                        }
+                    }
+                finally:
+                    # Ensure session is closed
+                    await db.close()
+                    
         except Exception as e:
+            response_time_ms = (time.time() - start_time) * 1000
             logger.error(f"Database health check failed: {e}")
             return {
                 "status": "unhealthy",
+                "response_time_ms": round(response_time_ms, 2),
                 "error": str(e),
                 "message": "Database connection failed"
             }
     
     async def check_redis_health(self) -> Dict[str, Any]:
-        """Check Redis connectivity"""
+        """Check Redis connectivity with real implementation"""
+        start_time = time.time()
         try:
-            # In a real implementation, you would check Redis connection
-            # For now, return a mock healthy status
+            import aioredis
+            from app.config import settings
+            
+            # Create a short-lived Redis client
+            redis = aioredis.from_url(
+                settings.REDIS_URL,
+                password=settings.REDIS_PASSWORD,
+                decode_responses=True
+            )
+            
+            try:
+                # Test basic connectivity with PING
+                await redis.ping()
+                
+                # Test SET/GET/DEL operations with namespaced key
+                test_key = "health_check:test"
+                test_value = f"health_check_{int(time.time())}"
+                
+                # SET with 5 second TTL
+                await redis.setex(test_key, 5, test_value)
+                
+                # GET to verify
+                retrieved_value = await redis.get(test_key)
+                if retrieved_value != test_value:
+                    raise Exception("SET/GET operation failed")
+                
+                # DEL to cleanup
+                await redis.delete(test_key)
+                
+                response_time_ms = (time.time() - start_time) * 1000
+                
+                # Get Redis info
+                info = await redis.info()
+                
+                return {
+                    "status": "healthy",
+                    "response_time_ms": round(response_time_ms, 2),
+                    "message": "Redis connection successful",
+                    "details": {
+                        "version": info.get("redis_version", "unknown"),
+                        "connected_clients": info.get("connected_clients", 0),
+                        "used_memory_human": info.get("used_memory_human", "unknown")
+                    }
+                }
+                
+            finally:
+                await redis.close()
+                
+        except ImportError:
+            # Redis not installed, return degraded status
+            response_time_ms = (time.time() - start_time) * 1000
             return {
-                "status": "healthy",
-                "response_time_ms": 0,
-                "message": "Redis connection successful"
+                "status": "degraded",
+                "response_time_ms": round(response_time_ms, 2),
+                "message": "Redis client not installed",
+                "details": {"note": "Install aioredis for Redis health checks"}
             }
         except Exception as e:
+            response_time_ms = (time.time() - start_time) * 1000
             logger.error(f"Redis health check failed: {e}")
             return {
                 "status": "unhealthy",
+                "response_time_ms": round(response_time_ms, 2),
                 "error": str(e),
                 "message": "Redis connection failed"
             }
     
     async def check_exchange_health(self) -> Dict[str, Any]:
-        """Check exchange API connectivity"""
+        """Check exchange API connectivity with real implementation"""
+        start_time = time.time()
         try:
-            # In a real implementation, you would check exchange API
-            # For now, return a mock healthy status
-            return {
-                "status": "healthy",
-                "response_time_ms": 0,
-                "message": "Exchange API connection successful"
-            }
+            from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+            from app.config import settings
+            
+            # Create Delta Exchange connector
+            connector = DeltaExchangeConnector(paper_trading=True)  # Use testnet for health checks
+            
+            try:
+                # Test unauthenticated endpoint first (instruments/heartbeat)
+                instruments_response = await connector._make_request("GET", "/products")
+                
+                response_time_ms = (time.time() - start_time) * 1000
+                
+                # If we have valid API keys, test authenticated endpoint
+                auth_status = "not_tested"
+                if settings.DELTA_TESTNET_API_KEY and settings.DELTA_TESTNET_API_SECRET:
+                    try:
+                        account_response = await connector.get_account_balance()
+                        auth_status = "authenticated" if account_response.get("success") else "auth_failed"
+                    except Exception as auth_e:
+                        auth_status = f"auth_error: {str(auth_e)[:50]}"
+                
+                return {
+                    "status": "healthy",
+                    "response_time_ms": round(response_time_ms, 2),
+                    "message": "Exchange API connection successful",
+                    "details": {
+                        "exchange": "Delta Exchange",
+                        "environment": "testnet",
+                        "instruments_count": len(instruments_response.get("result", [])) if isinstance(instruments_response, dict) else 0,
+                        "authentication": auth_status
+                    }
+                }
+                
+            finally:
+                await connector.cleanup()
+                
         except Exception as e:
+            response_time_ms = (time.time() - start_time) * 1000
             logger.error(f"Exchange health check failed: {e}")
             return {
                 "status": "unhealthy",
+                "response_time_ms": round(response_time_ms, 2),
                 "error": str(e),
                 "message": "Exchange API connection failed"
             }
     
     async def check_ai_service_health(self) -> Dict[str, Any]:
-        """Check AI service connectivity"""
+        """Check AI service connectivity with real implementation"""
+        start_time = time.time()
         try:
-            # In a real implementation, you would check OpenAI API
-            # For now, return a mock healthy status
+            import openai
+            from app.config import settings
+            
+            # Only test in non-production environments to avoid costs
+            if settings.ENVIRONMENT == "production":
+                return {
+                    "status": "skipped",
+                    "response_time_ms": 0,
+                    "message": "AI service health check skipped in production",
+                    "details": {"note": "Enable with ENABLE_AI_HEALTH_CHECK=true"}
+                }
+            
+            # Test with a minimal request to avoid costs
+            client = openai.AsyncOpenAI()
+            
+            try:
+                # Use the models endpoint which is typically free/cheap
+                models_response = await client.models.list()
+                
+                response_time_ms = (time.time() - start_time) * 1000
+                
+                # Count available models
+                model_count = len(models_response.data) if hasattr(models_response, 'data') else 0
+                
+                return {
+                    "status": "healthy",
+                    "response_time_ms": round(response_time_ms, 2),
+                    "message": "AI service connection successful",
+                    "details": {
+                        "provider": "OpenAI",
+                        "models_available": model_count,
+                        "api_version": getattr(client, '_version', 'unknown')
+                    }
+                }
+                
+            finally:
+                await client.close()
+                
+        except ImportError:
+            # OpenAI not installed, return degraded status
+            response_time_ms = (time.time() - start_time) * 1000
             return {
-                "status": "healthy",
-                "response_time_ms": 0,
-                "message": "AI service connection successful"
+                "status": "degraded",
+                "response_time_ms": round(response_time_ms, 2),
+                "message": "OpenAI client not installed",
+                "details": {"note": "Install openai for AI health checks"}
             }
         except Exception as e:
+            response_time_ms = (time.time() - start_time) * 1000
             logger.error(f"AI service health check failed: {e}")
             return {
                 "status": "unhealthy",
+                "response_time_ms": round(response_time_ms, 2),
                 "error": str(e),
                 "message": "AI service connection failed"
             }

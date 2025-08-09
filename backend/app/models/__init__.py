@@ -32,6 +32,10 @@ from .order import (
     TimeInForce
 )
 
+# Import risk and signal event models
+from .risk_event import RiskEvent, RiskEventType
+from .signal_event import SignalEvent, SignalEventType
+
 __all__ = [
     "Base",
     "MarketData",
@@ -66,6 +70,11 @@ __all__ = [
     "OrderStatus",
     "OrderType", 
     "OrderSide",
-    "TimeInForce"
+    "TimeInForce",
+    # Risk and signal event models
+    "RiskEvent",
+    "RiskEventType",
+    "SignalEvent",
+    "SignalEventType"
 ]
 

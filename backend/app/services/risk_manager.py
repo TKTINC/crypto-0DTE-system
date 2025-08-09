@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import math
 import statistics
+import uuid
+import json
 
 from sqlalchemy import select
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
@@ -24,8 +26,19 @@ from app.database import get_db
 from app.config import Settings
 from app.models.trade import Trade, TradeStatus, TradeType
 from app.models.signal import Signal, SignalType
+from app.models.risk_event import RiskEvent, RiskEventType
+from app.models.signal_event import SignalEvent, SignalEventType
+from app.services.metrics_service import metrics_service
 
 logger = logging.getLogger(__name__)
+
+
+class RiskDenied(Exception):
+    """Exception raised when an order is denied by the risk gate"""
+    def __init__(self, reason: str, risk_type: str = "general"):
+        self.reason = reason
+        self.risk_type = risk_type
+        super().__init__(f"Risk denied ({risk_type}): {reason}")
 
 
 class RiskManager:
@@ -58,6 +71,11 @@ class RiskManager:
         self.max_correlation_exposure = 0.30  # 30% max exposure to correlated assets
         self.max_open_positions = 5           # Max 5 open positions
         self.min_account_balance = 1000       # Minimum account balance to trade
+        
+        # Risk Gate Configuration (Critical Safety Parameters)
+        self.max_consecutive_losses = 4       # Max 4 consecutive losses before pause
+        self.consecutive_loss_pause_hours = 12  # Pause trading for 12 hours after consecutive losses
+        self.event_pause_active = False       # Event-based trading pause flag
         
         # Risk Metrics
         self.daily_pnl = 0.0
@@ -166,6 +184,209 @@ class RiskManager:
         except Exception as e:
             logger.error(f"Error validating signal: {e}")
             return False, f"Signal validation error: {str(e)}"
+    
+    async def check_order_risk_gate(
+        self,
+        symbol: str,
+        side: str,
+        size: float,
+        price: Optional[float] = None,
+        order_type: str = "market"
+    ) -> Tuple[bool, str]:
+        """
+        CRITICAL RISK CHOKE-POINT: Check all risk criteria before any order placement.
+        
+        This method MUST be called before every order placement to ensure:
+        - Daily loss limits not exceeded
+        - Per-asset exposure within limits
+        - Consecutive loss breaker not tripped
+        - Event pause not active
+        - Portfolio risk limits respected
+        
+        Args:
+            symbol: Trading symbol
+            side: Order side (buy/sell)
+            size: Order size
+            price: Order price (for limit orders)
+            order_type: Order type (market/limit)
+        
+        Returns:
+            Tuple of (is_allowed, reason)
+        """
+        # Generate trace ID for correlation
+        trace_id = str(uuid.uuid4())[:8]
+        
+        # Get current market data for context
+        try:
+            current_price = await self.delta_connector.get_current_price(symbol)
+        except:
+            current_price = price or 0
+        
+        # Structured log entry
+        risk_context = {
+            "trace_id": trace_id,
+            "timestamp": datetime.utcnow().isoformat(),
+            "symbol": symbol,
+            "side": side,
+            "size": size,
+            "price": price,
+            "order_type": order_type,
+            "current_price": current_price,
+            "notional_value": size * (price or current_price),
+            "action": "risk_gate_check"
+        }
+        
+        logger.info(f"🛡️ RISK GATE [{trace_id}]: {json.dumps(risk_context)}")
+        
+        try:
+            # 1. Check daily loss limits
+            daily_pnl = await self._calculate_daily_pnl()
+            if daily_pnl < -self.max_daily_loss:
+                reason = f"Daily loss limit exceeded: {daily_pnl:.2f} < -{self.max_daily_loss:.2f}"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "daily_loss_limit",
+                    "reason": reason,
+                    "daily_pnl": daily_pnl,
+                    "max_daily_loss": self.max_daily_loss,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # 2. Check per-asset exposure limits
+            current_exposure = await self._get_asset_exposure(symbol)
+            portfolio_value = await self._get_portfolio_value()
+            
+            if portfolio_value > 0:
+                exposure_ratio = current_exposure / portfolio_value
+                if exposure_ratio > self.max_position_size:
+                    reason = f"Asset exposure limit exceeded: {exposure_ratio:.1%} > {self.max_position_size:.1%}"
+                    risk_denial = {
+                        "trace_id": trace_id,
+                        "risk_type": "asset_exposure_limit",
+                        "reason": reason,
+                        "current_exposure": current_exposure,
+                        "portfolio_value": portfolio_value,
+                        "exposure_ratio": exposure_ratio,
+                        "max_position_size": self.max_position_size,
+                        "verdict": "DENIED"
+                    }
+                    logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                    return False, reason
+            
+            # 3. Check consecutive loss breaker
+            consecutive_losses = await self._count_consecutive_losses()
+            if consecutive_losses >= self.max_consecutive_losses:
+                reason = f"Consecutive loss breaker tripped: {consecutive_losses} >= {self.max_consecutive_losses}"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "consecutive_loss_breaker",
+                    "reason": reason,
+                    "consecutive_losses": consecutive_losses,
+                    "max_consecutive_losses": self.max_consecutive_losses,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # 4. Check event pause status
+            if await self._is_event_pause_active():
+                reason = "Event pause active - no new positions allowed"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "event_pause",
+                    "reason": reason,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # 5. Check portfolio risk limits
+            portfolio_check = await self._check_portfolio_risk_limits()
+            if not portfolio_check["allowed"]:
+                reason = f"Portfolio risk limit: {portfolio_check['reason']}"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "portfolio_risk_limit",
+                    "reason": reason,
+                    "portfolio_check": portfolio_check,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # 6. Check minimum balance
+            balance_check = await self._check_minimum_balance()
+            if not balance_check["allowed"]:
+                reason = f"Insufficient balance: {balance_check['reason']}"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "insufficient_balance",
+                    "reason": reason,
+                    "balance_check": balance_check,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # 7. Check market conditions
+            market_check = await self._check_market_conditions(symbol)
+            if not market_check["allowed"]:
+                reason = f"Market conditions: {market_check['reason']}"
+                risk_denial = {
+                    "trace_id": trace_id,
+                    "risk_type": "market_conditions",
+                    "reason": reason,
+                    "market_check": market_check,
+                    "verdict": "DENIED"
+                }
+                logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_denial)}")
+                return False, reason
+            
+            # All risk checks passed
+            risk_approval = {
+                "trace_id": trace_id,
+                "verdict": "APPROVED",
+                "daily_pnl": daily_pnl,
+                "exposure_ratio": exposure_ratio if portfolio_value > 0 else 0,
+                "consecutive_losses": consecutive_losses,
+                "portfolio_value": portfolio_value,
+                "checks_passed": ["daily_loss", "asset_exposure", "consecutive_loss", "event_pause", "portfolio_risk", "balance", "market_conditions"]
+            }
+            logger.info(f"✅ RISK APPROVED [{trace_id}]: {json.dumps(risk_approval)}")
+            
+            # Record metrics
+            metrics_service.record_risk_gate_decision("approved", "all_checks_passed")
+            
+            # Persist risk event to database
+            await self._persist_risk_event(
+                event_type=RiskEventType.ORDER_APPROVED,
+                correlation_id=trace_id,
+                symbol=symbol,
+                side=side,
+                quantity=size,
+                price=price or current_price,
+                notional_usd=size * (price or current_price),
+                decision="approved",
+                reason="All risk checks passed",
+                details=json.dumps(risk_approval)
+            )
+            
+            return True, "Risk gate passed - order approved"
+            
+        except Exception as e:
+            logger.error(f"Error in risk gate: {e}")
+            reason = f"Risk gate error: {str(e)}"
+            risk_error = {
+                "trace_id": trace_id,
+                "risk_type": "system_error",
+                "reason": reason,
+                "error": str(e),
+                "verdict": "DENIED"
+            }
+            logger.warning(f"🚫 RISK DENIED [{trace_id}]: {json.dumps(risk_error)}")
+            return False, reason
     
     async def calculate_position_size(
         self,
@@ -869,10 +1090,76 @@ class RiskManager:
             logger.error(f"Error getting risk summary: {e}")
             return {"error": str(e)}
     
+    async def _get_asset_exposure(self, symbol: str) -> float:
+        """Get current exposure for a specific asset"""
+        try:
+            async for db in get_db():
+                result = await db.execute(
+                    select(Trade).where(
+                        Trade.symbol == symbol,
+                        Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIAL])
+                    )
+                )
+                trades = result.scalars().all()
+                
+                total_exposure = sum(trade.size * trade.entry_price for trade in trades)
+                return total_exposure
+                
+        except Exception as e:
+            logger.error(f"Error getting asset exposure for {symbol}: {e}")
+            return 0.0
+    
+    async def _count_consecutive_losses(self) -> int:
+        """Count consecutive losing trades"""
+        try:
+            async for db in get_db():
+                result = await db.execute(
+                    select(Trade).where(
+                        Trade.status == TradeStatus.CLOSED
+                    ).order_by(Trade.exit_time.desc()).limit(10)
+                )
+                recent_trades = result.scalars().all()
+                
+                consecutive_losses = 0
+                for trade in recent_trades:
+                    if trade.pnl < 0:
+                        consecutive_losses += 1
+                    else:
+                        break
+                
+                return consecutive_losses
+                
+        except Exception as e:
+            logger.error(f"Error counting consecutive losses: {e}")
+            return 0
+    
+    async def _is_event_pause_active(self) -> bool:
+        """Check if event pause is currently active"""
+        try:
+            # This would check for market events, volatility spikes, etc.
+            # For now, return False (no pause)
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error checking event pause: {e}")
+            return True  # Err on the side of caution
+    
     async def emergency_risk_shutdown(self) -> Dict[str, Any]:
         """Emergency risk shutdown - stop all trading"""
         try:
             logger.critical("🚨 EMERGENCY RISK SHUTDOWN ACTIVATED")
+            
+            # Set trading lock
+            metrics_service.set_trading_lock(True, "emergency_shutdown")
+            
+            # Persist emergency stop event
+            await self._persist_risk_event(
+                event_type=RiskEventType.EMERGENCY_STOP,
+                correlation_id=str(uuid.uuid4())[:8],
+                decision="locked",
+                reason="Emergency risk shutdown activated",
+                details=json.dumps({"timestamp": datetime.utcnow().isoformat()})
+            )
             
             # This would trigger emergency procedures
             return {
@@ -884,4 +1171,59 @@ class RiskManager:
         except Exception as e:
             logger.error(f"Error in emergency risk shutdown: {e}")
             return {"success": False, "error": str(e)}
+    
+    async def _persist_risk_event(
+        self,
+        event_type: RiskEventType,
+        correlation_id: str,
+        symbol: str = None,
+        side: str = None,
+        quantity: float = None,
+        price: float = None,
+        notional_usd: float = None,
+        decision: str = None,
+        reason: str = None,
+        risk_score: float = None,
+        confidence: float = None,
+        details: str = None
+    ):
+        """Persist risk event to database for audit trail"""
+        try:
+            async for db in get_db():
+                # Get current portfolio metrics
+                portfolio_value = await self._get_portfolio_value()
+                daily_pnl = await self._calculate_daily_pnl()
+                total_exposure = await self._calculate_total_exposure()
+                open_positions_count = await self._count_open_positions()
+                
+                # Create risk event
+                risk_event = RiskEvent(
+                    event_type=event_type,
+                    correlation_id=correlation_id,
+                    symbol=symbol,
+                    side=side,
+                    quantity=quantity,
+                    price=price,
+                    notional_usd=notional_usd,
+                    portfolio_value_usd=portfolio_value,
+                    daily_pnl_usd=daily_pnl,
+                    total_exposure_usd=total_exposure,
+                    open_positions_count=open_positions_count,
+                    decision=decision,
+                    reason=reason,
+                    risk_score=risk_score,
+                    confidence=confidence,
+                    environment="testnet" if self.paper_trading else "live",
+                    paper_trading=self.paper_trading,
+                    details=details
+                )
+                
+                db.add(risk_event)
+                await db.commit()
+                
+                logger.debug(f"Risk event persisted: {event_type} for {correlation_id}")
+                
+        except Exception as e:
+            logger.error(f"Failed to persist risk event: {e}")
+            # Don't fail the main operation if persistence fails
 

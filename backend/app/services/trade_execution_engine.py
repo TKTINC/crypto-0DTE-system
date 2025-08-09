@@ -17,6 +17,7 @@ from decimal import Decimal
 import uuid
 
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+from app.services.risk_manager import RiskManager
 from app.database import get_db
 from app.config import Settings
 from app.models.trade import Trade, TradeStatus, TradeType
@@ -50,6 +51,10 @@ class TradeExecutionEngine:
         
         # Initialize Delta Exchange connector with environment awareness
         self.delta_connector = DeltaExchangeConnector(paper_trading=self.paper_trading)
+        
+        # Initialize Risk Manager for risk gate checks
+        self.risk_manager = RiskManager(paper_trading=self.paper_trading)
+        
         self.active_orders = {}
         self.order_monitoring_tasks = {}
         
@@ -65,6 +70,9 @@ class TradeExecutionEngine:
         try:
             # Initialize Delta Exchange connector
             await self.delta_connector.initialize()
+            
+            # Initialize Risk Manager
+            await self.risk_manager.initialize()
             
             # Load existing orders
             await self._load_existing_orders()
@@ -84,6 +92,9 @@ class TradeExecutionEngine:
             
             # Cleanup Delta connector
             await self.delta_connector.cleanup()
+            
+            # Cleanup Risk Manager
+            await self.risk_manager.cleanup()
             
             logger.info("✅ Trade Execution Engine cleaned up")
             
@@ -446,6 +457,23 @@ class TradeExecutionEngine:
     ) -> Dict[str, Any]:
         """Execute the main entry or exit order"""
         try:
+            # 🛡️ CRITICAL RISK GATE: Check all risk criteria before order placement
+            risk_allowed, risk_reason = await self.risk_manager.check_order_risk_gate(
+                symbol=symbol,
+                side=side,
+                size=size,
+                price=price,
+                order_type=order_type
+            )
+            
+            if not risk_allowed:
+                logger.warning(f"🚫 ORDER BLOCKED BY RISK GATE: {risk_reason}")
+                return {
+                    "success": False,
+                    "error": f"Risk gate denied: {risk_reason}",
+                    "risk_denied": True
+                }
+            
             # Prepare order parameters
             order_params = {
                 "symbol": symbol,
@@ -457,7 +485,7 @@ class TradeExecutionEngine:
             if order_type.upper() == "LIMIT" and price:
                 order_params["price"] = price
             
-            # Execute order on Delta Exchange
+            # Execute order on Delta Exchange (only after risk gate approval)
             order_result = await self.delta_connector.place_order(**order_params)
             
             if not order_result["success"]:
@@ -503,6 +531,19 @@ class TradeExecutionEngine:
             # Determine stop loss side (opposite of main position)
             stop_side = "SELL" if side.upper() == "BUY" else "BUY"
             
+            # 🛡️ RISK GATE: Check risk criteria for stop loss order
+            risk_allowed, risk_reason = await self.risk_manager.check_order_risk_gate(
+                symbol=symbol,
+                side=stop_side,
+                size=size,
+                price=stop_loss_price,
+                order_type="stop_market"
+            )
+            
+            if not risk_allowed:
+                logger.warning(f"🚫 STOP LOSS BLOCKED BY RISK GATE: {risk_reason}")
+                return
+            
             # Create stop loss order
             stop_order_result = await self.delta_connector.place_stop_order(
                 symbol=symbol,
@@ -543,6 +584,19 @@ class TradeExecutionEngine:
         try:
             # Determine take profit side (opposite of main position)
             tp_side = "SELL" if side.upper() == "BUY" else "BUY"
+            
+            # 🛡️ RISK GATE: Check risk criteria for take profit order
+            risk_allowed, risk_reason = await self.risk_manager.check_order_risk_gate(
+                symbol=symbol,
+                side=tp_side,
+                size=size,
+                price=take_profit_price,
+                order_type="limit"
+            )
+            
+            if not risk_allowed:
+                logger.warning(f"🚫 TAKE PROFIT BLOCKED BY RISK GATE: {risk_reason}")
+                return
             
             # Create take profit order
             tp_order_result = await self.delta_connector.place_order(

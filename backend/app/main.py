@@ -20,7 +20,7 @@ import uvicorn
 from app.config import settings
 from app.database import engine, get_db
 from app.models import Base
-from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring
+from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring, metrics, admin
 from app.services.websocket_manager import WebSocketManager
 from app.services.health_service import HealthService
 
@@ -237,6 +237,18 @@ app.include_router(
     monitoring.router,
     prefix="/api/v1/monitoring",
     tags=["System Monitoring"]
+)
+
+app.include_router(
+    metrics.router,
+    prefix="/api/v1/metrics",
+    tags=["Metrics"]
+)
+
+app.include_router(
+    admin.router,
+    prefix="/api/v1/admin",
+    tags=["Admin"]
 )
 
 

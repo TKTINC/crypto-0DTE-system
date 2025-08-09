@@ -15,6 +15,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, Optional, Any, Union
 from urllib.parse import urlencode
+from functools import wraps
+import random
 
 import aiohttp
 import websockets
@@ -28,6 +30,49 @@ logger = logging.getLogger(__name__)
 class DeltaExchangeError(Exception):
     """Delta Exchange API error"""
     pass
+
+
+def retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0, max_delay: float = 60.0):
+    """
+    Decorator for exponential backoff retry logic
+    
+    Args:
+        max_retries: Maximum number of retry attempts
+        base_delay: Base delay in seconds
+        max_delay: Maximum delay in seconds
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            last_exception = None
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    return await func(*args, **kwargs)
+                except (aiohttp.ClientError, asyncio.TimeoutError, DeltaExchangeError) as e:
+                    last_exception = e
+                    
+                    if attempt == max_retries:
+                        # Final attempt failed
+                        logger.error(f"Final retry attempt failed for {func.__name__}: {e}")
+                        raise e
+                    
+                    # Calculate delay with jitter
+                    delay = min(base_delay * (2 ** attempt), max_delay)
+                    jitter = random.uniform(0.1, 0.3) * delay
+                    total_delay = delay + jitter
+                    
+                    logger.warning(f"Retry {attempt + 1}/{max_retries} for {func.__name__} after {total_delay:.2f}s: {e}")
+                    await asyncio.sleep(total_delay)
+                except Exception as e:
+                    # Non-retryable exception
+                    logger.error(f"Non-retryable error in {func.__name__}: {e}")
+                    raise e
+            
+            # Should never reach here
+            raise last_exception
+        return wrapper
+    return decorator
 
 
 class OrderResponse(BaseModel):
@@ -209,14 +254,17 @@ class DeltaExchangeConnector:
             "passphrase": self.passphrase
         }
     
+    @retry_with_backoff(max_retries=3, base_delay=1.0, max_delay=30.0)
     async def _make_request(
         self,
         method: str,
         endpoint: str,
         params: Optional[Dict] = None,
-        data: Optional[Dict] = None
+        data: Optional[Dict] = None,
+        timeout: float = 30.0,
+        idempotency_key: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Make authenticated API request"""
+        """Make authenticated API request with timeout, retries, and idempotency"""
         if not self.session:
             await self.connect()
         
@@ -242,23 +290,55 @@ class DeltaExchangeConnector:
         headers = self._generate_signature(method, endpoint, body)
         headers["Content-Type"] = "application/json"
         
+        # Add idempotency key for POST requests
+        if method.upper() == "POST" and idempotency_key:
+            headers["Idempotency-Key"] = idempotency_key
+        
+        # Record metrics
+        start_time = time.time()
+        
         try:
+            # Create timeout
+            timeout_obj = aiohttp.ClientTimeout(total=timeout)
+            
             async with self.session.request(
-                method, url, headers=headers, data=body
+                method, url, headers=headers, data=body, timeout=timeout_obj
             ) as response:
                 self.rate_limit_calls += 1
+                response_time = time.time() - start_time
                 
+                # Record exchange request metrics
+                from app.services.metrics_service import metrics_service
+                metrics_service.record_exchange_request(
+                    exchange="delta_exchange",
+                    endpoint=endpoint,
+                    status_code=response.status
+                )
+                
+                # Handle response
                 if response.status == 200:
                     result = await response.json()
                     if result.get("success"):
+                        logger.debug(f"Delta Exchange API success: {method} {endpoint} ({response_time:.3f}s)")
                         return result.get("result", {})
                     else:
-                        raise DeltaExchangeError(f"API error: {result.get('error')}")
+                        error_msg = result.get('error', 'Unknown error')
+                        logger.error(f"Delta Exchange API error: {error_msg}")
+                        raise DeltaExchangeError(f"API error: {error_msg}")
+                elif response.status == 429:
+                    # Rate limited
+                    logger.warning(f"Rate limited by Delta Exchange: {endpoint}")
+                    raise DeltaExchangeError(f"Rate limited: {response.status}")
                 else:
                     error_text = await response.text()
+                    logger.error(f"Delta Exchange HTTP error: {response.status} - {error_text}")
                     raise DeltaExchangeError(f"HTTP {response.status}: {error_text}")
                     
+        except asyncio.TimeoutError:
+            logger.error(f"Timeout after {timeout}s for {method} {endpoint}")
+            raise DeltaExchangeError(f"Request timeout after {timeout}s")
         except aiohttp.ClientError as e:
+            logger.error(f"Connection error for {method} {endpoint}: {e}")
             raise DeltaExchangeError(f"Connection error: {e}")
     
     # =============================================================================
