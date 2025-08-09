@@ -83,12 +83,12 @@ class DeltaExchangeConnector:
         self.rate_limit_calls = 0
         self.rate_limit_window = 60  # 1 minute
         self.max_calls_per_window = 1000
-        
-        # Product cache
-        self.products_cache: Dict[str, Any] = {}
-        self.cache_expiry = 0
-        
-        logger.info(f"Delta Exchange connector initialized for {self.environment} environment")
+    
+    def __del__(self):
+        """Destructor to ensure cleanup"""
+        if self.session and not self.session.closed:
+            logger.warning("DeltaExchangeConnector: Session not properly closed, forcing cleanup")
+            # Note: We can't call async methods in __del__, so we just log the warning
     
     def switch_environment(self, paper_trading: bool):
         """Switch between testnet and live environments"""
@@ -155,15 +155,30 @@ class DeltaExchangeConnector:
     
     async def disconnect(self):
         """Close HTTP session and WebSocket"""
+        # Close HTTP session
         if self.session:
-            await self.session.close()
-            self.session = None
-            logger.info("Delta Exchange HTTP session closed")
+            try:
+                await self.session.close()
+                logger.info("Delta Exchange HTTP session closed")
+            except Exception as e:
+                logger.warning(f"Error closing HTTP session: {e}")
+            finally:
+                self.session = None
         
+        # Close WebSocket
         if self.websocket:
-            await self.websocket.close()
-            self.websocket = None
-            logger.info("Delta Exchange WebSocket closed")
+            try:
+                await self.websocket.close()
+                logger.info("Delta Exchange WebSocket closed")
+            except Exception as e:
+                logger.warning(f"Error closing WebSocket: {e}")
+            finally:
+                self.websocket = None
+    
+    async def cleanup(self):
+        """Cleanup resources - alias for disconnect for compatibility"""
+        await self.disconnect()
+        logger.info("Delta Exchange connector cleanup completed")
     
     def _generate_signature(self, method: str, path: str, body: str = "") -> Dict[str, str]:
         """Generate authentication signature"""
