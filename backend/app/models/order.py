@@ -92,8 +92,8 @@ class Order(Base):
     post_only = Column(Boolean, nullable=False, default=False)
     
     # Relationships
-    trade_id = Column(String(50), ForeignKey('autonomous_trades.trade_id'), nullable=True, index=True)
-    parent_order_id = Column(String(50), ForeignKey('autonomous_orders.order_id'), nullable=True)
+    trade_id = Column(UUID(as_uuid=True), ForeignKey('autonomous_trades.id'), nullable=True, index=True)
+    parent_order_id = Column(UUID(as_uuid=True), ForeignKey('autonomous_orders.id'), nullable=True)
     
     # Timing
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
@@ -112,7 +112,7 @@ class Order(Base):
     is_autonomous = Column(Boolean, nullable=False, default=True)
     
     # Self-referential relationship for parent/child orders
-    child_orders = relationship("Order", backref="parent_order", remote_side=[order_id])
+    child_orders = relationship("Order", backref="parent_order", remote_side=[id])
     
     def __repr__(self):
         return f"<Order(id={self.order_id}, symbol={self.symbol}, side={self.side}, type={self.order_type}, status={self.status})>"
@@ -254,7 +254,7 @@ class OrderExecution(Base):
     execution_id = Column(String(50), unique=True, nullable=False, index=True)
     
     # Order reference
-    order_id = Column(String(50), ForeignKey('autonomous_orders.order_id'), nullable=False, index=True)
+    order_id = Column(UUID(as_uuid=True), ForeignKey('autonomous_orders.id'), nullable=False, index=True)
     
     # Execution details
     quantity = Column(Numeric(20, 8), nullable=False)

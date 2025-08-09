@@ -222,7 +222,7 @@ class Position(Base):
     max_loss = Column(Numeric(20, 8), nullable=True, default=0)
     
     # Position metadata
-    trade_id = Column(String(50), ForeignKey('autonomous_trades.trade_id'), nullable=False, index=True)
+    trade_id = Column(UUID(as_uuid=True), ForeignKey('autonomous_trades.id'), nullable=False, index=True)
     strategy_name = Column(String(100), nullable=True)
     risk_amount = Column(Numeric(20, 8), nullable=True)
     
