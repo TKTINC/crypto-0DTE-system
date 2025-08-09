@@ -61,34 +61,32 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-    # Initialize services
-    await health_service.initialize()
-    
-    # Initialize autonomous trading services
-    try:
+            # Initialize Autonomous Trading System with environment awareness
         logger.info("🤖 Initializing Autonomous Trading System...")
         
-        # Initialize core services
-        risk_manager = RiskManager()
+        # Determine paper trading mode from settings
+        paper_trading = settings.PAPER_TRADING
+        logger.info(f"Trading mode: {'PAPER TRADING' if paper_trading else 'LIVE TRADING'}")
+        
+        # Initialize Risk Manager
+        risk_manager = RiskManager(paper_trading=paper_trading)
         await risk_manager.initialize()
         logger.info("✅ Risk Manager initialized")
         
-        position_manager = PositionManager()
+        # Initialize Position Manager
+        position_manager = PositionManager(paper_trading=paper_trading)
         await position_manager.initialize()
         logger.info("✅ Position Manager initialized")
         
-        trade_execution_engine = TradeExecutionEngine()
+        # Initialize Trade Execution Engine
+        trade_execution_engine = TradeExecutionEngine(paper_trading=paper_trading)
         await trade_execution_engine.initialize()
         logger.info("✅ Trade Execution Engine initialized")
         
-        autonomous_orchestrator = AutonomousTradingOrchestrator(
-            risk_manager=risk_manager,
-            position_manager=position_manager,
-            trade_execution_engine=trade_execution_engine
-        )
+        # Initialize Autonomous Trading Orchestrator
+        autonomous_orchestrator = AutonomousTradingOrchestrator(paper_trading=paper_trading)
         await autonomous_orchestrator.initialize()
         logger.info("✅ Autonomous Trading Orchestrator initialized")
-        
         # Start autonomous trading
         await autonomous_orchestrator.start()
         logger.info("🚀 Autonomous Trading System ACTIVE")

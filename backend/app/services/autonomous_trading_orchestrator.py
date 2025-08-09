@@ -43,16 +43,19 @@ class AutonomousTradingOrchestrator:
     - Automated profit taking and stop losses
     """
     
-    def __init__(self):
+    def __init__(self, paper_trading: bool = None):
         self.settings = Settings()
         self.is_running = False
         self.is_trading_enabled = True
         
-        # Core services
-        self.delta_connector = DeltaExchangeConnector()
-        self.trade_executor = TradeExecutionEngine()
-        self.position_manager = PositionManager()
-        self.risk_manager = RiskManager()
+        # Determine paper trading mode
+        self.paper_trading = paper_trading if paper_trading is not None else True  # Default to paper trading for safety
+        
+        # Core services with environment awareness
+        self.delta_connector = DeltaExchangeConnector(paper_trading=self.paper_trading)
+        self.trade_executor = TradeExecutionEngine(paper_trading=self.paper_trading)
+        self.position_manager = PositionManager(paper_trading=self.paper_trading)
+        self.risk_manager = RiskManager(paper_trading=self.paper_trading)
         
         # Configuration
         self.trading_pairs = ["BTC-USDT", "ETH-USDT"]

@@ -19,7 +19,7 @@ import math
 import statistics
 
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
-from app.database import get_db
+from app.database import get_db_session
 from app.config import Settings
 from app.models.trade import Trade, TradeStatus, TradeType
 from app.models.signal import Signal, SignalType
@@ -40,9 +40,14 @@ class RiskManager:
     - Emergency risk controls
     """
     
-    def __init__(self):
+    def __init__(self, paper_trading: bool = None):
         self.settings = Settings()
-        self.delta_connector = DeltaExchangeConnector()
+        
+        # Determine paper trading mode
+        self.paper_trading = paper_trading if paper_trading is not None else True  # Default to paper trading for safety
+        
+        # Initialize Delta Exchange connector with environment awareness
+        self.delta_connector = DeltaExchangeConnector(paper_trading=self.paper_trading)
         
         # Risk Configuration
         self.max_portfolio_risk = 0.02        # 2% max portfolio risk per trade

@@ -71,12 +71,27 @@ class Settings(BaseSettings):
     DELTA_API_KEY: str = Field(default="", env="DELTA_EXCHANGE_API_KEY")
     DELTA_API_SECRET: str = Field(default="", env="DELTA_EXCHANGE_API_SECRET")
     DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
+    
+    # Environment switching - defaults to testnet for safety
+    DELTA_EXCHANGE_TESTNET: bool = Field(default=True, env="DELTA_EXCHANGE_TESTNET")
+    PAPER_TRADING: bool = Field(default=True, env="PAPER_TRADING")
+    
+    # Testnet URLs (for paper trading)
+    DELTA_TESTNET_BASE_URL: str = "https://testnet-api.delta.exchange"
+    DELTA_TESTNET_WEBSOCKET_URL: str = "wss://testnet-socket.delta.exchange"
+    
+    # Live URLs (for real trading)
+    DELTA_LIVE_BASE_URL: str = "https://api.delta.exchange"
+    DELTA_LIVE_WEBSOCKET_URL: str = "wss://socket.delta.exchange"
+    
+    # Dynamic URLs based on environment
     DELTA_BASE_URL: str = Field(default="https://testnet-api.delta.exchange", env="DELTA_EXCHANGE_BASE_URL")
     DELTA_WEBSOCKET_URL: str = Field(default="wss://testnet-socket.delta.exchange", env="DELTA_WEBSOCKET_URL")
+    
+    # Legacy fields for backward compatibility
     DELTA_EXCHANGE_API_KEY: str = ""
     DELTA_EXCHANGE_API_SECRET: str = ""
     DELTA_EXCHANGE_BASE_URL: str = "https://testnet-api.delta.exchange"
-    DELTA_EXCHANGE_TESTNET: bool = True
     DELTA_EXCHANGE_RATE_LIMIT: int = 100  # requests per minute
     
     # OpenAI API Configuration

@@ -42,9 +42,14 @@ class TradeExecutionEngine:
     - Emergency position closure
     """
     
-    def __init__(self):
+    def __init__(self, paper_trading: bool = None):
         self.settings = Settings()
-        self.delta_connector = DeltaExchangeConnector()
+        
+        # Determine paper trading mode
+        self.paper_trading = paper_trading if paper_trading is not None else True  # Default to paper trading for safety
+        
+        # Initialize Delta Exchange connector with environment awareness
+        self.delta_connector = DeltaExchangeConnector(paper_trading=self.paper_trading)
         self.active_orders = {}
         self.order_monitoring_tasks = {}
         

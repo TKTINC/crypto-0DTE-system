@@ -54,14 +54,27 @@ class PositionResponse(BaseModel):
 
 
 class DeltaExchangeConnector:
-    """Delta Exchange API connector"""
+    """Delta Exchange API connector with testnet/live environment switching"""
     
-    def __init__(self):
+    def __init__(self, paper_trading: bool = None):
         self.api_key = settings.DELTA_API_KEY
         self.api_secret = settings.DELTA_API_SECRET
         self.passphrase = settings.DELTA_API_PASSPHRASE
-        self.base_url = settings.DELTA_BASE_URL
-        self.websocket_url = settings.DELTA_WEBSOCKET_URL
+        
+        # Determine environment based on paper trading flag
+        self.paper_trading = paper_trading if paper_trading is not None else settings.PAPER_TRADING
+        # Use testnet if paper trading OR if explicitly set to testnet, but prioritize paper_trading flag
+        self.is_testnet = self.paper_trading if paper_trading is not None else (settings.PAPER_TRADING or settings.DELTA_EXCHANGE_TESTNET)
+        
+        # Set URLs based on environment
+        if self.is_testnet:
+            self.base_url = settings.DELTA_TESTNET_BASE_URL
+            self.websocket_url = settings.DELTA_TESTNET_WEBSOCKET_URL
+            self.environment = "TESTNET"
+        else:
+            self.base_url = settings.DELTA_LIVE_BASE_URL
+            self.websocket_url = settings.DELTA_LIVE_WEBSOCKET_URL
+            self.environment = "LIVE"
         
         self.session: Optional[aiohttp.ClientSession] = None
         self.websocket: Optional[websockets.WebSocketServerProtocol] = None
@@ -73,6 +86,29 @@ class DeltaExchangeConnector:
         
         # Product cache
         self.products_cache: Dict[str, Any] = {}
+        self.cache_expiry = 0
+        
+        logger.info(f"Delta Exchange connector initialized for {self.environment} environment")
+    
+    def switch_environment(self, paper_trading: bool):
+        """Switch between testnet and live environments"""
+        self.paper_trading = paper_trading
+        # When explicitly switching, prioritize the paper_trading flag over settings
+        self.is_testnet = paper_trading
+        
+        if self.is_testnet:
+            self.base_url = settings.DELTA_TESTNET_BASE_URL
+            self.websocket_url = settings.DELTA_TESTNET_WEBSOCKET_URL
+            self.environment = "TESTNET"
+        else:
+            self.base_url = settings.DELTA_LIVE_BASE_URL
+            self.websocket_url = settings.DELTA_LIVE_WEBSOCKET_URL
+            self.environment = "LIVE"
+        
+        logger.info(f"Switched to {self.environment} environment")
+        
+        # Clear cache when switching environments
+        self.products_cache = {}
         self.cache_expiry = 0
     
     async def __aenter__(self):
