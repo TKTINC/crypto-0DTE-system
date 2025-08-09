@@ -67,25 +67,32 @@ class Settings(BaseSettings):
     INFLUXDB_ORG: str = "crypto-trading"
     INFLUXDB_BUCKET: str = "market-data"
     
-    # Delta Exchange API Configuration (FIXED - Corrected environment variable mapping)
+    # Delta Exchange API Configuration - UPDATED for separate testnet/production keys
+    
+    # Production API Keys (for live trading - from main delta.exchange account)
     DELTA_API_KEY: str = Field(default="", env="DELTA_API_KEY")
     DELTA_API_SECRET: str = Field(default="", env="DELTA_API_SECRET")
     DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
+    
+    # Testnet API Keys (for paper trading - from demo.delta.exchange account)
+    DELTA_TESTNET_API_KEY: str = Field(default="", env="DELTA_TESTNET_API_KEY")
+    DELTA_TESTNET_API_SECRET: str = Field(default="", env="DELTA_TESTNET_API_SECRET")
+    DELTA_TESTNET_API_PASSPHRASE: str = Field(default="", env="DELTA_TESTNET_API_PASSPHRASE")
     
     # Environment switching - defaults to testnet for safety
     DELTA_EXCHANGE_TESTNET: bool = Field(default=True, env="DELTA_EXCHANGE_TESTNET")
     PAPER_TRADING: bool = Field(default=True, env="PAPER_TRADING")
     
-    # Testnet URLs (for paper trading)
-    DELTA_TESTNET_BASE_URL: str = "https://testnet-api.delta.exchange"
+    # Testnet URLs (for paper trading - demo account)
+    DELTA_TESTNET_BASE_URL: str = "https://cdn-ind.testnet.deltaex.org"
     DELTA_TESTNET_WEBSOCKET_URL: str = "wss://testnet-socket.delta.exchange"
     
-    # Live URLs (for real trading)
-    DELTA_LIVE_BASE_URL: str = "https://api.delta.exchange"
+    # Live URLs (for real trading - production account)
+    DELTA_LIVE_BASE_URL: str = "https://api.india.delta.exchange"
     DELTA_LIVE_WEBSOCKET_URL: str = "wss://socket.delta.exchange"
     
     # Dynamic URLs based on environment
-    DELTA_BASE_URL: str = Field(default="https://testnet-api.delta.exchange", env="DELTA_EXCHANGE_BASE_URL")
+    DELTA_BASE_URL: str = Field(default="https://cdn-ind.testnet.deltaex.org", env="DELTA_EXCHANGE_BASE_URL")
     DELTA_WEBSOCKET_URL: str = Field(default="wss://testnet-socket.delta.exchange", env="DELTA_WEBSOCKET_URL")
     
     # OpenAI API Configuration

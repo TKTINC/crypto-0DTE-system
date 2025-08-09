@@ -57,9 +57,28 @@ class DeltaExchangeConnector:
     """Delta Exchange API connector with testnet/live environment switching"""
     
     def __init__(self, paper_trading: bool = None):
-        self.api_key = settings.DELTA_API_KEY
-        self.api_secret = settings.DELTA_API_SECRET
-        self.passphrase = settings.DELTA_API_PASSPHRASE
+        # Determine environment based on paper trading flag
+        self.paper_trading = paper_trading if paper_trading is not None else settings.PAPER_TRADING
+        # Use testnet if paper trading OR if explicitly set to testnet, but prioritize paper_trading flag
+        self.is_testnet = self.paper_trading if paper_trading is not None else (settings.PAPER_TRADING or settings.DELTA_EXCHANGE_TESTNET)
+        
+        # Select appropriate API keys based on environment
+        if self.is_testnet:
+            # Use testnet API keys (from demo.delta.exchange account)
+            self.api_key = settings.DELTA_TESTNET_API_KEY
+            self.api_secret = settings.DELTA_TESTNET_API_SECRET
+            self.passphrase = settings.DELTA_TESTNET_API_PASSPHRASE
+            self.base_url = settings.DELTA_TESTNET_BASE_URL
+            self.websocket_url = settings.DELTA_TESTNET_WEBSOCKET_URL
+            self.environment = "TESTNET"
+        else:
+            # Use production API keys (from main delta.exchange account)
+            self.api_key = settings.DELTA_API_KEY
+            self.api_secret = settings.DELTA_API_SECRET
+            self.passphrase = settings.DELTA_API_PASSPHRASE
+            self.base_url = settings.DELTA_LIVE_BASE_URL
+            self.websocket_url = settings.DELTA_LIVE_WEBSOCKET_URL
+            self.environment = "LIVE"
         
         # Check if we're in development mode (invalid/test API keys)
         self.is_development = (
@@ -67,21 +86,6 @@ class DeltaExchangeConnector:
             self.api_key.startswith('test_') or 
             settings.ENVIRONMENT.lower() in ['development', 'dev', 'local']
         )
-        
-        # Determine environment based on paper trading flag
-        self.paper_trading = paper_trading if paper_trading is not None else settings.PAPER_TRADING
-        # Use testnet if paper trading OR if explicitly set to testnet, but prioritize paper_trading flag
-        self.is_testnet = self.paper_trading if paper_trading is not None else (settings.PAPER_TRADING or settings.DELTA_EXCHANGE_TESTNET)
-        
-        # Set URLs based on environment
-        if self.is_testnet:
-            self.base_url = settings.DELTA_TESTNET_BASE_URL
-            self.websocket_url = settings.DELTA_TESTNET_WEBSOCKET_URL
-            self.environment = "TESTNET"
-        else:
-            self.base_url = settings.DELTA_LIVE_BASE_URL
-            self.websocket_url = settings.DELTA_LIVE_WEBSOCKET_URL
-            self.environment = "LIVE"
         
         self.session: Optional[aiohttp.ClientSession] = None
         self.websocket: Optional[websockets.WebSocketServerProtocol] = None
