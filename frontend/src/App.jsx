@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress.jsx'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
 import { useRealTimeData } from './hooks/useRealTimeData'
 import AutonomousMonitor from './components/AutonomousMonitor'
+import EnvironmentSwitcher from './components/EnvironmentSwitcher'
 import './App.css'
 
 // Mock data for development (fallback when API data is not available)
@@ -64,6 +65,43 @@ const mockPerformance = [
 function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeTab, setActiveTab] = useState('overview')
+  const [currentEnvironment, setCurrentEnvironment] = useState('TESTNET')
+  const [isPaperTrading, setIsPaperTrading] = useState(true)
+  
+  // Handle environment changes
+  const handleEnvironmentChange = (environment, paperTrading) => {
+    setCurrentEnvironment(environment)
+    setIsPaperTrading(paperTrading)
+    
+    // Refresh data when environment changes
+    refreshData()
+    fetchEnvironmentPortfolio()
+  }
+  
+  // Environment-specific portfolio data
+  const [environmentPortfolio, setEnvironmentPortfolio] = useState(null)
+  const [portfolioLoading, setPortfolioLoading] = useState(false)
+  
+  // Fetch environment-specific portfolio data
+  const fetchEnvironmentPortfolio = async () => {
+    setPortfolioLoading(true)
+    try {
+      const response = await fetch('/api/v1/autonomous/environment/portfolio')
+      if (response.ok) {
+        const data = await response.json()
+        setEnvironmentPortfolio(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch environment portfolio:', error)
+    } finally {
+      setPortfolioLoading(false)
+    }
+  }
+  
+  // Fetch environment portfolio on component mount and when environment changes
+  useEffect(() => {
+    fetchEnvironmentPortfolio()
+  }, [currentEnvironment, isPaperTrading])
   
   // Real-time data hooks
   const {
@@ -199,6 +237,17 @@ function Dashboard() {
                 </div>
               </div>
 
+              {/* Environment Status */}
+              <div className="text-right">
+                <p className="text-sm text-slate-400">Environment</p>
+                <div className="flex items-center space-x-2">
+                  <div className={`h-2 w-2 rounded-full ${isPaperTrading ? 'bg-blue-500 animate-pulse' : 'bg-red-500 animate-pulse'}`}></div>
+                  <span className={`text-sm font-medium ${isPaperTrading ? 'text-blue-400' : 'text-red-400'}`}>
+                    {currentEnvironment}
+                  </span>
+                </div>
+              </div>
+
               {/* Refresh Button */}
               <Button 
                 variant="outline" 
@@ -269,38 +318,78 @@ function Dashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Environment Status Banner */}
+            <Card className={`border-2 ${isPaperTrading ? 'border-blue-200 bg-blue-50/5' : 'border-red-200 bg-red-50/5'} bg-slate-800`}>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Badge 
+                      variant={isPaperTrading ? "secondary" : "destructive"}
+                      className={`${isPaperTrading ? 'bg-blue-500' : 'bg-red-500'} text-white font-semibold px-3 py-1`}
+                    >
+                      {currentEnvironment} MODE
+                    </Badge>
+                    <span className={`text-sm font-medium ${isPaperTrading ? 'text-blue-400' : 'text-red-400'}`}>
+                      {isPaperTrading 
+                        ? '🧪 Paper Trading - Virtual funds, no real money at risk'
+                        : '💰 Live Trading - Real money at risk'
+                      }
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab('settings')}
+                    className={`border-slate-600 ${isPaperTrading ? 'text-blue-400 hover:bg-blue-900/20' : 'text-red-400 hover:bg-red-900/20'}`}
+                  >
+                    Switch Environment
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className={`bg-slate-800 border-slate-700 ${isPaperTrading ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-red-500'}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-200">Portfolio Value</CardTitle>
-                  <DollarSign className="h-4 w-4 text-green-500" />
+                  <CardTitle className="text-sm font-medium text-slate-200">
+                    Portfolio Value
+                    <Badge variant="outline" className={`ml-2 text-xs ${isPaperTrading ? 'text-blue-400 border-blue-400' : 'text-red-400 border-red-400'}`}>
+                      {currentEnvironment}
+                    </Badge>
+                  </CardTitle>
+                  <DollarSign className={`h-4 w-4 ${isPaperTrading ? 'text-blue-500' : 'text-red-500'}`} />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-white">
-                    {formatCurrency(portfolio?.total_value || 0)}
+                    {environmentPortfolio ? formatCurrency(environmentPortfolio.balance) : formatCurrency(portfolio?.total_value || 0)}
                   </div>
-                  <p className={`text-xs flex items-center ${(portfolio?.daily_pnl_percent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {(portfolio?.daily_pnl_percent || 0) >= 0 ? 
+                  <p className={`text-xs flex items-center ${(environmentPortfolio?.total_pnl_percentage || portfolio?.daily_pnl_percent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(environmentPortfolio?.total_pnl_percentage || portfolio?.daily_pnl_percent || 0) >= 0 ? 
                       <TrendingUp className="h-3 w-3 mr-1" /> : 
                       <TrendingDown className="h-3 w-3 mr-1" />
                     }
-                    {formatPercent(portfolio?.daily_pnl_percent || 0)} today
+                    {formatPercent(environmentPortfolio?.total_pnl_percentage || portfolio?.daily_pnl_percent || 0)} today
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className={`bg-slate-800 border-slate-700 ${isPaperTrading ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-red-500'}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-200">Daily P&L</CardTitle>
-                  {(portfolio?.daily_pnl || 0) >= 0 ? 
+                  <CardTitle className="text-sm font-medium text-slate-200">
+                    Daily P&L
+                    <Badge variant="outline" className={`ml-2 text-xs ${isPaperTrading ? 'text-blue-400 border-blue-400' : 'text-red-400 border-red-400'}`}>
+                      {currentEnvironment}
+                    </Badge>
+                  </CardTitle>
+                  {(environmentPortfolio?.total_pnl || portfolio?.daily_pnl || 0) >= 0 ? 
                     <TrendingUp className="h-4 w-4 text-green-500" /> : 
                     <TrendingDown className="h-4 w-4 text-red-500" />
                   }
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold ${(portfolio?.daily_pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {(portfolio?.daily_pnl || 0) >= 0 ? '+' : ''}{formatCurrency(portfolio?.daily_pnl || 0)}
+                  <div className={`text-2xl font-bold ${(environmentPortfolio?.total_pnl || portfolio?.daily_pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(environmentPortfolio?.total_pnl || portfolio?.daily_pnl || 0) >= 0 ? '+' : ''}{formatCurrency(environmentPortfolio?.total_pnl || portfolio?.daily_pnl || 0)}
                   </div>
                   <p className="text-xs text-slate-400">
                     {signals?.length || 0} signals executed
@@ -308,9 +397,14 @@ function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className={`bg-slate-800 border-slate-700 ${isPaperTrading ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-red-500'}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-200">Win Rate</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-200">
+                    Win Rate
+                    <Badge variant="outline" className={`ml-2 text-xs ${isPaperTrading ? 'text-blue-400 border-blue-400' : 'text-red-400 border-red-400'}`}>
+                      {currentEnvironment}
+                    </Badge>
+                  </CardTitle>
                   <Target className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
@@ -323,9 +417,14 @@ function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className={`bg-slate-800 border-slate-700 ${isPaperTrading ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-red-500'}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-200">AI Confidence</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-200">
+                    AI Confidence
+                    <Badge variant="outline" className={`ml-2 text-xs ${isPaperTrading ? 'text-blue-400 border-blue-400' : 'text-red-400 border-red-400'}`}>
+                      {currentEnvironment}
+                    </Badge>
+                  </CardTitle>
                   <Brain className="h-4 w-4 text-purple-500" />
                 </CardHeader>
                 <CardContent>
@@ -676,36 +775,114 @@ function Dashboard() {
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
+            {/* Environment Portfolio Header */}
+            <Card className={`border-2 ${isPaperTrading ? 'border-blue-200 bg-blue-50/10' : 'border-red-200 bg-red-50/10'} bg-slate-800`}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-white">Portfolio Overview</CardTitle>
+                    <Badge 
+                      variant={isPaperTrading ? "secondary" : "destructive"}
+                      className={`${isPaperTrading ? 'bg-blue-500' : 'bg-red-500'} text-white font-semibold`}
+                    >
+                      {currentEnvironment}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchEnvironmentPortfolio}
+                    disabled={portfolioLoading}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${portfolioLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                <CardDescription className="text-slate-400">
+                  {isPaperTrading 
+                    ? 'Paper trading portfolio with virtual funds - safe for testing strategies'
+                    : 'Live trading portfolio with real funds - actual money at risk'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-sm text-slate-400">Total Balance</p>
+                    <p className={`text-2xl font-bold ${isPaperTrading ? 'text-blue-400' : 'text-red-400'}`}>
+                      {environmentPortfolio ? formatCurrency(environmentPortfolio.balance) : 'Loading...'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-slate-400">Total P&L</p>
+                    <p className={`text-2xl font-bold ${
+                      environmentPortfolio?.total_pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {environmentPortfolio ? formatCurrency(environmentPortfolio.total_pnl) : 'Loading...'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-slate-400">Active Positions</p>
+                    <p className="text-2xl font-bold text-white">
+                      {environmentPortfolio?.positions?.length || 0}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white">Portfolio Allocation</CardTitle>
                   <CardDescription className="text-slate-400">
-                    Current position distribution
+                    Current position distribution in {currentEnvironment}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {(portfolio?.positions || mockPortfolio.positions).map((position, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`h-3 w-3 rounded-full ${
-                            position.symbol === 'BTCUSDT' ? 'bg-orange-500' :
-                            position.symbol === 'ETHUSDT' ? 'bg-blue-500' : 'bg-green-500'
-                          }`}></div>
-                          <div>
-                            <p className="font-medium text-white">{position.symbol}</p>
-                            <p className="text-sm text-slate-400">Size: {position.size}</p>
+                    {portfolioLoading ? (
+                      <div className="text-center py-4">
+                        <RefreshCw className="h-6 w-6 animate-spin mx-auto text-slate-400" />
+                        <p className="text-sm text-slate-400 mt-2">Loading portfolio data...</p>
+                      </div>
+                    ) : environmentPortfolio?.positions?.length > 0 ? (
+                      environmentPortfolio.positions.map((position, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className={`h-3 w-3 rounded-full ${
+                              position.symbol === 'BTC-USDT' ? 'bg-orange-500' :
+                              position.symbol === 'ETH-USDT' ? 'bg-blue-500' : 'bg-green-500'
+                            }`}></div>
+                            <div>
+                              <p className="font-medium text-white">{position.symbol}</p>
+                              <p className="text-sm text-slate-400">
+                                {position.side} • Size: {position.size}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-white">
+                              {formatCurrency(position.current_price * position.size)}
+                            </p>
+                            <p className={`text-sm ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {formatCurrency(position.pnl)} ({position.pnl_percentage?.toFixed(2)}%)
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium text-white">{formatCurrency(position.value)}</p>
-                          <p className={`text-sm ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {formatPercent(position.pnlPercent)}
-                          </p>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <DollarSign className="h-12 w-12 mx-auto text-slate-600 mb-4" />
+                        <p className="text-slate-400">No active positions in {currentEnvironment}</p>
+                        <p className="text-sm text-slate-500 mt-2">
+                          {isPaperTrading 
+                            ? 'Start paper trading to see positions here'
+                            : 'No live positions currently active'
+                          }
+                        </p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -836,35 +1013,45 @@ function Dashboard() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Environment Switcher */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <EnvironmentSwitcher onEnvironmentChange={handleEnvironmentChange} />
+              </div>
+              
+              <div className="lg:col-span-2 grid grid-cols-1 gap-6">
+                <Card className="bg-slate-800 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white">Trading Settings</CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Configure AI trading parameters
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-300">Auto Trading</span>
+                      <Button variant="outline" size="sm" className="bg-green-600 text-white border-green-600">
+                        ENABLED
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-300">Max Position Size</span>
+                      <span className="text-sm font-medium text-white">25%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-300">Risk Level</span>
+                      <span className="text-sm font-medium text-yellow-400">Moderate</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-300">Signal Confidence Threshold</span>
+                      <span className="text-sm font-medium text-white">70%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Trading Settings</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Configure AI trading parameters
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Auto Trading</span>
-                    <Button variant="outline" size="sm" className="bg-green-600 text-white border-green-600">
-                      ENABLED
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Max Position Size</span>
-                    <span className="text-sm font-medium text-white">25%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Risk Level</span>
-                    <span className="text-sm font-medium text-yellow-400">Moderate</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Signal Confidence Threshold</span>
-                    <span className="text-sm font-medium text-white">70%</span>
-                  </div>
-                </CardContent>
-              </Card>
 
               <Card className="bg-slate-800 border-slate-700">
                 <CardHeader>
