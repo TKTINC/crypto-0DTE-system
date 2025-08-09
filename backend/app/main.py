@@ -61,7 +61,8 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-            # Initialize Autonomous Trading System with environment awareness
+    # Initialize Autonomous Trading System with environment awareness
+    try:
         logger.info("🤖 Initializing Autonomous Trading System...")
         
         # Determine paper trading mode from settings
@@ -87,6 +88,7 @@ async def lifespan(app: FastAPI):
         autonomous_orchestrator = AutonomousTradingOrchestrator(paper_trading=paper_trading)
         await autonomous_orchestrator.initialize()
         logger.info("✅ Autonomous Trading Orchestrator initialized")
+        
         # Start autonomous trading
         await autonomous_orchestrator.start()
         logger.info("🚀 Autonomous Trading System ACTIVE")
