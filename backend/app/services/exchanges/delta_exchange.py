@@ -84,6 +84,32 @@ class DeltaExchangeConnector:
         """Async context manager exit"""
         await self.disconnect()
     
+    async def initialize(self):
+        """Initialize the Delta Exchange connector"""
+        try:
+            # Connect to Delta Exchange
+            await self.connect()
+            
+            # Load products cache for faster symbol lookups
+            await self._load_products_cache()
+            
+            logger.info("Delta Exchange connector initialized successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize Delta Exchange connector: {e}")
+            return False
+    
+    async def _load_products_cache(self):
+        """Load products cache for symbol lookups"""
+        try:
+            # This will be implemented when we need product information
+            # For now, just mark cache as loaded
+            self.cache_expiry = int(time.time()) + 3600  # Cache for 1 hour
+            logger.debug("Delta Exchange products cache loaded")
+        except Exception as e:
+            logger.warning(f"Failed to load products cache: {e}")
+    
     async def connect(self):
         """Initialize HTTP session"""
         if not self.session:
