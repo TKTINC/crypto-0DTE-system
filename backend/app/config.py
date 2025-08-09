@@ -67,17 +67,17 @@ class Settings(BaseSettings):
     INFLUXDB_ORG: str = "crypto-trading"
     INFLUXDB_BUCKET: str = "market-data"
     
-    # Delta Exchange API Configuration - COMPREHENSIVE ENVIRONMENT SUPPORT
+    # Delta Exchange API Configuration - SIMPLIFIED (NO PASSPHRASE REQUIRED)
     
     # Production API Keys (for live trading - from main delta.exchange account)
     DELTA_API_KEY: str = Field(default="", env="DELTA_API_KEY")
     DELTA_API_SECRET: str = Field(default="", env="DELTA_API_SECRET")
-    DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
+    DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")  # Optional - Delta Exchange doesn't require
     
     # Testnet API Keys (for paper trading - from demo.delta.exchange account)
     DELTA_TESTNET_API_KEY: str = Field(default="", env="DELTA_TESTNET_API_KEY")
     DELTA_TESTNET_API_SECRET: str = Field(default="", env="DELTA_TESTNET_API_SECRET")
-    DELTA_TESTNET_PASSPHRASE: str = Field(default="", env="DELTA_TESTNET_PASSPHRASE")
+    DELTA_TESTNET_PASSPHRASE: str = Field(default="", env="DELTA_TESTNET_PASSPHRASE")  # Optional - Delta Exchange doesn't require
     
     # Environment switching - defaults to testnet for safety
     DELTA_EXCHANGE_TESTNET: bool = Field(default=True, env="DELTA_EXCHANGE_TESTNET")
@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     
     @property
     def current_delta_passphrase(self) -> str:
-        """Get API passphrase for current environment"""
+        """Get API passphrase for current environment (optional for Delta Exchange)"""
         return self.DELTA_TESTNET_PASSPHRASE if self.PAPER_TRADING else self.DELTA_API_PASSPHRASE
     
     @property

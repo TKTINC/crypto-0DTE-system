@@ -144,6 +144,7 @@ class DeltaExchangeConnector:
         logger.info(f"  Paper Trading: {self.paper_trading}")
         logger.info(f"  Development Mode: {self.is_development}")
         logger.info(f"  API Key: {self.api_key[:8]}..." if self.api_key else "  API Key: Not configured")
+        logger.info(f"  Passphrase: {'Configured' if self.passphrase else 'Not required (Delta Exchange)'}")
         self.max_calls_per_window = 1000
     
     def __del__(self):
@@ -253,12 +254,17 @@ class DeltaExchangeConnector:
             hashlib.sha256
         ).hexdigest()
         
-        return {
+        headers = {
             "api-key": self.api_key,
             "signature": signature,
-            "timestamp": timestamp,
-            "passphrase": self.passphrase
+            "timestamp": timestamp
         }
+        
+        # Only add passphrase if it's provided (Delta Exchange doesn't require it)
+        if self.passphrase:
+            headers["passphrase"] = self.passphrase
+            
+        return headers
     
     @retry_with_backoff(max_retries=3, base_delay=1.0, max_delay=30.0)
     async def _make_request(
@@ -757,14 +763,19 @@ class DeltaExchangeConnector:
             logger.info("Connected to Delta Exchange WebSocket")
             
             # Authenticate WebSocket
+            auth_payload = {
+                "api-key": self.api_key,
+                "signature": self._generate_websocket_signature(),
+                "timestamp": str(int(time.time()))
+            }
+            
+            # Only add passphrase if it's provided (Delta Exchange doesn't require it)
+            if self.passphrase:
+                auth_payload["passphrase"] = self.passphrase
+            
             auth_message = {
                 "type": "auth",
-                "payload": {
-                    "api-key": self.api_key,
-                    "signature": self._generate_websocket_signature(),
-                    "timestamp": str(int(time.time())),
-                    "passphrase": self.passphrase
-                }
+                "payload": auth_payload
             }
             
             await self.websocket.send(json.dumps(auth_message))
