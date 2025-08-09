@@ -844,6 +844,7 @@ class TradeExecutionEngine:
     
     async def _load_existing_orders(self):
         """Load existing orders from database"""
+        db = None
         try:
             db = next(get_db())
             active_orders = db.query(Order).filter(
@@ -867,7 +868,8 @@ class TradeExecutionEngine:
         except Exception as e:
             logger.error(f"Error loading existing orders: {e}")
         finally:
-            db.close()
+            if db:
+                db.close()
     
     async def _cancel_related_orders(self, trade_id: str):
         """Cancel all orders related to a trade"""
@@ -883,6 +885,7 @@ class TradeExecutionEngine:
     
     async def _get_related_orders(self, trade_id: str) -> List[Dict[str, Any]]:
         """Get all orders related to a trade"""
+        db = None
         try:
             db = next(get_db())
             orders = db.query(Order).filter(
@@ -906,10 +909,12 @@ class TradeExecutionEngine:
             logger.error(f"Error getting related orders: {e}")
             return []
         finally:
-            db.close()
+            if db:
+                db.close()
     
     async def _cancel_stop_loss_order(self, trade_id: str):
         """Cancel stop loss order for a trade"""
+        db = None
         try:
             db = next(get_db())
             stop_order = db.query(Order).filter(
@@ -925,10 +930,12 @@ class TradeExecutionEngine:
         except Exception as e:
             logger.error(f"Error cancelling stop loss order: {e}")
         finally:
-            db.close()
+            if db:
+                db.close()
     
     async def _cancel_take_profit_order(self, trade_id: str):
         """Cancel take profit order for a trade"""
+        db = None
         try:
             db = next(get_db())
             tp_order = db.query(Order).filter(
@@ -944,10 +951,12 @@ class TradeExecutionEngine:
         except Exception as e:
             logger.error(f"Error cancelling take profit order: {e}")
         finally:
-            db.close()
+            if db:
+                db.close()
     
     async def _update_trade_stop_loss(self, trade_id: str, new_stop_loss: float):
         """Update stop loss in trade record"""
+        db = None
         try:
             db = next(get_db())
             trade = db.query(Trade).filter(Trade.id == trade_id).first()
@@ -957,12 +966,15 @@ class TradeExecutionEngine:
                 db.commit()
         except Exception as e:
             logger.error(f"Error updating trade stop loss: {e}")
-            db.rollback()
+            if db:
+                db.rollback()
         finally:
-            db.close()
+            if db:
+                db.close()
     
     async def _update_trade_size(self, trade_id: str, new_size: float):
         """Update trade size in record"""
+        db = None
         try:
             db = next(get_db())
             trade = db.query(Trade).filter(Trade.id == trade_id).first()
@@ -972,7 +984,9 @@ class TradeExecutionEngine:
                 db.commit()
         except Exception as e:
             logger.error(f"Error updating trade size: {e}")
-            db.rollback()
+            if db:
+                db.rollback()
         finally:
-            db.close()
+            if db:
+                db.close()
 
