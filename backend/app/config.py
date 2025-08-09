@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     INFLUXDB_ORG: str = "crypto-trading"
     INFLUXDB_BUCKET: str = "market-data"
     
-    # Delta Exchange API Configuration - UPDATED for separate testnet/production keys
+    # Delta Exchange API Configuration - COMPREHENSIVE ENVIRONMENT SUPPORT
     
     # Production API Keys (for live trading - from main delta.exchange account)
     DELTA_API_KEY: str = Field(default="", env="DELTA_API_KEY")
@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     # Testnet API Keys (for paper trading - from demo.delta.exchange account)
     DELTA_TESTNET_API_KEY: str = Field(default="", env="DELTA_TESTNET_API_KEY")
     DELTA_TESTNET_API_SECRET: str = Field(default="", env="DELTA_TESTNET_API_SECRET")
-    DELTA_TESTNET_API_PASSPHRASE: str = Field(default="", env="DELTA_TESTNET_API_PASSPHRASE")
+    DELTA_TESTNET_PASSPHRASE: str = Field(default="", env="DELTA_TESTNET_PASSPHRASE")
     
     # Environment switching - defaults to testnet for safety
     DELTA_EXCHANGE_TESTNET: bool = Field(default=True, env="DELTA_EXCHANGE_TESTNET")
@@ -87,13 +87,35 @@ class Settings(BaseSettings):
     DELTA_TESTNET_BASE_URL: str = "https://cdn-ind.testnet.deltaex.org"
     DELTA_TESTNET_WEBSOCKET_URL: str = "wss://testnet-socket.delta.exchange"
     
-    # Live URLs (for real trading - production account)
+    # Live URLs (for real trading - production account)  
     DELTA_LIVE_BASE_URL: str = "https://api.india.delta.exchange"
     DELTA_LIVE_WEBSOCKET_URL: str = "wss://socket.delta.exchange"
     
-    # Dynamic URLs based on environment
-    DELTA_BASE_URL: str = Field(default="https://cdn-ind.testnet.deltaex.org", env="DELTA_EXCHANGE_BASE_URL")
-    DELTA_WEBSOCKET_URL: str = Field(default="wss://testnet-socket.delta.exchange", env="DELTA_WEBSOCKET_URL")
+    # Dynamic properties for current environment
+    @property
+    def current_delta_api_key(self) -> str:
+        """Get API key for current environment"""
+        return self.DELTA_TESTNET_API_KEY if self.PAPER_TRADING else self.DELTA_API_KEY
+    
+    @property
+    def current_delta_api_secret(self) -> str:
+        """Get API secret for current environment"""
+        return self.DELTA_TESTNET_API_SECRET if self.PAPER_TRADING else self.DELTA_API_SECRET
+    
+    @property
+    def current_delta_passphrase(self) -> str:
+        """Get API passphrase for current environment"""
+        return self.DELTA_TESTNET_PASSPHRASE if self.PAPER_TRADING else self.DELTA_API_PASSPHRASE
+    
+    @property
+    def current_delta_base_url(self) -> str:
+        """Get base URL for current environment"""
+        return self.DELTA_TESTNET_BASE_URL if self.PAPER_TRADING else self.DELTA_LIVE_BASE_URL
+    
+    @property
+    def current_delta_websocket_url(self) -> str:
+        """Get WebSocket URL for current environment"""
+        return self.DELTA_TESTNET_WEBSOCKET_URL if self.PAPER_TRADING else self.DELTA_LIVE_WEBSOCKET_URL
     
     # OpenAI API Configuration
     OPENAI_API_KEY: str = ""

@@ -104,25 +104,23 @@ class DeltaExchangeConnector:
     def __init__(self, paper_trading: bool = None):
         # Determine environment based on paper trading flag
         self.paper_trading = paper_trading if paper_trading is not None else settings.PAPER_TRADING
-        # Use testnet if paper trading OR if explicitly set to testnet, but prioritize paper_trading flag
-        self.is_testnet = self.paper_trading if paper_trading is not None else (settings.PAPER_TRADING or settings.DELTA_EXCHANGE_TESTNET)
         
-        # Select appropriate API keys based on environment
-        if self.is_testnet:
-            # Use testnet API keys (from demo.delta.exchange account)
-            self.api_key = settings.DELTA_TESTNET_API_KEY
-            self.api_secret = settings.DELTA_TESTNET_API_SECRET
-            self.passphrase = settings.DELTA_TESTNET_API_PASSPHRASE
-            self.base_url = settings.DELTA_TESTNET_BASE_URL
-            self.websocket_url = settings.DELTA_TESTNET_WEBSOCKET_URL
+        # Select appropriate API keys and URLs based on environment using new properties
+        if self.paper_trading:
+            # Use testnet API keys and URLs (from demo.delta.exchange account)
+            self.api_key = settings.current_delta_api_key
+            self.api_secret = settings.current_delta_api_secret
+            self.passphrase = settings.current_delta_passphrase
+            self.base_url = settings.current_delta_base_url
+            self.websocket_url = settings.current_delta_websocket_url
             self.environment = "TESTNET"
         else:
-            # Use production API keys (from main delta.exchange account)
-            self.api_key = settings.DELTA_API_KEY
-            self.api_secret = settings.DELTA_API_SECRET
-            self.passphrase = settings.DELTA_API_PASSPHRASE
-            self.base_url = settings.DELTA_LIVE_BASE_URL
-            self.websocket_url = settings.DELTA_LIVE_WEBSOCKET_URL
+            # Use production API keys and URLs (from main delta.exchange account)
+            self.api_key = settings.current_delta_api_key
+            self.api_secret = settings.current_delta_api_secret
+            self.passphrase = settings.current_delta_passphrase
+            self.base_url = settings.current_delta_base_url
+            self.websocket_url = settings.current_delta_websocket_url
             self.environment = "LIVE"
         
         # Check if we're in development mode (invalid/test API keys)
@@ -138,6 +136,14 @@ class DeltaExchangeConnector:
         # Rate limiting
         self.rate_limit_calls = 0
         self.rate_limit_window = 60  # 1 minute
+        
+        # Log environment configuration
+        logger.info(f"Delta Exchange Connector initialized:")
+        logger.info(f"  Environment: {self.environment}")
+        logger.info(f"  Base URL: {self.base_url}")
+        logger.info(f"  Paper Trading: {self.paper_trading}")
+        logger.info(f"  Development Mode: {self.is_development}")
+        logger.info(f"  API Key: {self.api_key[:8]}..." if self.api_key else "  API Key: Not configured")
         self.max_calls_per_window = 1000
     
     def __del__(self):
