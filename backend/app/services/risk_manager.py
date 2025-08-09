@@ -18,6 +18,7 @@ from decimal import Decimal
 import math
 import statistics
 
+from sqlalchemy import select
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
 from app.database import get_db
 from app.config import Settings
@@ -651,10 +652,13 @@ class RiskManager:
             daily_pnl = 0.0
             
             async for db in get_db():
-                daily_trades = db.query(Trade).filter(
-                    Trade.created_at >= today,
-                    Trade.status == TradeStatus.CLOSED
-                ).all()
+                result = await db.execute(
+                    select(Trade).filter(
+                        Trade.created_at >= today,
+                        Trade.status == TradeStatus.CLOSED
+                    )
+                )
+                daily_trades = result.scalars().all()
                 
                 daily_pnl = sum(float(trade.realized_pnl or 0) for trade in daily_trades)
                 break  # Exit after getting the data
@@ -691,10 +695,13 @@ class RiskManager:
         """Count open positions"""
         try:
             async for db in get_db():
-                count = db.query(Trade).filter(
-                    Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
-                ).count()
-                return count
+                result = await db.execute(
+                    select(Trade).filter(
+                        Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
+                    )
+                )
+                trades = result.scalars().all()
+                return len(trades)
         except Exception as e:
             logger.error(f"Error counting open positions: {e}")
             return 0
@@ -703,10 +710,13 @@ class RiskManager:
         """Check if there's an existing position in symbol"""
         try:
             async for db in get_db():
-                existing = db.query(Trade).filter(
-                    Trade.symbol == symbol,
-                    Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
-                ).first()
+                result = await db.execute(
+                    select(Trade).filter(
+                        Trade.symbol == symbol,
+                        Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
+                    )
+                )
+                existing = result.scalars().first()
                 return existing is not None
         except Exception as e:
             logger.error(f"Error checking existing position: {e}")
@@ -717,9 +727,12 @@ class RiskManager:
         try:
             open_trades = []
             async for db in get_db():
-                open_trades = db.query(Trade).filter(
-                    Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
-                ).all()
+                result = await db.execute(
+                    select(Trade).filter(
+                        Trade.status.in_([TradeStatus.OPEN, TradeStatus.PARTIALLY_FILLED])
+                    )
+                )
+                open_trades = result.scalars().all()
                 break  # Exit after getting the data
             
             positions = []
