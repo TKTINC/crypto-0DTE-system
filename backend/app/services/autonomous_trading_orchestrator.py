@@ -77,6 +77,16 @@ class AutonomousTradingOrchestrator:
         
         logger.info("Autonomous Trading Orchestrator initialized")
     
+    async def initialize(self):
+        """Initialize the autonomous trading orchestrator and all services"""
+        try:
+            logger.info("Initializing Autonomous Trading Orchestrator...")
+            await self._initialize_services()
+            logger.info("✅ Autonomous Trading Orchestrator initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Autonomous Trading Orchestrator: {e}")
+            raise
+    
     async def start(self):
         """Start the autonomous trading orchestrator"""
         if self.is_running:

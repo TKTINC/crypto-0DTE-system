@@ -844,32 +844,29 @@ class TradeExecutionEngine:
     
     async def _load_existing_orders(self):
         """Load existing orders from database"""
-        db = None
         try:
-            db = next(get_db())
-            active_orders = db.query(Order).filter(
-                Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
-            ).all()
-            
-            for order in active_orders:
-                self.active_orders[order.id] = {
-                    "order_id": order.id,
-                    "trade_id": order.trade_id,
-                    "symbol": order.symbol,
-                    "side": order.side,
-                    "size": float(order.size),
-                    "price": float(order.price) if order.price else None,
-                    "order_type": order.order_type.value,
-                    "status": order.status.value
-                }
-            
-            logger.info(f"Loaded {len(self.active_orders)} existing orders")
-            
+            async for db in get_db():
+                active_orders = db.query(Order).filter(
+                    Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
+                ).all()
+                
+                for order in active_orders:
+                    self.active_orders[order.id] = {
+                        "order_id": order.id,
+                        "trade_id": order.trade_id,
+                        "symbol": order.symbol,
+                        "side": order.side,
+                        "size": float(order.size),
+                        "price": float(order.price) if order.price else None,
+                        "order_type": order.order_type.value,
+                        "status": order.status.value
+                    }
+                
+                logger.info(f"Loaded {len(self.active_orders)} existing orders")
+                break  # Exit after getting the data
+                
         except Exception as e:
             logger.error(f"Error loading existing orders: {e}")
-        finally:
-            if db:
-                db.close()
     
     async def _cancel_related_orders(self, trade_id: str):
         """Cancel all orders related to a trade"""
