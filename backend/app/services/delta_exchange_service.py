@@ -33,8 +33,8 @@ class DeltaExchangeService:
     
     def __init__(self):
         self.base_url = "https://api.delta.exchange"
-        self.api_key = settings.DELTA_EXCHANGE_API_KEY
-        self.api_secret = settings.DELTA_EXCHANGE_API_SECRET
+        self.api_key = settings.DELTA_API_KEY
+        self.api_secret = settings.DELTA_API_SECRET
         self.calculator = FinancialCalculator()
         self.session = None
     

@@ -67,9 +67,9 @@ class Settings(BaseSettings):
     INFLUXDB_ORG: str = "crypto-trading"
     INFLUXDB_BUCKET: str = "market-data"
     
-    # Delta Exchange API Configuration (FIXED - Updated field mapping)
-    DELTA_API_KEY: str = Field(default="", env="DELTA_EXCHANGE_API_KEY")
-    DELTA_API_SECRET: str = Field(default="", env="DELTA_EXCHANGE_API_SECRET")
+    # Delta Exchange API Configuration (FIXED - Corrected environment variable mapping)
+    DELTA_API_KEY: str = Field(default="", env="DELTA_API_KEY")
+    DELTA_API_SECRET: str = Field(default="", env="DELTA_API_SECRET")
     DELTA_API_PASSPHRASE: str = Field(default="", env="DELTA_API_PASSPHRASE")
     
     # Environment switching - defaults to testnet for safety
@@ -87,12 +87,6 @@ class Settings(BaseSettings):
     # Dynamic URLs based on environment
     DELTA_BASE_URL: str = Field(default="https://testnet-api.delta.exchange", env="DELTA_EXCHANGE_BASE_URL")
     DELTA_WEBSOCKET_URL: str = Field(default="wss://testnet-socket.delta.exchange", env="DELTA_WEBSOCKET_URL")
-    
-    # Legacy fields for backward compatibility
-    DELTA_EXCHANGE_API_KEY: str = ""
-    DELTA_EXCHANGE_API_SECRET: str = ""
-    DELTA_EXCHANGE_BASE_URL: str = "https://testnet-api.delta.exchange"
-    DELTA_EXCHANGE_RATE_LIMIT: int = 100  # requests per minute
     
     # OpenAI API Configuration
     OPENAI_API_KEY: str = ""
@@ -175,7 +169,7 @@ class Settings(BaseSettings):
             # Fallback to default
             return ["http://localhost:3000"]
     
-    @field_validator("DELTA_EXCHANGE_API_KEY", "OPENAI_API_KEY")
+    @field_validator("DELTA_API_KEY", "OPENAI_API_KEY")
     @classmethod
     def validate_api_keys(cls, v: str, info) -> str:
         """Validate API keys (allow empty for development)"""

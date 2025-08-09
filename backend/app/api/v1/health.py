@@ -105,7 +105,7 @@ async def detailed_health_check(db: Session = Depends(get_db)) -> Dict[str, Any]
         "DATABASE_URL",
         "REDIS_URL",
         "JWT_SECRET_KEY",
-        "DELTA_EXCHANGE_API_KEY",
+        "DELTA_API_KEY",
         "OPENAI_API_KEY"
     ]
     
