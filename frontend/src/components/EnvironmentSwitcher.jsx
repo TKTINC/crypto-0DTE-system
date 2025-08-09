@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { AlertTriangle, TestTube, DollarSign, Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert.jsx'
+import LiveModeConfirmation from './LiveModeConfirmation'
 
 const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
   const [environment, setEnvironment] = useState({
@@ -19,6 +20,7 @@ const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [switchResult, setSwitchResult] = useState(null)
+  const [showLiveModeConfirmation, setShowLiveModeConfirmation] = useState(false)
 
   // Fetch current environment status
   const fetchEnvironmentStatus = async () => {
@@ -32,6 +34,28 @@ const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
       setError('Failed to load environment status')
       console.error('Environment status error:', err)
     }
+  }
+
+  // Handle environment switch with confirmation for live mode
+  const handleEnvironmentSwitch = (paperTrading) => {
+    // If switching to live mode (paperTrading = false), show confirmation
+    if (!paperTrading && environment.paper_trading) {
+      setShowLiveModeConfirmation(true)
+    } else {
+      // Direct switch for paper mode or already in live mode
+      switchEnvironment(paperTrading)
+    }
+  }
+
+  // Confirm live mode switch
+  const confirmLiveModeSwitch = () => {
+    setShowLiveModeConfirmation(false)
+    switchEnvironment(false) // Switch to live mode
+  }
+
+  // Cancel live mode switch
+  const cancelLiveModeSwitch = () => {
+    setShowLiveModeConfirmation(false)
   }
 
   // Switch environment
@@ -76,7 +100,7 @@ const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
   const handleSwitchChange = (checked) => {
     // checked = true means paper trading (TESTNET)
     // checked = false means live trading (LIVE)
-    switchEnvironment(checked)
+    handleEnvironmentSwitch(checked)
   }
 
   // Load environment status on component mount
@@ -94,6 +118,7 @@ const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
   const environmentBgColor = isPaperTrading ? 'bg-blue-50' : 'bg-red-50'
 
   return (
+    <>
     <Card className={`border-2 ${isPaperTrading ? 'border-blue-200' : 'border-red-200'} ${environmentBgColor}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -221,6 +246,15 @@ const EnvironmentSwitcher = ({ onEnvironmentChange }) => {
         </div>
       </CardContent>
     </Card>
+
+    {/* Live Mode Confirmation Modal */}
+    <LiveModeConfirmation
+      isOpen={showLiveModeConfirmation}
+      onConfirm={confirmLiveModeSwitch}
+      onCancel={cancelLiveModeSwitch}
+      currentBalance={environment.portfolio_balance}
+    />
+  </>
   )
 }
 

@@ -10,6 +10,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useRealTimeData } from './hooks/useRealTimeData'
 import AutonomousMonitor from './components/AutonomousMonitor'
 import EnvironmentSwitcher from './components/EnvironmentSwitcher'
+import EmergencyKillSwitch from './components/EmergencyKillSwitch'
+import OrdersJournal from './components/OrdersJournal'
+import RealTimeMetrics from './components/RealTimeMetrics'
 import './App.css'
 
 // Mock data for development (fallback when API data is not available)
@@ -102,6 +105,29 @@ function Dashboard() {
   useEffect(() => {
     fetchEnvironmentPortfolio()
   }, [currentEnvironment, isPaperTrading])
+  
+  // Emergency stop handler
+  const handleEmergencyStop = async () => {
+    try {
+      const response = await fetch('/api/v1/autonomous/emergency-stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      if (response.ok) {
+        // Refresh data after emergency stop
+        refreshData()
+        fetchEnvironmentPortfolio()
+      } else {
+        throw new Error('Emergency stop failed')
+      }
+    } catch (error) {
+      console.error('Emergency stop error:', error)
+      throw error
+    }
+  }
   
   // Real-time data hooks
   const {
@@ -289,7 +315,7 @@ function Dashboard() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-slate-800 border-slate-700">
+          <TabsList className="grid w-full grid-cols-8 bg-slate-800 border-slate-700">
             <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
@@ -305,6 +331,14 @@ function Dashboard() {
             <TabsTrigger value="portfolio" className="data-[state=active]:bg-purple-600">
               <DollarSign className="h-4 w-4 mr-2" />
               Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="data-[state=active]:bg-purple-600">
+              <Target className="h-4 w-4 mr-2" />
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="data-[state=active]:bg-purple-600">
+              <Activity className="h-4 w-4 mr-2" />
+              Metrics
             </TabsTrigger>
             <TabsTrigger value="performance" className="data-[state=active]:bg-purple-600">
               <TrendingUp className="h-4 w-4 mr-2" />
@@ -336,14 +370,21 @@ function Dashboard() {
                       }
                     </span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab('settings')}
-                    className={`border-slate-600 ${isPaperTrading ? 'text-blue-400 hover:bg-blue-900/20' : 'text-red-400 hover:bg-red-900/20'}`}
-                  >
-                    Switch Environment
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <EmergencyKillSwitch
+                      onEmergencyStop={handleEmergencyStop}
+                      isActive={autonomous?.status === 'active'}
+                      systemStatus={`${autonomous?.open_positions || 0} positions, ${autonomous?.pending_orders || 0} orders`}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveTab('settings')}
+                      className={`border-slate-600 ${isPaperTrading ? 'text-blue-400 hover:bg-blue-900/20' : 'text-red-400 hover:bg-red-900/20'}`}
+                    >
+                      Switch Environment
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1119,6 +1160,16 @@ function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Orders Journal Tab */}
+          <TabsContent value="orders" className="space-y-6">
+            <OrdersJournal environment={currentEnvironment} />
+          </TabsContent>
+
+          {/* Real-Time Metrics Tab */}
+          <TabsContent value="metrics" className="space-y-6">
+            <RealTimeMetrics environment={currentEnvironment} />
           </TabsContent>
         </Tabs>
       </main>
