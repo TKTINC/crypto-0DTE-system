@@ -12,9 +12,11 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.technical_analysis import TechnicalAnalyzer, StrategyEngine, TechnicalSignal
 from app.models.signal import Signal, SignalType, SignalStatus
-from app.database import get_db
+from app.database import get_db, AsyncSessionLocal
 from sqlalchemy.orm import Session
 
 
@@ -389,9 +391,9 @@ class SignalGenerationService:
     async def get_active_signals(self, symbol: Optional[str] = None) -> List[Signal]:
         """Get active signals from database"""
         try:
-            db = next(get_db())
-            try:
-                query = db.query(Signal).filter(Signal.status == SignalStatus.ACTIVE)
+            async with AsyncSessionLocal() as db:
+                # Use select() with AsyncSession instead of .query()
+                query = select(Signal).filter(Signal.status == SignalStatus.ACTIVE)
                 
                 if symbol:
                     query = query.filter(Signal.symbol == symbol)
@@ -400,10 +402,9 @@ class SignalGenerationService:
                 cutoff_time = datetime.utcnow() - timedelta(hours=24)
                 query = query.filter(Signal.generated_at >= cutoff_time)
                 
-                return query.order_by(Signal.generated_at.desc()).all()
-                
-            finally:
-                db.close()
+                query = query.order_by(Signal.generated_at.desc())
+                result = await db.execute(query)
+                return result.scalars().all()
                 
         except Exception as e:
             logger.error(f"Error getting active signals: {e}")
@@ -412,9 +413,12 @@ class SignalGenerationService:
     async def update_signal_status(self, signal_id: int, status: SignalStatus, execution_price: Optional[Decimal] = None) -> bool:
         """Update signal status (e.g., when executed or expired)"""
         try:
-            db = next(get_db())
-            try:
-                signal = db.query(Signal).filter(Signal.id == signal_id).first()
+            async with AsyncSessionLocal() as db:
+                # Use select() with AsyncSession instead of .query()
+                query = select(Signal).filter(Signal.id == signal_id)
+                result = await db.execute(query)
+                signal = result.scalar_one_or_none()
+                
                 if not signal:
                     return False
                 
@@ -423,12 +427,9 @@ class SignalGenerationService:
                     signal.execution_price = execution_price
                     signal.executed_at = datetime.utcnow()
                 
-                db.commit()
+                await db.commit()
                 logger.info(f"Updated signal {signal_id} status to {status.value}")
                 return True
-                
-            finally:
-                db.close()
                 
         except Exception as e:
             logger.error(f"Error updating signal status: {e}")
