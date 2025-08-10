@@ -144,11 +144,11 @@ EOF
     
     # Update or add the variable
     if grep -q "^$var_name=" "$CONFIG_FILE"; then
-        # Update existing
+        # Update existing - use | as delimiter to avoid issues with URLs containing /
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/^$var_name=.*/$var_name=$var_value/" "$CONFIG_FILE"
+            sed -i '' "s|^$var_name=.*|$var_name=$var_value|" "$CONFIG_FILE"
         else
-            sed -i "s/^$var_name=.*/$var_name=$var_value/" "$CONFIG_FILE"
+            sed -i "s|^$var_name=.*|$var_name=$var_value|" "$CONFIG_FILE"
         fi
         print_info "Updated $var_name in config file"
     else
