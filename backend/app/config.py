@@ -226,7 +226,7 @@ class Settings(BaseSettings):
         return self.ENVIRONMENT.lower() in ["production", "prod"]
     
     class Config:
-        env_file = ".env.local"
+        env_file = ".env.local"  # Look in backend directory (relative to where app runs)
         env_file_encoding = "utf-8"
         case_sensitive = True
         # Allow extra fields to prevent validation errors
