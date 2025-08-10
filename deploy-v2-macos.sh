@@ -93,6 +93,35 @@ wait_for_service() {
     done
     
     error "$service_name failed to start within $((max_attempts * 2)) seconds"
+    
+    # CRITICAL FIX: If service failed to start, kill the background process immediately
+    warning "Service startup failed - killing background processes to prevent runaway loops"
+    
+    # Kill the specific process that was started
+    if [[ -f "$LOG_DIR/backend.pid" ]]; then
+        local pid=$(cat "$LOG_DIR/backend.pid" 2>/dev/null)
+        if [[ -n "$pid" ]]; then
+            warning "Killing backend process $pid"
+            kill -9 "$pid" 2>/dev/null || true
+            rm -f "$LOG_DIR/backend.pid"
+        fi
+    fi
+    
+    # Kill any Python processes that might be running the backend
+    pkill -9 -f "python.*app.main" 2>/dev/null || true
+    pkill -9 -f "python.*main.py" 2>/dev/null || true
+    pkill -9 -f "uvicorn" 2>/dev/null || true
+    
+    # Wait a moment and verify processes are killed
+    sleep 2
+    local remaining=$(ps aux | grep -E "python.*app\.main|uvicorn" | grep -v grep | wc -l)
+    if [[ $remaining -gt 0 ]]; then
+        warning "Found $remaining remaining backend processes after cleanup"
+        ps aux | grep -E "python.*app\.main|uvicorn" | grep -v grep
+    else
+        success "All backend processes successfully terminated"
+    fi
+    
     return 1
 }
 
@@ -540,24 +569,41 @@ cleanup_on_failure() {
     # Stop ALL trading system processes (not just PID file processes)
     warning "Stopping all crypto trading system processes..."
     
-    # Kill all Python processes related to the trading system
-    pkill -f "python.*app.main" 2>/dev/null || true
-    pkill -f "python.*main.py" 2>/dev/null || true
-    pkill -f "uvicorn.*app" 2>/dev/null || true
-    pkill -f "fastapi" 2>/dev/null || true
-    pkill -f "autonomous_trading_orchestrator" 2>/dev/null || true
-    pkill -f "trading.*loop" 2>/dev/null || true
-    pkill -f "risk.*manager" 2>/dev/null || true
-    pkill -f "position.*manager" 2>/dev/null || true
+    # CRITICAL FIX: More aggressive process termination
+    # First try graceful termination
+    pkill -TERM -f "python.*app.main" 2>/dev/null || true
+    pkill -TERM -f "python.*main.py" 2>/dev/null || true
+    pkill -TERM -f "uvicorn.*app" 2>/dev/null || true
+    pkill -TERM -f "fastapi" 2>/dev/null || true
+    
+    # Wait for graceful termination
+    sleep 3
+    
+    # Then force kill any remaining processes
+    pkill -9 -f "python.*app.main" 2>/dev/null || true
+    pkill -9 -f "python.*main.py" 2>/dev/null || true
+    pkill -9 -f "uvicorn.*app" 2>/dev/null || true
+    pkill -9 -f "fastapi" 2>/dev/null || true
+    pkill -9 -f "autonomous_trading_orchestrator" 2>/dev/null || true
+    pkill -9 -f "trading.*loop" 2>/dev/null || true
+    pkill -9 -f "risk.*manager" 2>/dev/null || true
+    pkill -9 -f "position.*manager" 2>/dev/null || true
     
     # Kill all Node.js processes related to the frontend
-    pkill -f "node.*react-scripts" 2>/dev/null || true
-    pkill -f "npm.*start" 2>/dev/null || true
-    pkill -f "yarn.*start" 2>/dev/null || true
+    pkill -9 -f "node.*react-scripts" 2>/dev/null || true
+    pkill -9 -f "npm.*start" 2>/dev/null || true
+    pkill -9 -f "yarn.*start" 2>/dev/null || true
     
     # Kill processes by port if they're still running
     lsof -ti:8000 | xargs kill -9 2>/dev/null || true
     lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+    
+    # Kill any processes we started (legacy cleanup)
+    [[ -f "$LOG_DIR/backend.pid" ]] && kill -9 "$(cat "$LOG_DIR/backend.pid")" 2>/dev/null || true
+    [[ -f "$LOG_DIR/frontend.pid" ]] && kill -9 "$(cat "$LOG_DIR/frontend.pid")" 2>/dev/null || true
+    
+    # Clean up PID files
+    rm -f "$LOG_DIR"/*.pid 2>/dev/null || true
     
     # Execute rollback commands
     if [[ -f "$ROLLBACK_COMMANDS_FILE" ]]; then
@@ -565,26 +611,31 @@ cleanup_on_failure() {
         bash "$ROLLBACK_COMMANDS_FILE" 2>/dev/null || true
     fi
     
-    # Kill any processes we started (legacy cleanup)
-    [[ -f "$LOG_DIR/backend.pid" ]] && kill "$(cat "$LOG_DIR/backend.pid")" 2>/dev/null || true
-    [[ -f "$LOG_DIR/frontend.pid" ]] && kill "$(cat "$LOG_DIR/frontend.pid")" 2>/dev/null || true
+    # Wait longer for processes to terminate
+    sleep 5
     
-    # Clean up PID files
-    rm -f "$LOG_DIR"/*.pid 2>/dev/null || true
-    
-    # Wait a moment for processes to terminate
-    sleep 3
-    
-    # Final check for any remaining processes
-    local remaining_procs=$(ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react" | grep -v grep | wc -l)
+    # Final aggressive check for any remaining processes
+    local remaining_procs=$(ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react|crypto.*trading" | grep -v grep | wc -l)
     if [[ $remaining_procs -gt 0 ]]; then
-        warning "Found $remaining_procs remaining processes. Force killing..."
-        pkill -9 -f "python.*app" 2>/dev/null || true
-        pkill -9 -f "uvicorn" 2>/dev/null || true
-        pkill -9 -f "node.*react" 2>/dev/null || true
+        warning "Found $remaining_procs remaining processes. Final force kill..."
+        ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react|crypto.*trading" | grep -v grep
+        
+        # Nuclear option - kill by pattern matching
+        ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react|crypto.*trading" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null || true
+        
+        # Wait and check again
+        sleep 2
+        local final_check=$(ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react|crypto.*trading" | grep -v grep | wc -l)
+        if [[ $final_check -gt 0 ]]; then
+            error "WARNING: $final_check processes still running after aggressive cleanup!"
+            ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react|crypto.*trading" | grep -v grep
+        else
+            success "All processes successfully terminated after aggressive cleanup"
+        fi
+    else
+        success "All crypto trading system processes stopped"
     fi
     
-    success "All crypto trading system processes stopped"
     error "Deployment failed but cleanup completed successfully"
     info "System is now in a clean state. You can safely retry deployment."
     exit 1
