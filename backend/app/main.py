@@ -57,6 +57,15 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Crypto-0DTE-System...")
     
+    # Generate .env.local file from config.py settings
+    logger.info("🔧 Generating environment configuration...")
+    from app.utils.env_generator import ensure_env_file_exists
+    env_generated = ensure_env_file_exists(settings)
+    if env_generated:
+        logger.info("✅ Environment configuration ready")
+    else:
+        logger.warning("⚠️ Environment configuration generation failed, using existing settings")
+    
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
