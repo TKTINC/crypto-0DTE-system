@@ -102,8 +102,9 @@ async def get_ohlcv_data_query(
         # Try to get real data from Delta Exchange
         try:
             from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+            from app.config import settings
             
-            async with DeltaExchangeConnector() as delta:
+            async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
                 # Convert symbol format (BTC-USDT -> BTCUSDT for Delta)
                 delta_symbol = symbol.replace('-', '')
                 
@@ -261,8 +262,9 @@ async def test_market_data_connection():
         # Test Delta Exchange connection
         try:
             from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+            from app.config import settings
             
-            async with DeltaExchangeConnector() as delta:
+            async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
                 # Try to get a simple ticker to test connection
                 result = await delta.get_ticker("BTCUSDT")
                 

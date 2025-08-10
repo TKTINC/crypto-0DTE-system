@@ -32,7 +32,9 @@ class DataFeedService:
     """Real-time data feed service"""
     
     def __init__(self):
-        self.delta_connector = DeltaExchangeConnector()
+        # Use paper trading mode from settings
+        from app.config import settings
+        self.delta_connector = DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING)
         self.external_data = ExternalDataService()
         
         # Symbols to track

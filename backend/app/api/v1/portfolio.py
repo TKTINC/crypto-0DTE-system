@@ -52,7 +52,7 @@ async def get_portfolio_status(db: Session = Depends(get_db)):
     try:
         # Try to get real portfolio data from Delta Exchange
         try:
-            delta_connector = DeltaExchangeConnector(settings) 
+            delta_connector = DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) 
             # Get account balance and positions
             balance_data = await delta_connector.get_account_balance()
             positions_data = await delta_connector.get_positions()
