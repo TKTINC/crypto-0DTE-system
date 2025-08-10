@@ -84,11 +84,13 @@ class Settings(BaseSettings):
     PAPER_TRADING: bool = Field(default=True, env="PAPER_TRADING")
     
     # Testnet URLs (for paper trading - demo account)
-    DELTA_TESTNET_BASE_URL: str = "https://cdn-ind.testnet.deltaex.org"
-    DELTA_TESTNET_WEBSOCKET_URL: str = "wss://testnet-socket.delta.exchange"
+    # Note: Delta Exchange may use the same API endpoint for both testnet and live
+    # but differentiate based on API keys
+    DELTA_TESTNET_BASE_URL: str = "https://api.india.delta.exchange/api/v1"
+    DELTA_TESTNET_WEBSOCKET_URL: str = "wss://socket.delta.exchange"
     
     # Live URLs (for real trading - production account)  
-    DELTA_LIVE_BASE_URL: str = "https://api.india.delta.exchange"
+    DELTA_LIVE_BASE_URL: str = "https://api.india.delta.exchange/api/v1"
     DELTA_LIVE_WEBSOCKET_URL: str = "wss://socket.delta.exchange"
     
     # Dynamic properties for current environment
