@@ -69,7 +69,7 @@ class User(Base):
     profile = relationship("UserProfile", back_populates="user", uselist=False)
     settings = relationship("UserSettings", back_populates="user", uselist=False)
     portfolios = relationship("Portfolio", back_populates="user")
-    risk_profile = relationship("RiskProfile", back_populates="user", uselist=False)
+    risk_profile = relationship("RiskProfile", foreign_keys="RiskProfile.user_id", back_populates="user", uselist=False)
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, active={self.is_active})>"
