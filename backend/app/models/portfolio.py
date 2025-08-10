@@ -175,7 +175,7 @@ class Transaction(Base):
     
     # Relationships
     portfolio = relationship("Portfolio", back_populates="transactions")
-    position = relationship("Position", back_populates="transactions")
+    position = relationship("PortfolioPosition", back_populates="transactions")
 
     def __repr__(self):
         return f"<Transaction(id={self.id}, type={self.transaction_type.value}, symbol={self.symbol}, amount={self.total_amount})>"
