@@ -8,8 +8,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Column, Integer, String, DateTime, Numeric, Boolean, Text, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, Integer, String, DateTime, Numeric, Boolean, Text, Index, JSON
+from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 from app.database import Base
@@ -25,7 +25,7 @@ class MarketData(Base):
     exchange = Column(String(50), nullable=False, index=True)
     timestamp = Column(DateTime, nullable=False, index=True)
     data_type = Column(String(50), nullable=False)  # price, volume, orderbook, etc.
-    data = Column(JSONB, nullable=False)
+    data = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (
@@ -124,8 +124,8 @@ class OrderBook(Base):
     spread_percentage = Column(Numeric(10, 4), nullable=False)
     
     # Depth data (top 10 levels)
-    bids = Column(JSONB)  # [{"price": 50000, "size": 1.5}, ...]
-    asks = Column(JSONB)  # [{"price": 50100, "size": 2.0}, ...]
+    bids = Column(JSON)  # [{"price": 50000, "size": 1.5}, ...]
+    asks = Column(JSON)  # [{"price": 50100, "size": 2.0}, ...]
     
     # Liquidity metrics
     bid_liquidity_10 = Column(Numeric(20, 8))  # Total bid liquidity in top 10 levels

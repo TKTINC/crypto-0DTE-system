@@ -175,9 +175,9 @@ class Settings(BaseSettings):
         if not v:
             raise ValueError("DATABASE_URL cannot be empty")
         
-        # Ensure PostgreSQL URL format
-        if not v.startswith(("postgresql://", "postgresql+asyncpg://")):
-            raise ValueError("DATABASE_URL must be a PostgreSQL URL")
+        # Allow both PostgreSQL and SQLite URLs
+        if not v.startswith(("postgresql://", "postgresql+asyncpg://", "sqlite://", "sqlite+aiosqlite://")):
+            raise ValueError("DATABASE_URL must be a PostgreSQL or SQLite URL")
         
         return v
     

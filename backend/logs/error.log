@@ -633,3 +633,318 @@ client_session: <aiohttp.client.ClientSession object at 0x7f78070f0dd0>
 2025-08-10 08:56:28,718 [ERROR] asyncio [base_events.py:1757]: Unclosed connector
 connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f78070cbaf0>, 453382.453233153)])']
 connector: <aiohttp.connector.TCPConnector object at 0x7f780709b4d0>
+2025-08-10 11:09:57,897 [ERROR] uvicorn.error [on.py:121]: Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/crypto-0DTE-system/backend/app/main.py", line 70, in lifespan
+    async with engine.begin() as conn:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/ext/asyncio/engine.py", line 1066, in begin
+    async with conn:
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/ext/asyncio/engine.py", line 274, in start
+    await greenlet_spawn(self.sync_engine.connect)
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 3271, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 3295, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/impl.py", line 175, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/create.py", line 646, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/default.py", line 626, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connect_utils.py", line 1075, in _connect
+    raise last_error or exceptions.TargetServerAttributeNotMatched(
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connect_utils.py", line 886, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connect_utils.py", line 931, in __connect_addr
+    tr, pr = await connector
+             ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/asyncpg/connect_utils.py", line 802, in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 2043, in create_connection
+  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
+ConnectionRefusedError: [Errno 111] Connection refused
+
+2025-08-10 11:09:57,897 [ERROR] uvicorn.error [on.py:59]: Application startup failed. Exiting.
+2025-08-10 11:11:55,316 [ERROR] uvicorn.error [on.py:121]: Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 134, in _compiler_dispatch
+    meth = getter(visitor)
+           ^^^^^^^^^^^^^^^
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 6769, in visit_create_table
+    processed = self.process(
+                ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 6800, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 136, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x7f1fa013ead0> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "/usr/lib/python3.11/contextlib.py", line 204, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/ext/asyncio/engine.py", line 1068, in begin
+    yield conn
+  File "/home/ubuntu/crypto-0DTE-system/backend/app/main.py", line 71, in lifespan
+    await conn.run_sync(Base.metadata.create_all)
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/ext/asyncio/engine.py", line 887, in run_sync
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 2453, in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 661, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/ddl.py", line 984, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 661, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/ddl.py", line 1022, in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 1413, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/engine/base.py", line 1521, in _execute_ddl
+    compiled = ddl.compile(
+               ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/elements.py", line 311, in compile
+    return self._compiler(dialect, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/sqlalchemy/sql/compiler.py", line 6779, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'market_data', column 'data'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x7f1fa013ead0> can't render element of type JSONB
+
+2025-08-10 11:11:55,316 [ERROR] uvicorn.error [on.py:59]: Application startup failed. Exiting.
+2025-08-10 11:13:03,906 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:05,830 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:08,533 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:13,987 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:13,987 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:13,988 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:13,988 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:14,062 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:14,718 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:16,555 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:19,299 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:25,030 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:25,031 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:25,031 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:25,031 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:25,035 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:25,035 [ERROR] app.services.trade_execution_engine [trade_execution_engine.py:923]: Error loading existing orders: 'AsyncSession' object has no attribute 'query'
+2025-08-10 11:13:25,709 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:27,415 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:30,466 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:35,651 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:35,651 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:35,652 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:35,652 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:35,654 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:35,655 [ERROR] app.services.trade_execution_engine [trade_execution_engine.py:923]: Error loading existing orders: 'AsyncSession' object has no attribute 'query'
+2025-08-10 11:13:36,113 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:37,926 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:40,324 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:46,009 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:46,010 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:46,010 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:46,010 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:46,013 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:13:46,013 [ERROR] app.services.autonomous_trading_orchestrator [autonomous_trading_orchestrator.py:483]: Error loading existing positions: 'async_generator' object is not an iterator
+2025-08-10 11:13:46,630 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:48,469 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:13:51,546 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
