@@ -4,7 +4,7 @@
  * Centralized API client with error handling, retries, and request/response interceptors.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 class APIError extends Error {
   constructor(message, status, data) {
