@@ -47,6 +47,7 @@ class AutonomousTradingOrchestrator:
         self.settings = Settings()
         self.is_running = False
         self.is_trading_enabled = True
+        self.background_tasks = []  # Track background tasks for proper cleanup
         
         # Determine paper trading mode
         self.paper_trading = paper_trading if paper_trading is not None else True  # Default to paper trading for safety
@@ -99,8 +100,8 @@ class AutonomousTradingOrchestrator:
         # Initialize services
         await self._initialize_services()
         
-        # Start background tasks
-        tasks = [
+        # Start background tasks (non-blocking)
+        self.background_tasks = [
             asyncio.create_task(self._market_monitoring_loop()),
             asyncio.create_task(self._signal_generation_loop()),
             asyncio.create_task(self._position_management_loop()),
@@ -108,19 +109,29 @@ class AutonomousTradingOrchestrator:
             asyncio.create_task(self._system_health_loop())
         ]
         
-        logger.info("✅ All autonomous trading loops started")
+        logger.info("✅ All autonomous trading loops started in background")
         
-        # Wait for all tasks
-        try:
-            await asyncio.gather(*tasks)
-        except Exception as e:
-            logger.error(f"Error in orchestrator tasks: {e}")
-            await self.stop()
+        # Return immediately - don't wait for tasks to complete
+        # Tasks will run in background while FastAPI server starts
     
     async def stop(self):
         """Stop the autonomous trading orchestrator"""
         self.is_running = False
         logger.info("🛑 Stopping Autonomous Trading Orchestrator")
+        
+        # Cancel all background tasks
+        for task in self.background_tasks:
+            if not task.done():
+                task.cancel()
+        
+        # Wait for tasks to be cancelled
+        if self.background_tasks:
+            try:
+                await asyncio.gather(*self.background_tasks, return_exceptions=True)
+            except Exception as e:
+                logger.error(f"Error cancelling background tasks: {e}")
+        
+        self.background_tasks.clear()
         
         # Close all positions if configured to do so
         if self.settings.CLOSE_POSITIONS_ON_SHUTDOWN:
@@ -134,26 +145,51 @@ class AutonomousTradingOrchestrator:
     async def _initialize_services(self):
         """Initialize all required services"""
         try:
-            # Initialize Delta Exchange connection
-            await self.delta_connector.initialize()
+            # Initialize Delta Exchange connection (non-blocking for API failures)
+            try:
+                await self.delta_connector.initialize()
+                logger.info("✅ Delta Exchange connector initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ Delta Exchange connector initialization failed: {e}")
+                logger.info("Continuing with limited functionality...")
             
-            # Initialize trade executor
-            await self.trade_executor.initialize()
+            # Initialize trade executor (non-blocking for API failures)
+            try:
+                await self.trade_executor.initialize()
+                logger.info("✅ Trade Execution Engine initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ Trade Execution Engine initialization failed: {e}")
+                logger.info("Continuing with limited functionality...")
             
-            # Initialize position manager
-            await self.position_manager.initialize()
+            # Initialize position manager (non-blocking for API failures)
+            try:
+                await self.position_manager.initialize()
+                logger.info("✅ Position Manager initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ Position Manager initialization failed: {e}")
+                logger.info("Continuing with limited functionality...")
             
-            # Initialize risk manager
-            await self.risk_manager.initialize()
+            # Initialize risk manager (non-blocking for API failures)
+            try:
+                await self.risk_manager.initialize()
+                logger.info("✅ Risk Manager initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ Risk Manager initialization failed: {e}")
+                logger.info("Continuing with limited functionality...")
             
-            # Load existing positions
-            await self._load_existing_positions()
+            # Load existing positions (non-blocking for API failures)
+            try:
+                await self._load_existing_positions()
+                logger.info("✅ Existing positions loaded")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to load existing positions: {e}")
+                logger.info("Starting with empty position state...")
             
-            logger.info("✅ All services initialized successfully")
+            logger.info("✅ Service initialization completed (some services may have limited functionality)")
             
         except Exception as e:
-            logger.error(f"Failed to initialize services: {e}")
-            raise
+            logger.error(f"Critical error during service initialization: {e}")
+            # Don't raise - allow startup to continue with limited functionality
     
     async def _cleanup_services(self):
         """Cleanup all services"""

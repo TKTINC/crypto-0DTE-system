@@ -78,33 +78,51 @@ async def lifespan(app: FastAPI):
         paper_trading = settings.PAPER_TRADING
         logger.info(f"Trading mode: {'PAPER TRADING' if paper_trading else 'LIVE TRADING'}")
         
-        # Initialize Risk Manager
-        risk_manager = RiskManager(paper_trading=paper_trading)
-        await risk_manager.initialize()
-        logger.info("✅ Risk Manager initialized")
+        # Initialize Risk Manager (non-blocking for API failures)
+        try:
+            risk_manager = RiskManager(paper_trading=paper_trading)
+            await risk_manager.initialize()
+            logger.info("✅ Risk Manager initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ Risk Manager initialization failed: {e}")
+            risk_manager = None
         
-        # Initialize Position Manager
-        position_manager = PositionManager(paper_trading=paper_trading)
-        await position_manager.initialize()
-        logger.info("✅ Position Manager initialized")
+        # Initialize Position Manager (non-blocking for API failures)
+        try:
+            position_manager = PositionManager(paper_trading=paper_trading)
+            await position_manager.initialize()
+            logger.info("✅ Position Manager initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ Position Manager initialization failed: {e}")
+            position_manager = None
         
-        # Initialize Trade Execution Engine
-        trade_execution_engine = TradeExecutionEngine(paper_trading=paper_trading)
-        await trade_execution_engine.initialize()
-        logger.info("✅ Trade Execution Engine initialized")
+        # Initialize Trade Execution Engine (non-blocking for API failures)
+        try:
+            trade_execution_engine = TradeExecutionEngine(paper_trading=paper_trading)
+            await trade_execution_engine.initialize()
+            logger.info("✅ Trade Execution Engine initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ Trade Execution Engine initialization failed: {e}")
+            trade_execution_engine = None
         
-        # Initialize Autonomous Trading Orchestrator
-        autonomous_orchestrator = AutonomousTradingOrchestrator(paper_trading=paper_trading)
-        await autonomous_orchestrator.initialize()
-        logger.info("✅ Autonomous Trading Orchestrator initialized")
+        # Initialize Autonomous Trading Orchestrator (non-blocking for API failures)
+        try:
+            autonomous_orchestrator = AutonomousTradingOrchestrator(paper_trading=paper_trading)
+            await autonomous_orchestrator.initialize()
+            logger.info("✅ Autonomous Trading Orchestrator initialized")
+            
+            # Start autonomous trading (non-blocking)
+            await autonomous_orchestrator.start()
+            logger.info("🚀 Autonomous Trading System ACTIVE")
+        except Exception as e:
+            logger.warning(f"⚠️ Autonomous Trading Orchestrator initialization failed: {e}")
+            autonomous_orchestrator = None
         
-        # Start autonomous trading
-        await autonomous_orchestrator.start()
-        logger.info("🚀 Autonomous Trading System ACTIVE")
+        logger.info("✅ Autonomous Trading System startup completed (some services may have limited functionality)")
         
     except Exception as e:
-        logger.error(f"❌ Failed to initialize Autonomous Trading System: {e}")
-        # Continue without autonomous trading
+        logger.error(f"❌ Critical error during Autonomous Trading System initialization: {e}")
+        # Continue without autonomous trading - FastAPI server will still start
     
     logger.info("Crypto-0DTE-System started successfully")
     
