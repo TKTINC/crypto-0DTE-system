@@ -9,7 +9,7 @@ from app.database import Base
 # Import all models to ensure they are registered with SQLAlchemy
 from .market_data import MarketData, CryptoPrice, OrderBook
 from .signal import Signal, SignalExecution, SignalPerformance, SignalType, SignalStatus, RiskLevel
-from .portfolio import Portfolio, Position, Transaction
+from .portfolio import Portfolio, PortfolioPosition, Transaction
 from .user import User, UserProfile, UserSettings
 from .compliance import TaxRecord, TDSRecord, ComplianceLog
 from .risk_profile import RiskProfile, RiskMetrics
@@ -48,7 +48,7 @@ __all__ = [
     "SignalStatus", 
     "RiskLevel",
     "Portfolio",
-    "Position",
+    "PortfolioPosition",
     "Transaction",
     "User",
     "UserProfile",

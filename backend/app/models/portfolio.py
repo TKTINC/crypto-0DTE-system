@@ -72,16 +72,16 @@ class Portfolio(Base):
     
     # Relationships
     user = relationship("User", back_populates="portfolios")
-    positions = relationship("Position", back_populates="portfolio")
+    positions = relationship("PortfolioPosition", back_populates="portfolio")
     transactions = relationship("Transaction", back_populates="portfolio")
 
     def __repr__(self):
         return f"<Portfolio(id={self.id}, name={self.name}, value={self.total_value}, pnl={self.total_pnl_percentage}%)>"
 
 
-class Position(Base):
+class PortfolioPosition(Base):
     """
-    Position model for tracking individual cryptocurrency positions.
+    Portfolio position model for tracking individual cryptocurrency positions.
     """
     __tablename__ = "positions"
 

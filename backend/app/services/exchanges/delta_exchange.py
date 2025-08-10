@@ -896,6 +896,7 @@ class DeltaExchangeConnector:
                 "symbol": symbol,
                 "price": 50000.0 if "BTC" in symbol else 3000.0,
                 "volume": 1000000.0,
+                "volume_24h": 1000000.0,  # Added missing field
                 "change_24h": 2.5,
                 "high_24h": 51000.0 if "BTC" in symbol else 3100.0,
                 "low_24h": 49000.0 if "BTC" in symbol else 2900.0,
