@@ -157,6 +157,58 @@ init_deployment() {
 }
 
 # ============================================================================
+# PRE-DEPLOYMENT CLEANUP
+# ============================================================================
+
+pre_deployment_cleanup() {
+    step "Performing pre-deployment cleanup..."
+    
+    info "Stopping any existing crypto trading processes..."
+    
+    # Kill all Python backend processes
+    pkill -9 -f "Python.*app\.main" 2>/dev/null || true
+    pkill -9 -f "python.*app\.main" 2>/dev/null || true
+    pkill -9 -f "uvicorn" 2>/dev/null || true
+    
+    # Kill all crypto database connections
+    pkill -9 -f "postgres.*crypto" 2>/dev/null || true
+    
+    # Kill processes using our ports
+    lsof -ti:8000 2>/dev/null | xargs kill -9 2>/dev/null || true
+    lsof -ti:3000 2>/dev/null | xargs kill -9 2>/dev/null || true
+    
+    # Wait for processes to die
+    sleep 3
+    
+    # Verify cleanup
+    local remaining_python=$(ps aux | grep -E "Python.*app\.main|python.*app\.main" | grep -v grep | wc -l)
+    local remaining_postgres=$(ps aux | grep "postgres.*crypto" | grep -v grep | wc -l)
+    
+    if [[ $remaining_python -gt 0 ]]; then
+        warning "Found $remaining_python remaining Python processes - force killing..."
+        ps aux | grep -E "Python.*app\.main|python.*app\.main" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null || true
+    fi
+    
+    if [[ $remaining_postgres -gt 0 ]]; then
+        warning "Found $remaining_postgres remaining PostgreSQL connections - force killing..."
+        ps aux | grep "postgres.*crypto" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null || true
+    fi
+    
+    # Final verification
+    sleep 2
+    local final_check=$(ps aux | grep -E "Python.*app\.main|python.*app\.main|postgres.*crypto" | grep -v grep | wc -l)
+    
+    if [[ $final_check -eq 0 ]]; then
+        success "All existing processes cleaned up successfully"
+    else
+        warning "Some processes may still be running - continuing with deployment"
+        ps aux | grep -E "Python.*app\.main|python.*app\.main|postgres.*crypto" | grep -v grep || true
+    fi
+    
+    save_state "CLEANUP_COMPLETE"
+}
+
+# ============================================================================
 # DEPENDENCY VALIDATION
 # ============================================================================
 
@@ -653,6 +705,7 @@ main() {
     init_deployment
     
     # Execute deployment steps in order
+    pre_deployment_cleanup
     validate_system_requirements
     setup_database_services
     setup_python_environment
