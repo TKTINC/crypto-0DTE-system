@@ -23,6 +23,8 @@ from app.config import Settings
 from app.models.trade import Trade, TradeStatus, TradeType
 from app.models.order import Order, OrderStatus, OrderType
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -792,30 +794,29 @@ class TradeExecutionEngine:
     async def _get_trade_record(self, trade_id: str) -> Optional[Trade]:
         """Get trade record from database"""
         try:
-            db = next(get_db())
-            trade = db.query(Trade).filter(Trade.id == trade_id).first()
-            return trade
+            async for db in get_db():
+                result = await db.execute(select(Trade).filter(Trade.id == trade_id))
+                trade = result.scalar_one_or_none()
+                return trade
         except Exception as e:
             logger.error(f"Error getting trade record: {e}")
             return None
-        finally:
-            db.close()
     
     async def _update_trade_status(self, trade_id: str, status: TradeStatus):
         """Update trade status in database"""
         try:
-            db = next(get_db())
-            trade = db.query(Trade).filter(Trade.id == trade_id).first()
-            if trade:
-                trade.status = status
-                trade.updated_at = datetime.utcnow()
-                db.commit()
-                logger.info(f"Updated trade {trade_id} status to {status.value}")
+            async for db in get_db():
+                result = await db.execute(select(Trade).filter(Trade.id == trade_id))
+                trade = result.scalar_one_or_none()
+                if trade:
+                    trade.status = status
+                    trade.updated_at = datetime.utcnow()
+                    await db.commit()
+                    logger.info(f"Updated trade {trade_id} status to {status.value}")
         except Exception as e:
             logger.error(f"Error updating trade status: {e}")
-            db.rollback()
-        finally:
-            db.close()
+            async for db in get_db():
+                await db.rollback()
     
     async def _update_trade_closure(
         self,
@@ -826,22 +827,22 @@ class TradeExecutionEngine:
     ):
         """Update trade with closure information"""
         try:
-            db = next(get_db())
-            trade = db.query(Trade).filter(Trade.id == trade_id).first()
-            if trade:
-                trade.exit_price = Decimal(str(exit_price))
-                trade.realized_pnl = Decimal(str(realized_pnl))
-                trade.exit_reason = exit_type
-                trade.status = TradeStatus.CLOSED
-                trade.closed_at = datetime.utcnow()
-                trade.updated_at = datetime.utcnow()
-                db.commit()
-                logger.info(f"Updated trade {trade_id} closure")
+            async for db in get_db():
+                result = await db.execute(select(Trade).filter(Trade.id == trade_id))
+                trade = result.scalar_one_or_none()
+                if trade:
+                    trade.exit_price = Decimal(str(exit_price))
+                    trade.realized_pnl = Decimal(str(realized_pnl))
+                    trade.exit_reason = exit_type
+                    trade.status = TradeStatus.CLOSED
+                    trade.closed_at = datetime.utcnow()
+                    trade.updated_at = datetime.utcnow()
+                    await db.commit()
+                    logger.info(f"Updated trade {trade_id} closure")
         except Exception as e:
             logger.error(f"Error updating trade closure: {e}")
-            db.rollback()
-        finally:
-            db.close()
+            async for db in get_db():
+                await db.rollback()
     
     async def _calculate_realized_pnl(self, trade: Trade, exit_price: float) -> float:
         """Calculate realized PnL for a trade"""
@@ -900,9 +901,12 @@ class TradeExecutionEngine:
         """Load existing orders from database"""
         try:
             async for db in get_db():
-                active_orders = db.query(Order).filter(
-                    Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
-                ).all()
+                result = await db.execute(
+                    select(Order).filter(
+                        Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
+                    )
+                )
+                active_orders = result.scalars().all()
                 
                 for order in active_orders:
                     self.active_orders[order.id] = {
@@ -936,19 +940,21 @@ class TradeExecutionEngine:
     
     async def _get_related_orders(self, trade_id: str) -> List[Dict[str, Any]]:
         """Get all orders related to a trade"""
-        db = None
         try:
-            db = next(get_db())
-            orders = db.query(Order).filter(
-                Order.trade_id == trade_id,
-                Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
-            ).all()
-            
-            return [
-                {
-                    "order_id": order.id,
-                    "order_type": order.order_type.value,
-                    "symbol": order.symbol,
+            async for db in get_db():
+                result = await db.execute(
+                    select(Order).filter(
+                        Order.trade_id == trade_id,
+                        Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
+                    )
+                )
+                orders = result.scalars().all()
+                
+                return [
+                    {
+                        "order_id": order.id,
+                        "order_type": order.order_type.value,
+                        "symbol": order.symbol,
                     "side": order.side,
                     "size": float(order.size),
                     "price": float(order.price) if order.price else None
@@ -959,85 +965,74 @@ class TradeExecutionEngine:
         except Exception as e:
             logger.error(f"Error getting related orders: {e}")
             return []
-        finally:
-            if db:
-                db.close()
     
     async def _cancel_stop_loss_order(self, trade_id: str):
         """Cancel stop loss order for a trade"""
-        db = None
         try:
-            db = next(get_db())
-            stop_order = db.query(Order).filter(
-                Order.trade_id == trade_id,
-                Order.order_type == OrderType.STOP_LOSS,
-                Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
-            ).first()
-            
-            if stop_order:
-                await self.delta_connector.cancel_order(stop_order.id)
-                logger.info(f"Cancelled stop loss order for trade {trade_id}")
+            async for db in get_db():
+                result = await db.execute(
+                    select(Order).filter(
+                        Order.trade_id == trade_id,
+                        Order.order_type == OrderType.STOP_LOSS,
+                        Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
+                    )
+                )
+                stop_order = result.scalar_one_or_none()
                 
+                if stop_order:
+                    await self.delta_connector.cancel_order(stop_order.id)
+                    logger.info(f"Cancelled stop loss order for trade {trade_id}")
+                    
         except Exception as e:
             logger.error(f"Error cancelling stop loss order: {e}")
-        finally:
-            if db:
-                db.close()
     
     async def _cancel_take_profit_order(self, trade_id: str):
         """Cancel take profit order for a trade"""
-        db = None
         try:
-            db = next(get_db())
-            tp_order = db.query(Order).filter(
-                Order.trade_id == trade_id,
-                Order.order_type == OrderType.TAKE_PROFIT,
-                Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
-            ).first()
-            
-            if tp_order:
-                await self.delta_connector.cancel_order(tp_order.id)
-                logger.info(f"Cancelled take profit order for trade {trade_id}")
+            async for db in get_db():
+                result = await db.execute(
+                    select(Order).filter(
+                        Order.trade_id == trade_id,
+                        Order.order_type == OrderType.TAKE_PROFIT,
+                        Order.status.in_([OrderStatus.PENDING, OrderStatus.PARTIALLY_FILLED])
+                    )
+                )
+                tp_order = result.scalar_one_or_none()
                 
+                if tp_order:
+                    await self.delta_connector.cancel_order(tp_order.id)
+                    logger.info(f"Cancelled take profit order for trade {trade_id}")
+                    
         except Exception as e:
             logger.error(f"Error cancelling take profit order: {e}")
-        finally:
-            if db:
-                db.close()
     
     async def _update_trade_stop_loss(self, trade_id: str, new_stop_loss: float):
         """Update stop loss in trade record"""
-        db = None
         try:
-            db = next(get_db())
-            trade = db.query(Trade).filter(Trade.id == trade_id).first()
-            if trade:
-                trade.stop_loss = Decimal(str(new_stop_loss))
-                trade.updated_at = datetime.utcnow()
-                db.commit()
+            async for db in get_db():
+                result = await db.execute(select(Trade).filter(Trade.id == trade_id))
+                trade = result.scalar_one_or_none()
+                if trade:
+                    trade.stop_loss = Decimal(str(new_stop_loss))
+                    trade.updated_at = datetime.utcnow()
+                    await db.commit()
         except Exception as e:
             logger.error(f"Error updating trade stop loss: {e}")
-            if db:
-                db.rollback()
-        finally:
-            if db:
-                db.close()
+            async for db in get_db():
+                await db.rollback()
     
     async def _update_trade_size(self, trade_id: str, new_size: float):
         """Update trade size in record"""
-        db = None
         try:
-            db = next(get_db())
-            trade = db.query(Trade).filter(Trade.id == trade_id).first()
-            if trade:
-                trade.size = Decimal(str(new_size))
-                trade.updated_at = datetime.utcnow()
-                db.commit()
+            async for db in get_db():
+                result = await db.execute(select(Trade).filter(Trade.id == trade_id))
+                trade = result.scalar_one_or_none()
+                if trade:
+                    trade.size = Decimal(str(new_size))
+                    trade.updated_at = datetime.utcnow()
+                    await db.commit()
         except Exception as e:
             logger.error(f"Error updating trade size: {e}")
-            if db:
-                db.rollback()
-        finally:
-            if db:
-                db.close()
+            async for db in get_db():
+                await db.rollback()
 

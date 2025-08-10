@@ -11493,3 +11493,484 @@ connector: <aiohttp.connector.TCPConnector object at 0x7f780709b4d0>
 2025-08-10 11:13:48,469 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 2/3 for _make_request after 2.46s: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
 2025-08-10 11:13:51,546 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
 2025-08-10 11:13:51,547 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 3/3 for _make_request after 4.93s: HTTP 401: {"error":{"code":"ip_not_whitelisted_for_api_key","context":{"client_ip":"3.239.230.49"}},"success":false}
+2025-08-10 11:53:46,356 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-10 11:53:46,367 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-10 11:53:46,409 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-10 11:53:46,409 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-10 11:53:46,427 [INFO] app.main [main.py:58]: Starting Crypto-0DTE-System...
+2025-08-10 11:53:46,428 [INFO] app.main [main.py:61]: 🔧 Generating environment configuration...
+2025-08-10 11:53:46,428 [INFO] app.utils.env_generator [env_generator.py:120]: .env.local file exists at: /home/ubuntu/crypto-0DTE-system/backend/app/.env.local
+2025-08-10 11:53:46,428 [INFO] app.utils.env_generator [env_generator.py:122]: Regenerating .env.local to ensure consistency with config.py...
+2025-08-10 11:53:46,428 [INFO] app.utils.env_generator [env_generator.py:31]: Generating .env.local file at: /home/ubuntu/crypto-0DTE-system/backend/app/.env.local
+2025-08-10 11:53:46,428 [INFO] app.utils.env_generator [env_generator.py:91]: ✅ .env.local file generated successfully
+2025-08-10 11:53:46,428 [INFO] app.utils.env_generator [env_generator.py:92]:    Environment: TESTNET
+2025-08-10 11:53:46,429 [INFO] app.utils.env_generator [env_generator.py:93]:    Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:53:46,429 [INFO] app.utils.env_generator [env_generator.py:94]:    API Key: qWsp9KOn...
+2025-08-10 11:53:46,429 [INFO] app.main [main.py:65]: ✅ Environment configuration ready
+2025-08-10 11:53:46,429 [DEBUG] aiosqlite [core.py:104]: executing <function connect.<locals>.connector at 0x7f551550d620>
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:106]: operation <function connect.<locals>.connector at 0x7f551550d620> completed
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f551551c9a0>, 'regexp', 2, <function SQLiteDialect_pysqlite.on_connect.<locals>.regexp at 0x7f551681e480>, deterministic=True)
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f551551c9a0>, 'regexp', 2, <function SQLiteDialect_pysqlite.on_connect.<locals>.regexp at 0x7f551681e480>, deterministic=True) completed
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f551551c9a0>, 'floor', 1, <built-in function floor>, deterministic=True)
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f551551c9a0>, 'floor', 1, <built-in function floor>, deterministic=True) completed
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,430 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e6c0>, 'PRAGMA read_uncommitted', [])
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e6c0>, 'PRAGMA read_uncommitted', []) completed
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e6c0>)
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e6c0>) completed
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e6c0>)
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e6c0>) completed
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,431 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,432 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,432 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,432 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_data")', ())
+2025-08-10 11:53:46,433 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_data")', ()) completed
+2025-08-10 11:53:46,433 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,433 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,433 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,433 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("crypto_prices")', ())
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("crypto_prices")', ()) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("ohlcv_data")', ())
+2025-08-10 11:53:46,434 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("ohlcv_data")', ()) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("order_books")', ())
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("order_books")', ()) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,435 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_trades")', ())
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_trades")', ()) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("funding_rates")', ())
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("funding_rates")', ()) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,436 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("options_data")', ())
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("options_data")', ()) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_sentiment")', ())
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("market_sentiment")', ()) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,437 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("defi_metrics")', ())
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("defi_metrics")', ()) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signals")', ())
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signals")', ()) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,438 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_executions")', ())
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_executions")', ()) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_performance")', ())
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_performance")', ()) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,439 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("portfolios")', ())
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("portfolios")', ()) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("positions")', ())
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("positions")', ()) completed
+2025-08-10 11:53:46,440 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("transactions")', ())
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("transactions")', ()) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,441 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("users")', ())
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("users")', ()) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("user_profiles")', ())
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("user_profiles")', ()) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,442 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("user_settings")', ())
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("user_settings")', ()) completed
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,443 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("tax_records")', ())
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("tax_records")', ()) completed
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("tds_records")', ())
+2025-08-10 11:53:46,444 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("tds_records")', ()) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("compliance_logs")', ())
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("compliance_logs")', ()) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,445 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_profiles")', ())
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_profiles")', ()) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_metrics")', ())
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_metrics")', ()) completed
+2025-08-10 11:53:46,446 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_trades")', ())
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_trades")', ()) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,447 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_positions")', ())
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_positions")', ()) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_orders")', ())
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_orders")', ()) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,448 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_order_executions")', ())
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("autonomous_order_executions")', ()) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_events")', ())
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("risk_events")', ()) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_events")', ())
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551572e740>, 'PRAGMA main.table_info("signal_events")', ()) completed
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>)
+2025-08-10 11:53:46,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551572e740>) completed
+2025-08-10 11:53:46,451 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method commit of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,451 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method commit of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,451 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:46,451 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:46,451 [INFO] app.main [main.py:75]: 🤖 Initializing Autonomous Trading System...
+2025-08-10 11:53:46,451 [INFO] app.main [main.py:79]: Trading mode: PAPER TRADING
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:53:46,456 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:53:46,456 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:53:46,456 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:53:46,456 [INFO] app.services.risk_manager [risk_manager.py:1018]: Risk metrics loaded
+2025-08-10 11:53:47,062 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841226/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:47,062 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 1/3 for _make_request after 1.28s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841226/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:48,933 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841228/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:48,933 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 2/3 for _make_request after 2.55s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841228/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:52,088 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841231/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:52,088 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 3/3 for _make_request after 4.86s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841231/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:57,550 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841236/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:57,550 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841236/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:57,550 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841236/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:57,550 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:53:57,626 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:57,626 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:57,626 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551552cdc0>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED'))
+2025-08-10 11:53:57,626 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551552cdc0>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED')) completed
+2025-08-10 11:53:57,627 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551552cdc0>)
+2025-08-10 11:53:57,627 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551552cdc0>) completed
+2025-08-10 11:53:57,627 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551552cdc0>)
+2025-08-10 11:53:57,627 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551552cdc0>) completed
+2025-08-10 11:53:57,628 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:53:57,628 [INFO] app.services.risk_manager [risk_manager.py:1039]: Portfolio tracking initialized: $0
+2025-08-10 11:53:57,628 [INFO] app.services.risk_manager [risk_manager.py:108]: ✅ Risk Manager initialized successfully
+2025-08-10 11:53:57,628 [INFO] app.main [main.py:84]: ✅ Risk Manager initialized
+2025-08-10 11:53:57,632 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:53:57,632 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:53:57,633 [INFO] app.services.position_manager [position_manager.py:60]: Position Manager initialized
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:53:57,633 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:53:57,633 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:53:57,633 [INFO] app.services.position_manager [position_manager.py:498]: Position states loaded
+2025-08-10 11:53:57,633 [INFO] app.services.position_manager [position_manager.py:71]: ✅ Position Manager initialized successfully
+2025-08-10 11:53:57,633 [INFO] app.main [main.py:89]: ✅ Position Manager initialized
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:53:57,637 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:53:57,641 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:53:57,642 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 11:53:57,642 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:68]: Trade Execution Engine initialized
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:53:57,642 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:53:57,642 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:53:57,642 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:53:57,642 [INFO] app.services.risk_manager [risk_manager.py:1018]: Risk metrics loaded
+2025-08-10 11:53:57,643 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:57,643 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:57,643 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:53:57,644 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:53:57,845 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841237/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:57,845 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 1/3 for _make_request after 1.21s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841237/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:59,669 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841239/v2/wallet/balances"}},"success":false}
+2025-08-10 11:53:59,670 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 2/3 for _make_request after 2.40s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841239/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:02,234 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841242/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:02,234 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 3/3 for _make_request after 4.58s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841242/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:07,447 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841246/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:07,448 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841246/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:07,448 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841246/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:07,448 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:54:07,449 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:07,449 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551439f940>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED'))
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551439f940>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED')) completed
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551439f940>)
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551439f940>) completed
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551439f940>)
+2025-08-10 11:54:07,450 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551439f940>) completed
+2025-08-10 11:54:07,451 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:54:07,451 [INFO] app.services.risk_manager [risk_manager.py:1039]: Portfolio tracking initialized: $0
+2025-08-10 11:54:07,451 [INFO] app.services.risk_manager [risk_manager.py:108]: ✅ Risk Manager initialized successfully
+2025-08-10 11:54:07,452 [DEBUG] aiosqlite [core.py:104]: executing <function connect.<locals>.connector at 0x7f551438f420>
+2025-08-10 11:54:07,452 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:07,452 [DEBUG] aiosqlite [core.py:106]: operation <function connect.<locals>.connector at 0x7f551438f420> completed
+2025-08-10 11:54:07,452 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f55143573d0>, 'regexp', 2, <function SQLiteDialect_pysqlite.on_connect.<locals>.regexp at 0x7f551681e480>, deterministic=True)
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f55143573d0>, 'regexp', 2, <function SQLiteDialect_pysqlite.on_connect.<locals>.regexp at 0x7f551681e480>, deterministic=True) completed
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f55143573d0>, 'floor', 1, <built-in function floor>, deterministic=True)
+2025-08-10 11:54:07,453 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method create_function of sqlite3.Connection object at 0x7f55143573d0>, 'floor', 1, <built-in function floor>, deterministic=True) completed
+2025-08-10 11:54:07,456 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:07,456 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:07,456 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551439fdc0>, 'SELECT autonomous_orders.id, autonomous_orders.order_id, autonomous_orders.symbol, autonomous_orders.side, autonomous_orders.order_type, autonomous_orders.status, autonomous_orders.quantity, autonomous_orders.price, autonomous_orders.stop_price, autonomous_orders.trigger_price, autonomous_orders.filled_quantity, autonomous_orders.remaining_quantity, autonomous_orders.average_fill_price, autonomous_orders.total_fees, autonomous_orders.exchange_order_id, autonomous_orders.exchange_client_order_id, autonomous_orders.exchange_status, autonomous_orders.exchange_error_message, autonomous_orders.time_in_force, autonomous_orders.reduce_only, autonomous_orders.post_only, autonomous_orders.trade_id, autonomous_orders.parent_order_id, autonomous_orders.created_at, autonomous_orders.submitted_at, autonomous_orders.filled_at, autonomous_orders.cancelled_at, autonomous_orders.updated_at, autonomous_orders.expires_at, autonomous_orders.strategy_name, autonomous_orders.order_metadata, autonomous_orders.is_paper_trade, autonomous_orders.is_autonomous \nFROM autonomous_orders \nWHERE autonomous_orders.status IN (?, ?)', ('PENDING', 'PARTIALLY_FILLED'))
+2025-08-10 11:54:07,457 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f551439fdc0>, 'SELECT autonomous_orders.id, autonomous_orders.order_id, autonomous_orders.symbol, autonomous_orders.side, autonomous_orders.order_type, autonomous_orders.status, autonomous_orders.quantity, autonomous_orders.price, autonomous_orders.stop_price, autonomous_orders.trigger_price, autonomous_orders.filled_quantity, autonomous_orders.remaining_quantity, autonomous_orders.average_fill_price, autonomous_orders.total_fees, autonomous_orders.exchange_order_id, autonomous_orders.exchange_client_order_id, autonomous_orders.exchange_status, autonomous_orders.exchange_error_message, autonomous_orders.time_in_force, autonomous_orders.reduce_only, autonomous_orders.post_only, autonomous_orders.trade_id, autonomous_orders.parent_order_id, autonomous_orders.created_at, autonomous_orders.submitted_at, autonomous_orders.filled_at, autonomous_orders.cancelled_at, autonomous_orders.updated_at, autonomous_orders.expires_at, autonomous_orders.strategy_name, autonomous_orders.order_metadata, autonomous_orders.is_paper_trade, autonomous_orders.is_autonomous \nFROM autonomous_orders \nWHERE autonomous_orders.status IN (?, ?)', ('PENDING', 'PARTIALLY_FILLED')) completed
+2025-08-10 11:54:07,458 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551439fdc0>)
+2025-08-10 11:54:07,458 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f551439fdc0>) completed
+2025-08-10 11:54:07,458 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551439fdc0>)
+2025-08-10 11:54:07,458 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f551439fdc0>) completed
+2025-08-10 11:54:07,458 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:923]: Loaded 0 existing orders
+2025-08-10 11:54:07,458 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:82]: ✅ Trade Execution Engine initialized successfully
+2025-08-10 11:54:07,458 [INFO] app.main [main.py:94]: ✅ Trade Execution Engine initialized
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:54:07,463 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:54:07,467 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:54:07,471 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:54:07,472 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 11:54:07,472 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:68]: Trade Execution Engine initialized
+2025-08-10 11:54:07,475 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:54:07,476 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:54:07,476 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:54:07,476 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:54:07,476 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:54:07,476 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:54:07,476 [INFO] app.services.position_manager [position_manager.py:60]: Position Manager initialized
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 11:54:07,480 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 11:54:07,480 [INFO] app.services.autonomous_trading_orchestrator [autonomous_trading_orchestrator.py:78]: Autonomous Trading Orchestrator initialized
+2025-08-10 11:54:07,480 [INFO] app.services.autonomous_trading_orchestrator [autonomous_trading_orchestrator.py:83]: Initializing Autonomous Trading Orchestrator...
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:54:07,480 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:54:07,480 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:54:07,481 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:54:07,481 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:54:07,481 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:54:07,481 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:54:07,481 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:54:07,481 [INFO] app.services.risk_manager [risk_manager.py:1018]: Risk metrics loaded
+2025-08-10 11:54:07,481 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:07,482 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:07,482 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:07,482 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:08,131 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841247/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:08,131 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 1/3 for _make_request after 1.29s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841247/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:10,044 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841249/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:10,045 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 2/3 for _make_request after 2.49s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841249/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:13,004 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841252/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:13,005 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 3/3 for _make_request after 4.59s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841252/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:18,219 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841257/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:18,220 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:57]: Final retry attempt failed for _make_request: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841257/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:18,220 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:552]: Failed to get account balance: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841257/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:18,220 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:54:18,221 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f55143bbbc0>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED'))
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f55143bbbc0>, 'SELECT autonomous_trades.id, autonomous_trades.trade_id, autonomous_trades.symbol, autonomous_trades.trade_type, autonomous_trades.status, autonomous_trades.signal_id, autonomous_trades.signal_confidence, autonomous_trades.signal_reasoning, autonomous_trades.order_type, autonomous_trades.quantity, autonomous_trades.entry_price, autonomous_trades.target_price, autonomous_trades.stop_loss_price, autonomous_trades.exchange_order_id, autonomous_trades.filled_quantity, autonomous_trades.average_fill_price, autonomous_trades.total_fees, autonomous_trades.exit_price, autonomous_trades.exit_reason, autonomous_trades.exit_order_id, autonomous_trades.realized_pnl, autonomous_trades.unrealized_pnl, autonomous_trades.pnl_percentage, autonomous_trades.risk_amount, autonomous_trades.position_size_usd, autonomous_trades.leverage, autonomous_trades.created_at, autonomous_trades.submitted_at, autonomous_trades.filled_at, autonomous_trades.closed_at, autonomous_trades.updated_at, autonomous_trades.strategy_name, autonomous_trades.strategy_version, autonomous_trades.trade_metadata, autonomous_trades.is_paper_trade, autonomous_trades.is_autonomous \nFROM autonomous_trades \nWHERE autonomous_trades.created_at >= ? AND autonomous_trades.status = ?', ('2025-08-10', 'CLOSED')) completed
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f55143bbbc0>)
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f55143bbbc0>) completed
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f55143bbbc0>)
+2025-08-10 11:54:18,222 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f55143bbbc0>) completed
+2025-08-10 11:54:18,223 [ERROR] app.services.risk_manager [risk_manager.py:987]: Error getting open positions: OPEN
+2025-08-10 11:54:18,223 [INFO] app.services.risk_manager [risk_manager.py:1039]: Portfolio tracking initialized: $0
+2025-08-10 11:54:18,223 [INFO] app.services.risk_manager [risk_manager.py:108]: ✅ Risk Manager initialized successfully
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method cursor of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f55143bbbc0>, 'SELECT autonomous_orders.id, autonomous_orders.order_id, autonomous_orders.symbol, autonomous_orders.side, autonomous_orders.order_type, autonomous_orders.status, autonomous_orders.quantity, autonomous_orders.price, autonomous_orders.stop_price, autonomous_orders.trigger_price, autonomous_orders.filled_quantity, autonomous_orders.remaining_quantity, autonomous_orders.average_fill_price, autonomous_orders.total_fees, autonomous_orders.exchange_order_id, autonomous_orders.exchange_client_order_id, autonomous_orders.exchange_status, autonomous_orders.exchange_error_message, autonomous_orders.time_in_force, autonomous_orders.reduce_only, autonomous_orders.post_only, autonomous_orders.trade_id, autonomous_orders.parent_order_id, autonomous_orders.created_at, autonomous_orders.submitted_at, autonomous_orders.filled_at, autonomous_orders.cancelled_at, autonomous_orders.updated_at, autonomous_orders.expires_at, autonomous_orders.strategy_name, autonomous_orders.order_metadata, autonomous_orders.is_paper_trade, autonomous_orders.is_autonomous \nFROM autonomous_orders \nWHERE autonomous_orders.status IN (?, ?)', ('PENDING', 'PARTIALLY_FILLED'))
+2025-08-10 11:54:18,224 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>)
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method execute of sqlite3.Cursor object at 0x7f55143bbbc0>, 'SELECT autonomous_orders.id, autonomous_orders.order_id, autonomous_orders.symbol, autonomous_orders.side, autonomous_orders.order_type, autonomous_orders.status, autonomous_orders.quantity, autonomous_orders.price, autonomous_orders.stop_price, autonomous_orders.trigger_price, autonomous_orders.filled_quantity, autonomous_orders.remaining_quantity, autonomous_orders.average_fill_price, autonomous_orders.total_fees, autonomous_orders.exchange_order_id, autonomous_orders.exchange_client_order_id, autonomous_orders.exchange_status, autonomous_orders.exchange_error_message, autonomous_orders.time_in_force, autonomous_orders.reduce_only, autonomous_orders.post_only, autonomous_orders.trade_id, autonomous_orders.parent_order_id, autonomous_orders.created_at, autonomous_orders.submitted_at, autonomous_orders.filled_at, autonomous_orders.cancelled_at, autonomous_orders.updated_at, autonomous_orders.expires_at, autonomous_orders.strategy_name, autonomous_orders.order_metadata, autonomous_orders.is_paper_trade, autonomous_orders.is_autonomous \nFROM autonomous_orders \nWHERE autonomous_orders.status IN (?, ?)', ('PENDING', 'PARTIALLY_FILLED')) completed
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f551551c9a0>) completed
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f55143bbbc0>)
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method fetchall of sqlite3.Cursor object at 0x7f55143bbbc0>) completed
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f55143bbbc0>)
+2025-08-10 11:54:18,225 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7f55143bbbc0>) completed
+2025-08-10 11:54:18,225 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:923]: Loaded 0 existing orders
+2025-08-10 11:54:18,225 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:82]: ✅ Trade Execution Engine initialized successfully
+2025-08-10 11:54:18,226 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:54:18,226 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:54:18,226 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:54:18,226 [INFO] app.services.position_manager [position_manager.py:498]: Position states loaded
+2025-08-10 11:54:18,226 [INFO] app.services.position_manager [position_manager.py:71]: ✅ Position Manager initialized successfully
+2025-08-10 11:54:18,226 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 11:54:18,226 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:204]: Delta Exchange products cache loaded
+2025-08-10 11:54:18,226 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:191]: Delta Exchange connector initialized successfully
+2025-08-10 11:54:18,226 [INFO] app.services.risk_manager [risk_manager.py:1018]: Risk metrics loaded
+2025-08-10 11:54:18,226 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:18,226 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:18,227 [DEBUG] aiosqlite [core.py:104]: executing functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>)
+2025-08-10 11:54:18,227 [DEBUG] aiosqlite [core.py:106]: operation functools.partial(<built-in method rollback of sqlite3.Connection object at 0x7f55143573d0>) completed
+2025-08-10 11:54:18,704 [ERROR] app.services.exchanges.delta_exchange [delta_exchange.py:342]: Delta Exchange HTTP error: 401 - {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841258/v2/wallet/balances"}},"success":false}
+2025-08-10 11:54:18,704 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:65]: Retry 1/3 for _make_request after 1.25s: HTTP 401: {"error":{"code":"Signature Mismatch","context":{"signature_data":"GET1754841258/v2/wallet/balances"}},"success":false}
