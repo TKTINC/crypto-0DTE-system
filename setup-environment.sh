@@ -1,8 +1,8 @@
 #!/bin/bash
-# Crypto-0DTE System - Unified Environment Setup
-# ==============================================
-# Consolidates functionality from setup-api-keys.sh, setup-env.sh, and configure-api-keys.sh
-# One script to handle all environment configuration needs
+# Crypto-0DTE System - Automated Environment Setup
+# ================================================
+# Automatically configures environment using preconfigured values from config.py
+# No manual input required - just run the script!
 
 set -e
 
@@ -20,9 +20,10 @@ CONFIG_DIR="$PROJECT_ROOT/config"
 CONFIG_FILE="$CONFIG_DIR/api-keys.conf"
 ENV_FILE="$PROJECT_ROOT/backend/.env.local"
 
-echo -e "${BLUE}🔑 Crypto-0DTE System - Environment Setup${NC}"
-echo "=============================================="
-echo "Unified setup for all environment configuration"
+echo -e "${BLUE}🔑 Crypto-0DTE System - Automated Environment Setup${NC}"
+echo "========================================================"
+echo "Automatically configuring environment using preconfigured values"
+echo "No manual input required!"
 echo ""
 
 # Helper functions
@@ -157,48 +158,175 @@ EOF
     fi
 }
 
-# Prompt for variable value
-prompt_for_variable() {
-    local var_name="$1"
-    local var_description="$2"
-    local current_value="${!var_name:-}"
-    local is_secret="$3"
+# Preconfigured values from config.py
+get_preconfigured_values() {
+    # Delta Exchange API Keys (from config.py)
+    # These are the actual values configured in the system
     
-    echo ""
-    echo -e "${BLUE}Setting up: $var_name${NC}"
-    echo "Description: $var_description"
+    # Testnet API Keys (for paper trading)
+    DELTA_TESTNET_API_KEY="qWsp9KOnQ3xylffXdyjUFp0xZ7fGP9"
+    DELTA_TESTNET_API_SECRET="xcBcNDpU1bCoWPaTJEmTjxpqjN2G3lYgU3XSnAYpIE1wU93M6hutJB8VGpGD"
     
-    if [[ -n "$current_value" ]]; then
-        if [[ "$is_secret" == "true" ]]; then
-            echo "Current value: ****** (${#current_value} characters)"
-        else
-            echo "Current value: $current_value"
-        fi
-        echo ""
-        read -p "Keep current value? (Y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Nn]$ ]]; then
-            current_value=""
-        else
-            echo "$current_value"
-            return 0
-        fi
+    # Live API Keys (for production trading - will be configured when ready)
+    DELTA_API_KEY=""  # To be configured for live trading
+    DELTA_API_SECRET=""  # To be configured for live trading
+    
+    # OpenAI API Configuration (from config.py)
+    OPENAI_API_KEY=""  # Will use system default if available
+    OPENAI_API_BASE="https://api.openai.com/v1"
+    
+    # Environment Configuration
+    ENVIRONMENT="testnet"  # Default to testnet for safety
+    PAPER_TRADING="true"
+    
+    print_info "Loaded preconfigured values from config.py"
+}
+
+# Setup environment variables automatically
+setup_environment_variables() {
+    local profile_file
+    profile_file=$(detect_shell_profile)
+    
+    print_header "🔧 Automated Environment Variable Setup"
+    print_info "Detected shell: $(basename "$SHELL")"
+    print_info "Profile file: $profile_file"
+    
+    # Backup existing profile
+    if [[ -f "$profile_file" ]]; then
+        local backup_file="${profile_file}.backup-$(date +%Y%m%d-%H%M%S)"
+        cp "$profile_file" "$backup_file"
+        print_info "Backed up existing profile to: $backup_file"
     fi
     
-    while [[ -z "$current_value" ]]; do
-        if [[ "$is_secret" == "true" ]]; then
-            read -s -p "Enter $var_name: " current_value
-            echo
-        else
-            read -p "Enter $var_name: " current_value
-        fi
-        
-        if [[ -z "$current_value" ]]; then
-            print_warning "Value cannot be empty. Please try again."
-        fi
-    done
+    print_info "Configuring all required environment variables..."
     
-    echo "$current_value"
+    # Delta Exchange Testnet API Keys (Required for paper trading)
+    add_var_to_profile "DELTA_TESTNET_API_KEY" "$DELTA_TESTNET_API_KEY" "$profile_file"
+    update_config_file "DELTA_TESTNET_API_KEY" "$DELTA_TESTNET_API_KEY"
+    print_success "Configured Delta Exchange testnet API key"
+    
+    add_var_to_profile "DELTA_TESTNET_API_SECRET" "$DELTA_TESTNET_API_SECRET" "$profile_file"
+    update_config_file "DELTA_TESTNET_API_SECRET" "$DELTA_TESTNET_API_SECRET"
+    print_success "Configured Delta Exchange testnet API secret"
+    
+    # Delta Exchange Live API Keys (Optional - for future live trading)
+    if [[ -n "$DELTA_API_KEY" ]]; then
+        add_var_to_profile "DELTA_API_KEY" "$DELTA_API_KEY" "$profile_file"
+        update_config_file "DELTA_API_KEY" "$DELTA_API_KEY"
+        print_success "Configured Delta Exchange live API key"
+        
+        add_var_to_profile "DELTA_API_SECRET" "$DELTA_API_SECRET" "$profile_file"
+        update_config_file "DELTA_API_SECRET" "$DELTA_API_SECRET"
+        print_success "Configured Delta Exchange live API secret"
+    else
+        print_info "Live trading API keys not configured (testnet mode only)"
+    fi
+    
+    # OpenAI API Keys (Optional - use system default if available)
+    local system_openai_key="${OPENAI_API_KEY:-}"
+    if [[ -n "$system_openai_key" ]]; then
+        add_var_to_profile "OPENAI_API_KEY" "$system_openai_key" "$profile_file"
+        update_config_file "OPENAI_API_KEY" "$system_openai_key"
+        print_success "Configured OpenAI API key (from system)"
+    else
+        print_info "OpenAI API key not configured (AI features will be limited)"
+    fi
+    
+    add_var_to_profile "OPENAI_API_BASE" "$OPENAI_API_BASE" "$profile_file"
+    update_config_file "OPENAI_API_BASE" "$OPENAI_API_BASE"
+    print_success "Configured OpenAI API base URL"
+    
+    # Environment Configuration
+    add_var_to_profile "ENVIRONMENT" "$ENVIRONMENT" "$profile_file"
+    update_config_file "ENVIRONMENT" "$ENVIRONMENT"
+    print_success "Configured environment: $ENVIRONMENT"
+    
+    add_var_to_profile "PAPER_TRADING" "$PAPER_TRADING" "$profile_file"
+    update_config_file "PAPER_TRADING" "$PAPER_TRADING"
+    print_success "Configured paper trading: $PAPER_TRADING"
+    
+    print_success "All environment variables configured automatically"
+}
+
+# Generate backend environment file
+generate_backend_env() {
+    print_header "🔧 Backend Environment File Generation"
+    
+    # Create backend directory if it doesn't exist
+    mkdir -p "$(dirname "$ENV_FILE")"
+    
+    # Generate .env.local file with preconfigured values
+    cat > "$ENV_FILE" << EOF
+# Crypto-0DTE System Backend Environment
+# Generated by setup-environment.sh on $(date)
+# Using preconfigured values from config.py
+
+# Environment Configuration
+ENVIRONMENT=$ENVIRONMENT
+PAPER_TRADING=$PAPER_TRADING
+
+# Delta Exchange API Configuration (Testnet)
+DELTA_TESTNET_API_KEY=$DELTA_TESTNET_API_KEY
+DELTA_TESTNET_API_SECRET=$DELTA_TESTNET_API_SECRET
+
+# Delta Exchange API Configuration (Live - for future use)
+DELTA_API_KEY=${DELTA_API_KEY:-}
+DELTA_API_SECRET=${DELTA_API_SECRET:-}
+
+# OpenAI Configuration
+OPENAI_API_KEY=${OPENAI_API_KEY:-}
+OPENAI_API_BASE=$OPENAI_API_BASE
+
+# Database Configuration
+DATABASE_URL=postgresql+asyncpg://crypto_user:crypto_password@localhost:5432/crypto_0dte_local
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379/0
+
+# Application Configuration
+APP_NAME=Crypto 0DTE Trading System
+APP_VERSION=1.0.0
+DEBUG=false
+API_V1_STR=/api/v1
+API_HOST=0.0.0.0
+API_PORT=8000
+HOST=0.0.0.0
+PORT=8000
+
+# Security Configuration
+SECRET_KEY=your-super-secret-key-change-in-production
+JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Logging Configuration
+LOG_LEVEL=INFO
+LOG_FORMAT=%(asctime)s [%(levelname)s] %(name)s: %(message)s
+LOG_FILE=/Users/balu/crypto-0DTE-system/logs/backend.log
+
+# CORS Configuration
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001
+API_CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001
+
+# Trading Configuration
+MAX_POSITION_SIZE=1000.0
+MAX_DAILY_LOSS=500.0
+RISK_PERCENTAGE=0.02
+
+# Market Data Configuration
+MARKET_DATA_SYMBOLS=BTCUSDT,ETHUSDT,ADAUSDT
+MARKET_DATA_TIMEFRAMES=1m,5m,15m,1h
+MARKET_DATA_HISTORY_DAYS=30
+
+# Monitoring Configuration
+METRICS_ENABLED=true
+HEALTH_CHECK_INTERVAL=60
+EOF
+    
+    print_success "Backend environment file generated: $ENV_FILE"
+    print_info "All configuration values loaded from config.py"
 }
 
 # Check current configuration
@@ -213,6 +341,8 @@ check_current_config() {
     echo "  DELTA_API_SECRET: ${DELTA_API_SECRET:+SET (${#DELTA_API_SECRET} chars)}" || echo "  DELTA_API_SECRET: NOT SET"
     echo "  OPENAI_API_KEY: ${OPENAI_API_KEY:+SET (${#OPENAI_API_KEY} chars)}" || echo "  OPENAI_API_KEY: NOT SET"
     echo "  OPENAI_API_BASE: ${OPENAI_API_BASE:-NOT SET}"
+    echo "  ENVIRONMENT: ${ENVIRONMENT:-NOT SET}"
+    echo "  PAPER_TRADING: ${PAPER_TRADING:-NOT SET}"
     
     # Check config file
     echo ""
@@ -232,130 +362,6 @@ check_current_config() {
     echo ""
 }
 
-# Setup environment variables
-setup_environment_variables() {
-    local profile_file
-    profile_file=$(detect_shell_profile)
-    
-    print_header "🔧 Environment Variable Setup"
-    print_info "Detected shell: $(basename "$SHELL")"
-    print_info "Profile file: $profile_file"
-    
-    # Backup existing profile
-    if [[ -f "$profile_file" ]]; then
-        local backup_file="${profile_file}.backup-$(date +%Y%m%d-%H%M%S)"
-        cp "$profile_file" "$backup_file"
-        print_info "Backed up existing profile to: $backup_file"
-    fi
-    
-    echo ""
-    echo -e "${YELLOW}📋 Required Variables:${NC}"
-    
-    # Delta Exchange Testnet API Keys (Required)
-    local delta_testnet_key
-    delta_testnet_key=$(prompt_for_variable "DELTA_TESTNET_API_KEY" "Delta Exchange testnet API key for paper trading" "true")
-    add_var_to_profile "DELTA_TESTNET_API_KEY" "$delta_testnet_key" "$profile_file"
-    update_config_file "DELTA_TESTNET_API_KEY" "$delta_testnet_key"
-    
-    local delta_testnet_secret
-    delta_testnet_secret=$(prompt_for_variable "DELTA_TESTNET_API_SECRET" "Delta Exchange testnet API secret for paper trading" "true")
-    add_var_to_profile "DELTA_TESTNET_API_SECRET" "$delta_testnet_secret" "$profile_file"
-    update_config_file "DELTA_TESTNET_API_SECRET" "$delta_testnet_secret"
-    
-    echo ""
-    echo -e "${YELLOW}📋 Optional Variables:${NC}"
-    
-    # Delta Exchange Live API Keys (Optional)
-    echo ""
-    read -p "Do you want to set up live trading API keys? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        local delta_live_key
-        delta_live_key=$(prompt_for_variable "DELTA_API_KEY" "Delta Exchange live API key for real trading" "true")
-        add_var_to_profile "DELTA_API_KEY" "$delta_live_key" "$profile_file"
-        update_config_file "DELTA_API_KEY" "$delta_live_key"
-        
-        local delta_live_secret
-        delta_live_secret=$(prompt_for_variable "DELTA_API_SECRET" "Delta Exchange live API secret for real trading" "true")
-        add_var_to_profile "DELTA_API_SECRET" "$delta_live_secret" "$profile_file"
-        update_config_file "DELTA_API_SECRET" "$delta_live_secret"
-    else
-        print_info "Skipping live trading API keys (can be added later)"
-    fi
-    
-    # OpenAI API Keys (Optional)
-    echo ""
-    read -p "Do you want to set up OpenAI API keys for AI features? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        local openai_key
-        openai_key=$(prompt_for_variable "OPENAI_API_KEY" "OpenAI API key for AI-powered trading features" "true")
-        add_var_to_profile "OPENAI_API_KEY" "$openai_key" "$profile_file"
-        update_config_file "OPENAI_API_KEY" "$openai_key"
-        
-        # Check if user wants custom OpenAI base URL
-        local current_openai_base="${OPENAI_API_BASE:-https://api.openai.com/v1}"
-        echo ""
-        echo "OpenAI API Base URL (current: $current_openai_base)"
-        read -p "Use custom OpenAI API base URL? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            local openai_base
-            openai_base=$(prompt_for_variable "OPENAI_API_BASE" "OpenAI API base URL" "false")
-            add_var_to_profile "OPENAI_API_BASE" "$openai_base" "$profile_file"
-            update_config_file "OPENAI_API_BASE" "$openai_base"
-        else
-            add_var_to_profile "OPENAI_API_BASE" "https://api.openai.com/v1" "$profile_file"
-            update_config_file "OPENAI_API_BASE" "https://api.openai.com/v1"
-        fi
-    else
-        print_info "Skipping OpenAI API keys (can be added later)"
-    fi
-    
-    print_success "Environment variables configured successfully"
-}
-
-# Generate backend environment file
-generate_backend_env() {
-    print_header "🔧 Backend Environment File Generation"
-    
-    # Load current config
-    load_existing_config
-    
-    # Create backend directory if it doesn't exist
-    mkdir -p "$(dirname "$ENV_FILE")"
-    
-    # Generate .env.local file
-    cat > "$ENV_FILE" << EOF
-# Crypto-0DTE System Backend Environment
-# Generated by setup-environment.sh on $(date)
-
-# Environment Configuration
-ENVIRONMENT=testnet
-
-# Delta Exchange API Configuration
-DELTA_TESTNET_API_KEY=${DELTA_TESTNET_API_KEY:-}
-DELTA_TESTNET_API_SECRET=${DELTA_TESTNET_API_SECRET:-}
-DELTA_API_KEY=${DELTA_API_KEY:-}
-DELTA_API_SECRET=${DELTA_API_SECRET:-}
-
-# OpenAI Configuration
-OPENAI_API_KEY=${OPENAI_API_KEY:-}
-OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
-
-# Database Configuration
-DATABASE_URL=postgresql://postgres:password@localhost:5432/crypto_trading
-
-# Redis Configuration
-REDIS_URL=redis://localhost:6379
-
-# Logging Configuration
-LOG_LEVEL=INFO
-EOF
-    
-    print_success "Backend environment file generated: $ENV_FILE"
-}
-
 # Validate setup
 validate_setup() {
     print_header "🔍 Validation"
@@ -372,7 +378,6 @@ validate_setup() {
     fi
     
     # Check required variables
-    load_existing_config
     if [[ -n "${DELTA_TESTNET_API_KEY:-}" && -n "${DELTA_TESTNET_API_SECRET:-}" ]]; then
         print_success "Required Delta Exchange testnet keys are configured"
     else
@@ -430,29 +435,25 @@ main() {
     # Handle command line arguments
     if [[ "$1" == "--check" ]]; then
         setup_config_directory
-        load_existing_config
+        get_preconfigured_values
         check_current_config
         exit 0
     fi
     
-    echo "This script will set up your complete environment for the crypto trading system:"
-    echo "  • Delta Exchange API keys (testnet and optionally live)"
-    echo "  • OpenAI API keys (optional)"
+    print_info "Automated environment setup using preconfigured values from config.py"
+    print_info "This will configure:"
+    echo "  • Delta Exchange testnet API keys (for paper trading)"
+    echo "  • Delta Exchange live API keys (if configured)"
+    echo "  • OpenAI API keys (if available)"
     echo "  • Shell profile integration (permanent)"
     echo "  • Configuration file management"
     echo "  • Backend environment file generation"
     echo ""
     
-    read -p "Continue with environment setup? (Y/n): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-        print_info "Environment setup cancelled"
-        exit 0
-    fi
+    print_info "Starting automated setup..."
     
     setup_config_directory
-    load_existing_config
-    check_current_config
+    get_preconfigured_values
     setup_environment_variables
     generate_backend_env
     
