@@ -138,10 +138,10 @@ class OrderBook(Base):
     )
 
 
-class Trade(Base):
+class MarketTrade(Base):
     """Individual trade data"""
     
-    __tablename__ = "trades"
+    __tablename__ = "market_trades"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     symbol = Column(String(20), nullable=False, index=True)
@@ -161,8 +161,8 @@ class Trade(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (
-        Index('idx_trades_symbol_timestamp', 'symbol', 'timestamp'),
-        Index('idx_trades_exchange_trade_id', 'exchange', 'trade_id'),
+        Index('idx_market_trades_symbol_timestamp', 'symbol', 'timestamp'),
+        Index('idx_market_trades_exchange_trade_id', 'exchange', 'trade_id'),
     )
 
 

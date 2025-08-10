@@ -19,7 +19,7 @@ import aioredis
 
 from app.config import settings
 from app.database import get_db_session, influxdb_manager, redis_manager
-from app.models.market_data import CryptoPrice, OrderBook, Trade, FundingRate, MarketSentiment, DeFiMetrics
+from app.models.market_data import CryptoPrice, OrderBook, MarketTrade, FundingRate, MarketSentiment, DeFiMetrics
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
 from app.services.external_data_service import ExternalDataService
 from app.utils.logging_config import setup_logging
@@ -647,7 +647,7 @@ class DataFeedService:
             # Store in PostgreSQL
             async with get_db_session() as session:
                 for trade_data in self.trade_buffer:
-                    trade = Trade(**trade_data)
+                    trade = MarketTrade(**trade_data)
                     session.add(trade)
                 
                 await session.commit()
