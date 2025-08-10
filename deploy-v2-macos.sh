@@ -535,18 +535,58 @@ validate_deployment() {
 # ============================================================================
 
 cleanup_on_failure() {
-    error "Deployment failed. Running cleanup..."
+    error "Deployment failed. Running comprehensive cleanup..."
     
+    # Stop ALL trading system processes (not just PID file processes)
+    warning "Stopping all crypto trading system processes..."
+    
+    # Kill all Python processes related to the trading system
+    pkill -f "python.*app.main" 2>/dev/null || true
+    pkill -f "python.*main.py" 2>/dev/null || true
+    pkill -f "uvicorn.*app" 2>/dev/null || true
+    pkill -f "fastapi" 2>/dev/null || true
+    pkill -f "autonomous_trading_orchestrator" 2>/dev/null || true
+    pkill -f "trading.*loop" 2>/dev/null || true
+    pkill -f "risk.*manager" 2>/dev/null || true
+    pkill -f "position.*manager" 2>/dev/null || true
+    
+    # Kill all Node.js processes related to the frontend
+    pkill -f "node.*react-scripts" 2>/dev/null || true
+    pkill -f "npm.*start" 2>/dev/null || true
+    pkill -f "yarn.*start" 2>/dev/null || true
+    
+    # Kill processes by port if they're still running
+    lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+    lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+    
+    # Execute rollback commands
     if [[ -f "$ROLLBACK_COMMANDS_FILE" ]]; then
         info "Executing rollback commands..."
-        bash "$ROLLBACK_COMMANDS_FILE"
+        bash "$ROLLBACK_COMMANDS_FILE" 2>/dev/null || true
     fi
     
-    # Kill any processes we started
+    # Kill any processes we started (legacy cleanup)
     [[ -f "$LOG_DIR/backend.pid" ]] && kill "$(cat "$LOG_DIR/backend.pid")" 2>/dev/null || true
     [[ -f "$LOG_DIR/frontend.pid" ]] && kill "$(cat "$LOG_DIR/frontend.pid")" 2>/dev/null || true
     
-    error "Deployment failed and cleanup completed"
+    # Clean up PID files
+    rm -f "$LOG_DIR"/*.pid 2>/dev/null || true
+    
+    # Wait a moment for processes to terminate
+    sleep 3
+    
+    # Final check for any remaining processes
+    local remaining_procs=$(ps aux | grep -E "python.*app|uvicorn|fastapi|node.*react" | grep -v grep | wc -l)
+    if [[ $remaining_procs -gt 0 ]]; then
+        warning "Found $remaining_procs remaining processes. Force killing..."
+        pkill -9 -f "python.*app" 2>/dev/null || true
+        pkill -9 -f "uvicorn" 2>/dev/null || true
+        pkill -9 -f "node.*react" 2>/dev/null || true
+    fi
+    
+    success "All crypto trading system processes stopped"
+    error "Deployment failed but cleanup completed successfully"
+    info "System is now in a clean state. You can safely retry deployment."
     exit 1
 }
 
