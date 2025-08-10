@@ -236,6 +236,10 @@ class Settings(BaseSettings):
 # Global settings instance
 settings = Settings()
 
+def get_settings() -> Settings:
+    """Get the global settings instance"""
+    return settings
+
 # Export commonly used settings
-__all__ = ["settings", "Settings"]
+__all__ = ["settings", "Settings", "get_settings"]
 

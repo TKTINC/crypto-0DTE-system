@@ -261,10 +261,10 @@ class AutonomousTradingOrchestrator:
                 delta_health = await self.delta_connector.health_check()
                 
                 # Log system status
-                if delta_health["status"] == "healthy":
+                if delta_health:
                     logger.debug("System health check: All systems operational")
                 else:
-                    logger.warning(f"System health issue: {delta_health}")
+                    logger.warning("System health issue: Delta Exchange API connection failed")
                 
                 # Update uptime metrics
                 self.system_metrics["uptime_hours"] = (
@@ -289,12 +289,25 @@ class AutonomousTradingOrchestrator:
             logger.info(f"🧠 Generating AI signal for {symbol}")
             signal_response = await generate_signal(symbol)
             
-            if not signal_response or signal_response.get("signal_type") == "HOLD":
+            if not signal_response or signal_response.type == "HOLD":
                 logger.debug(f"No actionable signal for {symbol}")
                 return
             
+            # Convert SignalResponse to dict for compatibility with existing code
+            signal_dict = {
+                "symbol": signal_response.symbol,
+                "signal_type": signal_response.type,
+                "entry_price": signal_response.entry,
+                "target_price": signal_response.target,
+                "stop_loss": signal_response.stopLoss,
+                "take_profit": signal_response.target,
+                "reasoning": signal_response.reasoning,
+                "confidence": signal_response.confidence,
+                "strategy": signal_response.strategy
+            }
+            
             # Validate signal with risk management
-            is_valid, validation_reason = await self.risk_manager.validate_signal(signal_response)
+            is_valid, validation_reason = await self.risk_manager.validate_signal(signal_dict)
             
             if not is_valid:
                 logger.info(f"Signal rejected for {symbol}: {validation_reason}")
@@ -307,13 +320,13 @@ class AutonomousTradingOrchestrator:
                 return
             
             # Execute the signal
-            await self._execute_signal(signal_response)
+            await self._execute_signal(signal_dict)
             
             # Update tracking
             self.last_signal_generation[symbol] = datetime.utcnow()
             self.system_metrics["signals_generated"] += 1
             
-            logger.info(f"✅ Signal processed for {symbol}: {signal_response['signal_type']}")
+            logger.info(f"✅ Signal processed for {symbol}: {signal_response.type}")
             
         except Exception as e:
             logger.error(f"Error processing signal for {symbol}: {e}")
