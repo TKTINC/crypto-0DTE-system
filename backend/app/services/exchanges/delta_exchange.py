@@ -123,12 +123,9 @@ class DeltaExchangeConnector:
             self.websocket_url = settings.current_delta_websocket_url
             self.environment = "LIVE"
         
-        # Check if we're in development mode (invalid/test API keys)
-        self.is_development = (
-            not self.api_key or 
-            self.api_key.startswith('test_') or 
-            settings.ENVIRONMENT.lower() in ['development', 'dev', 'local']
-        )
+        # No development mode - always connect to real APIs
+        # Paper trading uses testnet APIs, live trading uses production APIs
+        self.is_development = False
         
         self.session: Optional[aiohttp.ClientSession] = None
         self.websocket: Optional[websockets.WebSocketServerProtocol] = None
@@ -142,7 +139,6 @@ class DeltaExchangeConnector:
         logger.info(f"  Environment: {self.environment}")
         logger.info(f"  Base URL: {self.base_url}")
         logger.info(f"  Paper Trading: {self.paper_trading}")
-        logger.info(f"  Development Mode: {self.is_development}")
         logger.info(f"  API Key: {self.api_key[:8]}..." if self.api_key else "  API Key: Not configured")
         logger.info(f"  Passphrase: {'Configured' if self.passphrase else 'Not required (Delta Exchange)'}")
         self.max_calls_per_window = 1000
@@ -538,15 +534,6 @@ class DeltaExchangeConnector:
     
     async def get_account_balance(self) -> Dict[str, Any]:
         """Get account balance information"""
-        # Return mock data in development mode
-        if self.is_development:
-            logger.info("Development mode: Returning mock account balance")
-            return {
-                'available_balance': 10000.0,
-                'total_balance': 10000.0,
-                'currency': 'USDT'
-            }
-            
         try:
             response = await self._make_request("GET", "/v2/wallet/balances")
             if isinstance(response, dict) and 'result' in response:
@@ -567,11 +554,6 @@ class DeltaExchangeConnector:
     
     async def get_positions(self) -> List[Dict[str, Any]]:
         """Get open positions"""
-        # Return mock data in development mode
-        if self.is_development:
-            logger.info("Development mode: Returning mock positions")
-            return []  # No open positions in development mode
-            
         try:
             response = await self._make_request("GET", "/v2/positions")
             if isinstance(response, dict) and 'result' in response:
@@ -889,32 +871,18 @@ class DeltaExchangeConnector:
     
     async def get_market_data(self, symbol: str, lookback_hours: int = 24) -> Dict[str, Any]:
         """Get comprehensive market data for technical analysis"""
-        # Return mock data in development mode
-        if self.is_development:
-            logger.info(f"Development mode: Returning mock market data for {symbol}")
-            return {
-                "symbol": symbol,
-                "price": 50000.0 if "BTC" in symbol else 3000.0,
-                "volume": 1000000.0,
-                "volume_24h": 1000000.0,  # Added missing field
-                "change_24h": 2.5,
-                "high_24h": 51000.0 if "BTC" in symbol else 3100.0,
-                "low_24h": 49000.0 if "BTC" in symbol else 2900.0,
-                "timestamp": int(time.time())
-            }
-            
         try:
             # Get current ticker
             ticker = await self.get_ticker(symbol)
             if not ticker:
                 return {}
             
-            # For now, return basic ticker data
-            # In a full implementation, you would also get historical candles
+            # Return comprehensive market data with all required fields
             return {
                 "symbol": symbol,
                 "price": ticker.get("close", 0),
                 "volume": ticker.get("volume", 0),
+                "volume_24h": ticker.get("volume", 0),  # Use volume as volume_24h
                 "change_24h": ticker.get("change_24h", 0),
                 "high_24h": ticker.get("high", 0),
                 "low_24h": ticker.get("low", 0),
@@ -927,16 +895,6 @@ class DeltaExchangeConnector:
     
     async def get_current_price(self, symbol: str) -> float:
         """Get current price for a symbol"""
-        # Return mock data in development mode
-        if self.is_development:
-            logger.info(f"Development mode: Returning mock price for {symbol}")
-            if "BTC" in symbol:
-                return 50000.0
-            elif "ETH" in symbol:
-                return 3000.0
-            else:
-                return 100.0
-                
         try:
             ticker = await self.get_ticker(symbol)
             if ticker and 'close' in ticker:

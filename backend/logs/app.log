@@ -9561,3 +9561,69 @@ pip install python-multipart
 2025-08-09 02:53:06,016 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
 2025-08-09 02:53:06,017 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
 2025-08-09 02:53:06,034 [INFO] app.main [main.py:58]: Starting Crypto-0DTE-System...
+2025-08-10 08:55:59,013 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-10 08:55:59,022 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-10 08:55:59,044 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:55:59,044 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:55:59,044 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:55:59,044 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 08:55:59,045 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:55:59,045 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: <app.services.exchanges.delta_exchange.DeltaExchangeConnector object at 0x7fe506252ad0>
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:55:59,048 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:55:59,048 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: <app.services.exchanges.delta_exchange.DeltaExchangeConnector object at 0x7fe506252ad0>
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:55:59,051 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:55:59,051 [INFO] app.services.position_manager [position_manager.py:60]: Position Manager initialized
+2025-08-10 08:56:27,489 [INFO] app.utils.logging_config [logging_config.py:84]: Logging configuration initialized
+2025-08-10 08:56:27,489 [INFO] app.utils.logging_config [logging_config.py:85]: Log directory: /home/ubuntu/crypto-0DTE-system/backend/logs
+2025-08-10 08:56:27,511 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:56:27,511 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:56:27,511 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:56:27,511 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 08:56:27,511 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:56:27,512 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: <app.services.exchanges.delta_exchange.DeltaExchangeConnector object at 0x7f7816d56950>
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:56:27,515 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:56:27,515 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: <app.services.exchanges.delta_exchange.DeltaExchangeConnector object at 0x7f7816d56950>
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:56:27,518 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:56:27,518 [INFO] app.services.position_manager [position_manager.py:60]: Position Manager initialized
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:56:27,521 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:138]: Delta Exchange Connector initialized:
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:139]:   Environment: TESTNET
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:140]:   Base URL: https://cdn-ind.testnet.deltaex.org
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:141]:   Paper Trading: True
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:142]:   API Key: qWsp9KOn...
+2025-08-10 08:56:27,524 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:143]:   Passphrase: Not required (Delta Exchange)
+2025-08-10 08:56:27,525 [INFO] app.services.risk_manager [risk_manager.py:94]: Risk Manager initialized
+2025-08-10 08:56:27,525 [INFO] app.services.trade_execution_engine [trade_execution_engine.py:66]: Trade Execution Engine initialized
+2025-08-10 08:56:27,525 [INFO] app.services.exchanges.delta_exchange [delta_exchange.py:213]: Delta Exchange HTTP session initialized
+2025-08-10 08:56:28,717 [DEBUG] app.services.exchanges.delta_exchange [delta_exchange.py:330]: Delta Exchange API success: GET /v2/tickers/BTC-USDT (1.192s)
+2025-08-10 08:56:28,717 [WARNING] app.services.exchanges.delta_exchange [delta_exchange.py:149]: DeltaExchangeConnector: Session not properly closed, forcing cleanup
+2025-08-10 08:56:28,718 [ERROR] asyncio [base_events.py:1757]: Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f78070f0dd0>
+2025-08-10 08:56:28,718 [ERROR] asyncio [base_events.py:1757]: Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f78070cbaf0>, 453382.453233153)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f780709b4d0>

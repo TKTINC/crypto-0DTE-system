@@ -628,3 +628,8 @@ ConnectionRefusedError: [Errno 111] Connection refused
 ConnectionRefusedError: [Errno 111] Connection refused
 
 2025-08-09 02:53:06,041 [ERROR] uvicorn.error [on.py:59]: Application startup failed. Exiting.
+2025-08-10 08:56:28,718 [ERROR] asyncio [base_events.py:1757]: Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f78070f0dd0>
+2025-08-10 08:56:28,718 [ERROR] asyncio [base_events.py:1757]: Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7f78070cbaf0>, 453382.453233153)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7f780709b4d0>
