@@ -145,13 +145,15 @@ class AutonomousTradingOrchestrator:
     async def _initialize_services(self):
         """Initialize all required services"""
         try:
-            # Initialize Delta Exchange connection (non-blocking for API failures)
-            try:
-                await self.delta_connector.initialize()
-                logger.info("✅ Delta Exchange connector initialized")
-            except Exception as e:
-                logger.warning(f"⚠️ Delta Exchange connector initialization failed: {e}")
-                logger.info("Continuing with limited functionality...")
+            # Initialize Delta Exchange connection (DISABLED during startup to prevent blocking)
+            logger.info("⏸️ Delta Exchange connector initialization DISABLED during startup")
+            logger.info("💡 Delta Exchange connector will be enabled after successful deployment")
+            # try:
+            #     await self.delta_connector.initialize()
+            #     logger.info("✅ Delta Exchange connector initialized")
+            # except Exception as e:
+            #     logger.warning(f"⚠️ Delta Exchange connector initialization failed: {e}")
+            #     logger.info("Continuing with limited functionality...")
             
             # Initialize trade executor (non-blocking for API failures)
             try:

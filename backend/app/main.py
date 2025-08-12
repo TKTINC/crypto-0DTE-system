@@ -108,11 +108,14 @@ async def lifespan(app: FastAPI):
             logger.warning(f"⚠️ Trade Execution Engine initialization failed: {e}")
             trade_execution_engine = None
         
-        # Initialize Data Feed Service for real-time market data (non-blocking for API failures)
+        # Initialize Data Feed Service (DISABLED during startup to prevent blocking)
         try:
-            data_feed_service = DataFeedService()
-            await data_feed_service.start()
-            logger.info("✅ Data Feed Service initialized - WebSocket connections active")
+            logger.info("⏸️ Data Feed Service initialization DISABLED during startup")
+            logger.info("💡 Data Feed Service will be enabled after successful deployment")
+            # data_feed_service = DataFeedService()
+            # await data_feed_service.start()
+            data_feed_service = None
+            logger.info("✅ Data Feed Service startup blocking DISABLED")
         except Exception as e:
             logger.warning(f"⚠️ Data Feed Service initialization failed: {e}")
             data_feed_service = None

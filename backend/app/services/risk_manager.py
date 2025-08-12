@@ -96,13 +96,15 @@ class RiskManager:
     async def initialize(self):
         """Initialize the risk manager (non-blocking for API failures)"""
         try:
-            # Try to initialize Delta Exchange connector, but don't block startup if it fails
-            try:
-                await self.delta_connector.initialize()
-                logger.info("Delta Exchange connector initialized successfully")
-            except Exception as e:
-                logger.warning(f"Delta Exchange connector initialization failed: {e}")
-                logger.info("Risk Manager will continue with limited functionality")
+            # Initialize Delta Exchange connector (DISABLED during startup to prevent blocking)
+            logger.info("⏸️ Risk Manager Delta connector initialization DISABLED during startup")
+            logger.info("💡 Risk Manager will be enabled after successful deployment")
+            # try:
+            #     await self.delta_connector.initialize()
+            #     logger.info("Delta Exchange connector initialized successfully")
+            # except Exception as e:
+            #     logger.warning(f"Delta Exchange connector initialization failed: {e}")
+            #     logger.info("Risk Manager will continue with limited functionality")
             
             # Load risk metrics (this doesn't make API calls)
             await self._load_risk_metrics()
@@ -110,7 +112,7 @@ class RiskManager:
             # Initialize portfolio tracking (now non-blocking for API failures)
             await self._initialize_portfolio_tracking()
             
-            logger.info("✅ Risk Manager initialized successfully")
+            logger.info("✅ Risk Manager initialized (startup blocking disabled)")
             
         except Exception as e:
             logger.warning(f"Risk Manager initialization had issues but continuing: {e}")

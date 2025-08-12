@@ -62,13 +62,15 @@ class PositionManager:
     async def initialize(self):
         """Initialize the position manager (non-blocking for API failures)"""
         try:
-            # Try to initialize Delta Exchange connector, but don't block startup if it fails
-            try:
-                await self.delta_connector.initialize()
-                logger.info("Delta Exchange connector initialized successfully")
-            except Exception as e:
-                logger.warning(f"Delta Exchange connector initialization failed: {e}")
-                logger.info("Position Manager will continue with limited functionality")
+            # Initialize Delta Exchange connector (DISABLED during startup to prevent blocking)
+            logger.info("⏸️ Position Manager Delta connector initialization DISABLED during startup")
+            logger.info("💡 Position Manager will be enabled after successful deployment")
+            # try:
+            #     await self.delta_connector.initialize()
+            #     logger.info("Delta Exchange connector initialized successfully")
+            # except Exception as e:
+            #     logger.warning(f"Delta Exchange connector initialization failed: {e}")
+            #     logger.info("Position Manager will continue with limited functionality")
             
             # Try to load existing position states, but don't block startup if it fails
             try:
@@ -77,7 +79,7 @@ class PositionManager:
                 logger.warning(f"Could not load position states during startup: {e}")
                 logger.info("Position Manager will start with empty position state")
             
-            logger.info("✅ Position Manager initialized successfully")
+            logger.info("✅ Position Manager initialized (startup blocking disabled)")
             
         except Exception as e:
             logger.warning(f"Position Manager initialization had issues but continuing: {e}")
