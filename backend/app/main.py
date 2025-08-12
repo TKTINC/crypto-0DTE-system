@@ -9,6 +9,7 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from typing import Dict, Any
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Depends, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +21,7 @@ import uvicorn
 from app.config import settings
 from app.database import engine, get_db
 from app.models import Base
-from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring, metrics, admin
+from app.api.v1 import market_data, signals, portfolio, trading, autonomous, monitoring, metrics, admin, health
 from app.services.websocket_manager import WebSocketManager
 from app.services.health_service import HealthService
 
@@ -231,6 +232,12 @@ async def liveness_check():
 
 # Include API routers
 app.include_router(
+    health.router,
+    prefix="/api/v1",
+    tags=["Health"]
+)
+
+app.include_router(
     market_data.router,
     prefix="/api/v1/market-data",
     tags=["Market Data"]
@@ -277,6 +284,16 @@ app.include_router(
     prefix="/api/v1/admin",
     tags=["Admin"]
 )
+
+# Simple health endpoint for frontend compatibility
+@app.get("/api/v1/health")
+async def simple_health_check():
+    """Simple health check endpoint that frontend expects"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "crypto-0dte-backend"
+    }
 
 
 # =============================================================================

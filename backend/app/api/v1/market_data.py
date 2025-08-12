@@ -135,6 +135,10 @@ async def get_ohlcv_data_query(
                         ))
                     
                     return ohlcv_data
+                else:
+                    # Empty data from Delta Exchange, trigger fallback
+                    logger.warning(f"Delta Exchange returned empty data for {symbol}, using mock data")
+                    raise Exception("Empty data from Delta Exchange")
                     
         except Exception as delta_error:
             logger.warning(f"Delta Exchange API failed: {delta_error}, falling back to mock data")
