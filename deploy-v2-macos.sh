@@ -76,7 +76,7 @@ port_available() {
 wait_for_service() {
     local service_name="$1"
     local port="$2"
-    local max_attempts=30
+    local max_attempts=50
     local attempt=1
     
     step "Waiting for $service_name to be ready on port $port..."
