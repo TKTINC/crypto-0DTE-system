@@ -198,14 +198,22 @@ class Settings(BaseSettings):
             # Fallback to default
             return ["http://localhost:3000"]
     
-    @field_validator("DELTA_API_KEY", "OPENAI_API_KEY")
+    @field_validator("DELTA_API_KEY", "OPENAI_API_KEY", "DELTA_TESTNET_API_KEY")
     @classmethod
     def validate_api_keys(cls, v: str, info) -> str:
         """Validate API keys (allow empty for development)"""
         field_name = info.field_name
         
-        # Allow empty keys in development/testing
-        if not v:
+        # Skip validation for environment-specific keys that aren't being used
+        if field_name == "DELTA_API_KEY" and hasattr(cls, 'PAPER_TRADING') and cls.PAPER_TRADING:
+            # In paper trading mode, DELTA_API_KEY can be empty
+            return v
+        elif field_name == "DELTA_TESTNET_API_KEY" and hasattr(cls, 'PAPER_TRADING') and not cls.PAPER_TRADING:
+            # In live trading mode, DELTA_TESTNET_API_KEY can be empty
+            return v
+        
+        # Allow empty keys in development/testing with warning
+        if not v and field_name in ["OPENAI_API_KEY"]:
             print(f"Warning: {field_name} is empty - some features may not work")
         
         return v
@@ -231,6 +239,27 @@ class Settings(BaseSettings):
         case_sensitive = True
         # Allow extra fields to prevent validation errors
         extra = "ignore"
+
+    def validate_current_environment(self) -> bool:
+        """Validate that the current environment has the required API keys"""
+        if self.PAPER_TRADING:
+            # In testnet mode, check testnet keys
+            if not self.DELTA_TESTNET_API_KEY:
+                print(f"Warning: DELTA_TESTNET_API_KEY is empty - testnet trading will not work")
+                return False
+            if not self.DELTA_TESTNET_API_SECRET:
+                print(f"Warning: DELTA_TESTNET_API_SECRET is empty - testnet trading will not work")
+                return False
+        else:
+            # In live mode, check live keys
+            if not self.DELTA_API_KEY:
+                print(f"Warning: DELTA_API_KEY is empty - live trading will not work")
+                return False
+            if not self.DELTA_API_SECRET:
+                print(f"Warning: DELTA_API_SECRET is empty - live trading will not work")
+                return False
+        
+        return True
 
 
 # Global settings instance

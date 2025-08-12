@@ -68,22 +68,31 @@ class TradeExecutionEngine:
         logger.info("Trade Execution Engine initialized")
     
     async def initialize(self):
-        """Initialize the trade execution engine"""
+        """Initialize the trade execution engine (non-blocking for API failures)"""
         try:
-            # Initialize Delta Exchange connector
-            await self.delta_connector.initialize()
+            # Try to initialize Delta Exchange connector, but don't block startup if it fails
+            try:
+                await self.delta_connector.initialize()
+                logger.info("Delta Exchange connector initialized successfully")
+            except Exception as e:
+                logger.warning(f"Delta Exchange connector initialization failed: {e}")
+                logger.info("Trade Execution Engine will continue with limited functionality")
             
-            # Initialize Risk Manager
+            # Initialize Risk Manager (now non-blocking)
             await self.risk_manager.initialize()
             
-            # Load existing orders
-            await self._load_existing_orders()
+            # Try to load existing orders, but don't block startup if it fails
+            try:
+                await self._load_existing_orders()
+            except Exception as e:
+                logger.warning(f"Could not load existing orders during startup: {e}")
+                logger.info("Trade Execution Engine will start with empty order state")
             
             logger.info("✅ Trade Execution Engine initialized successfully")
             
         except Exception as e:
-            logger.error(f"Failed to initialize Trade Execution Engine: {e}")
-            raise
+            logger.warning(f"Trade Execution Engine initialization had issues but continuing: {e}")
+            # Don't raise the exception - allow startup to continue
     
     async def cleanup(self):
         """Cleanup the trade execution engine"""
