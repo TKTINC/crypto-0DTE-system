@@ -744,45 +744,78 @@ class DeltaExchangeConnector:
             self.websocket = await websockets.connect(self.websocket_url)
             logger.info("Connected to Delta Exchange WebSocket")
             
-            # Authenticate WebSocket
-            auth_payload = {
-                "api-key": self.api_key,
-                "signature": self._generate_websocket_signature(),
-                "timestamp": str(int(time.time()))
-            }
+            # Try different authentication formats
+            auth_success = False
+            signature_formats = ["http_api", "timestamp_only", "timestamp_key"]
             
-            # Only add passphrase if it's provided (Delta Exchange doesn't require it)
-            if self.passphrase:
-                auth_payload["passphrase"] = self.passphrase
+            for format_type in signature_formats:
+                try:
+                    # Generate timestamp once for both signature and auth payload
+                    timestamp = str(int(time.time()))
+                    
+                    # Authenticate WebSocket
+                    auth_payload = {
+                        "api-key": self.api_key,
+                        "signature": self._generate_websocket_signature(timestamp, format_type),
+                        "timestamp": timestamp
+                    }
+                    
+                    # Only add passphrase if it's provided (Delta Exchange doesn't require it)
+                    if self.passphrase:
+                        auth_payload["passphrase"] = self.passphrase
+                    
+                    auth_message = {
+                        "type": "auth",
+                        "payload": auth_payload
+                    }
+                    
+                    logger.info(f"Trying WebSocket authentication with format: {format_type}")
+                    await self.websocket.send(json.dumps(auth_message))
+                    response = await self.websocket.recv()
+                    auth_response = json.loads(response)
+                    
+                    if auth_response.get("type") == "auth" and auth_response.get("success"):
+                        logger.info(f"WebSocket authentication successful with format: {format_type}")
+                        auth_success = True
+                        break
+                    else:
+                        logger.warning(f"WebSocket authentication failed with format {format_type}: {auth_response}")
+                        
+                except Exception as format_error:
+                    logger.warning(f"WebSocket authentication error with format {format_type}: {format_error}")
+                    continue
             
-            auth_message = {
-                "type": "auth",
-                "payload": auth_payload
-            }
-            
-            await self.websocket.send(json.dumps(auth_message))
-            response = await self.websocket.recv()
-            auth_response = json.loads(response)
-            
-            if auth_response.get("type") == "auth" and auth_response.get("success"):
-                logger.info("WebSocket authentication successful")
-            else:
-                raise DeltaExchangeError("WebSocket authentication failed")
+            if not auth_success:
+                raise DeltaExchangeError("WebSocket authentication failed with all signature formats")
                 
         except Exception as e:
             logger.error(f"WebSocket connection failed: {e}")
             raise DeltaExchangeError(f"WebSocket connection failed: {e}")
-    
-    def _generate_websocket_signature(self) -> str:
+
+    def _generate_websocket_signature(self, timestamp: str, format_type: str = "http_api") -> str:
         """Generate WebSocket authentication signature"""
-        timestamp = str(int(time.time()))
-        message = timestamp + "GET" + "/live"
         
-        return hmac.new(
+        if format_type == "http_api":
+            # Format 1: Same as HTTP API (timestamp + method + path)
+            message = timestamp + "GET" + "/live"
+        elif format_type == "timestamp_only":
+            # Format 2: Just timestamp (some exchanges use this for WebSocket)
+            message = timestamp
+        elif format_type == "timestamp_key":
+            # Format 3: Timestamp + api_key (another common pattern)
+            message = timestamp + self.api_key
+        else:
+            # Default to HTTP API format
+            message = timestamp + "GET" + "/live"
+        
+        signature = hmac.new(
             self.api_secret.encode(),
             message.encode(),
             hashlib.sha256
         ).hexdigest()
+        
+        logger.debug(f"WebSocket signature ({format_type}): message='{message}' -> signature='{signature}'")
+        return signature
     
     async def subscribe_to_ticker(self, symbols: List[str]):
         """Subscribe to ticker updates"""

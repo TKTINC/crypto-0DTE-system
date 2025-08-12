@@ -132,6 +132,11 @@ class DataFeedService:
                 for symbol in self.symbols:
                     ticker = await self.delta_connector.get_ticker(symbol)
                     
+                    # Check if ticker data is valid
+                    if ticker is None or not isinstance(ticker, dict):
+                        logger.warning(f"No ticker data received for {symbol}, skipping...")
+                        continue
+                    
                     price_data = {
                         "symbol": symbol,
                         "exchange": "delta",
@@ -189,6 +194,11 @@ class DataFeedService:
             try:
                 for symbol in self.symbols:
                     orderbook = await self.delta_connector.get_orderbook(symbol, depth=10)
+                    
+                    # Check if orderbook data is valid
+                    if orderbook is None or not isinstance(orderbook, dict):
+                        logger.warning(f"No orderbook data received for {symbol}, skipping...")
+                        continue
                     
                     bids = orderbook.get("buy", [])
                     asks = orderbook.get("sell", [])
