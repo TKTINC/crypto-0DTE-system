@@ -94,22 +94,27 @@ class RiskManager:
         logger.info("Risk Manager initialized")
     
     async def initialize(self):
-        """Initialize the risk manager"""
+        """Initialize the risk manager (non-blocking for API failures)"""
         try:
-            # Initialize Delta Exchange connector
-            await self.delta_connector.initialize()
+            # Try to initialize Delta Exchange connector, but don't block startup if it fails
+            try:
+                await self.delta_connector.initialize()
+                logger.info("Delta Exchange connector initialized successfully")
+            except Exception as e:
+                logger.warning(f"Delta Exchange connector initialization failed: {e}")
+                logger.info("Risk Manager will continue with limited functionality")
             
-            # Load risk metrics
+            # Load risk metrics (this doesn't make API calls)
             await self._load_risk_metrics()
             
-            # Initialize portfolio tracking
+            # Initialize portfolio tracking (now non-blocking for API failures)
             await self._initialize_portfolio_tracking()
             
             logger.info("✅ Risk Manager initialized successfully")
             
         except Exception as e:
-            logger.error(f"Failed to initialize Risk Manager: {e}")
-            raise
+            logger.warning(f"Risk Manager initialization had issues but continuing: {e}")
+            # Don't raise the exception - allow startup to continue
     
     async def cleanup(self):
         """Cleanup the risk manager"""
@@ -1030,16 +1035,37 @@ class RiskManager:
             logger.error(f"Error saving risk metrics: {e}")
     
     async def _initialize_portfolio_tracking(self):
-        """Initialize portfolio tracking"""
+        """Initialize portfolio tracking (non-blocking for API failures)"""
         try:
-            self.portfolio_value = await self._get_portfolio_value()
-            self.total_exposure = await self._calculate_total_exposure()
-            self.daily_pnl = await self._calculate_daily_pnl()
+            # Try to get portfolio value, but don't block startup if it fails
+            try:
+                self.portfolio_value = await self._get_portfolio_value()
+            except Exception as e:
+                logger.warning(f"Could not get portfolio value during startup: {e}")
+                self.portfolio_value = 0.0
+            
+            # Try to calculate exposure, but don't block startup if it fails
+            try:
+                self.total_exposure = await self._calculate_total_exposure()
+            except Exception as e:
+                logger.warning(f"Could not calculate total exposure during startup: {e}")
+                self.total_exposure = 0.0
+            
+            # Try to calculate daily P&L, but don't block startup if it fails
+            try:
+                self.daily_pnl = await self._calculate_daily_pnl()
+            except Exception as e:
+                logger.warning(f"Could not calculate daily P&L during startup: {e}")
+                self.daily_pnl = 0.0
             
             logger.info(f"Portfolio tracking initialized: ${self.portfolio_value:,.0f}")
             
         except Exception as e:
-            logger.error(f"Error initializing portfolio tracking: {e}")
+            logger.warning(f"Portfolio tracking initialization failed, using defaults: {e}")
+            # Set safe defaults
+            self.portfolio_value = 0.0
+            self.total_exposure = 0.0
+            self.daily_pnl = 0.0
     
     async def _update_risk_metrics(self):
         """Update risk metrics cache"""
