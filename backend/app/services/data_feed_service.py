@@ -21,7 +21,7 @@ from app.config import settings
 from app.database import get_db_session, influxdb_manager, redis_manager
 from app.models.market_data import CryptoPrice, OrderBook, MarketTrade, FundingRate, MarketSentiment, DeFiMetrics
 from app.services.exchanges.delta_exchange import DeltaExchangeConnector
-from app.services.external_data_service import ExternalDataService
+# from app.services.external_data_service import ExternalDataService  # TODO: Create this service
 from app.utils.logging_config import setup_logging
 
 setup_logging()
@@ -35,7 +35,7 @@ class DataFeedService:
         # Use paper trading mode from settings
         from app.config import settings
         self.delta_connector = DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING)
-        self.external_data = ExternalDataService()
+        # self.external_data = ExternalDataService()  # TODO: Create this service
         
         # Symbols to track
         self.symbols = ["BTCUSDT", "ETHUSDT"]
@@ -70,7 +70,7 @@ class DataFeedService:
             await self.delta_connector.connect()
             
             # Initialize external data service
-            await self.external_data.initialize()
+            # await self.external_data.initialize()  # TODO: Create external data service
             
             self.running = True
             
@@ -366,17 +366,18 @@ class DataFeedService:
         
         while self.running:
             try:
+                # TODO: Implement external data service
                 # Get Fear & Greed Index
-                fear_greed_data = await self.external_data.get_fear_greed_index()
+                # fear_greed_data = await self.external_data.get_fear_greed_index()
                 
                 # Get social sentiment
-                social_sentiment = await self.external_data.get_social_sentiment()
+                # social_sentiment = await self.external_data.get_social_sentiment()
                 
                 # Get market metrics
-                market_metrics = await self.external_data.get_market_metrics()
+                # market_metrics = await self.external_data.get_market_metrics()
                 
                 # Store sentiment data
-                await self._store_sentiment_data(fear_greed_data, social_sentiment, market_metrics)
+                # await self._store_sentiment_data(fear_greed_data, social_sentiment, market_metrics)
                 
                 await asyncio.sleep(self.sentiment_interval)
                 
@@ -419,11 +420,12 @@ class DataFeedService:
         
         while self.running:
             try:
+                # TODO: Implement external data service
                 # Get DeFi metrics
-                defi_data = await self.external_data.get_defi_metrics()
+                # defi_data = await self.external_data.get_defi_metrics()
                 
                 # Store DeFi data
-                await self._store_defi_data(defi_data)
+                # await self._store_defi_data(defi_data)
                 
                 await asyncio.sleep(self.defi_interval)
                 
