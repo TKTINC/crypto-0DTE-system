@@ -41,12 +41,12 @@ class DataFeedService:
         self.symbols = ["BTCUSDT", "ETHUSDT"]
         self.options_symbols = []
         
-        # Data collection intervals
-        self.price_interval = 1  # 1 second
-        self.orderbook_interval = 1  # 1 second
-        self.funding_interval = 300  # 5 minutes
-        self.sentiment_interval = 3600  # 1 hour
-        self.defi_interval = 1800  # 30 minutes
+        # Data collection intervals (increased to reduce API load)
+        self.price_interval = 30  # 30 seconds (was 1 second)
+        self.orderbook_interval = 30  # 30 seconds (was 1 second)
+        self.funding_interval = 600  # 10 minutes (was 5 minutes)
+        self.sentiment_interval = 7200  # 2 hours (was 1 hour)
+        self.defi_interval = 3600  # 1 hour (was 30 minutes)
         
         # Running flags
         self.running = False
@@ -74,17 +74,31 @@ class DataFeedService:
             
             self.running = True
             
-            # Start data collection tasks
-            self.tasks = [
-                asyncio.create_task(self._collect_price_data()),
-                asyncio.create_task(self._collect_orderbook_data()),
-                asyncio.create_task(self._collect_trade_data()),
-                asyncio.create_task(self._collect_funding_rates()),
-                asyncio.create_task(self._collect_sentiment_data()),
-                asyncio.create_task(self._collect_defi_data()),
-                asyncio.create_task(self._flush_buffers()),
-                asyncio.create_task(self._websocket_listener())
-            ]
+            # Start data collection tasks in background (non-blocking)
+            self.tasks = []
+            
+            # Start WebSocket listener first (highest priority)
+            self.tasks.append(asyncio.create_task(self._websocket_listener()))
+            
+            # Start other tasks with delays to prevent startup blocking
+            async def start_delayed_tasks():
+                await asyncio.sleep(5)  # Wait 5 seconds after startup
+                try:
+                    self.tasks.extend([
+                        asyncio.create_task(self._collect_price_data()),
+                        asyncio.create_task(self._collect_orderbook_data()),
+                        asyncio.create_task(self._collect_trade_data()),
+                        asyncio.create_task(self._collect_funding_rates()),
+                        asyncio.create_task(self._collect_sentiment_data()),
+                        asyncio.create_task(self._collect_defi_data()),
+                        asyncio.create_task(self._flush_buffers())
+                    ])
+                    logger.info("Background data collection tasks started")
+                except Exception as e:
+                    logger.warning(f"Some background tasks failed to start: {e}")
+            
+            # Start delayed tasks in background
+            asyncio.create_task(start_delayed_tasks())
             
             logger.info("Data Feed Service started successfully")
             
@@ -130,37 +144,42 @@ class DataFeedService:
         while self.running:
             try:
                 for symbol in self.symbols:
-                    ticker = await self.delta_connector.get_ticker(symbol)
-                    
-                    # Check if ticker data is valid
-                    if ticker is None or not isinstance(ticker, dict):
-                        logger.warning(f"No ticker data received for {symbol}, skipping...")
-                        continue
-                    
-                    price_data = {
-                        "symbol": symbol,
-                        "exchange": "delta",
-                        "timestamp": datetime.utcnow(),
-                        "open_price": Decimal(str(ticker.get("open", 0))),
-                        "high_price": Decimal(str(ticker.get("high", 0))),
-                        "low_price": Decimal(str(ticker.get("low", 0))),
-                        "close_price": Decimal(str(ticker.get("close", 0))),
-                        "volume": Decimal(str(ticker.get("volume", 0))),
-                        "price_change": Decimal(str(ticker.get("change_24h", 0))),
-                        "volume_change": Decimal(str(ticker.get("volume_change_24h", 0)))
-                    }
-                    
-                    # Add to buffer
-                    self.price_buffer.append(price_data)
-                    
-                    # Cache latest price in Redis
-                    await self._cache_latest_price(symbol, price_data)
+                    try:
+                        ticker = await self.delta_connector.get_ticker(symbol)
+                        
+                        # Check if ticker data is valid
+                        if ticker is None or not isinstance(ticker, dict):
+                            logger.debug(f"No ticker data received for {symbol}, skipping...")
+                            continue
+                        
+                        price_data = {
+                            "symbol": symbol,
+                            "exchange": "delta",
+                            "timestamp": datetime.utcnow(),
+                            "open_price": Decimal(str(ticker.get("open", 0))),
+                            "high_price": Decimal(str(ticker.get("high", 0))),
+                            "low_price": Decimal(str(ticker.get("low", 0))),
+                            "close_price": Decimal(str(ticker.get("close", 0))),
+                            "volume": Decimal(str(ticker.get("volume", 0))),
+                            "price_change": Decimal(str(ticker.get("change_24h", 0))),
+                            "volume_change": Decimal(str(ticker.get("volume_change_24h", 0)))
+                        }
+                        
+                        # Add to buffer
+                        self.price_buffer.append(price_data)
+                        
+                        # Cache latest price in Redis
+                        await self._cache_latest_price(symbol, price_data)
+                        
+                    except Exception as symbol_error:
+                        logger.debug(f"Error collecting price data for {symbol}: {symbol_error}")
+                        continue  # Continue with next symbol
                 
                 await asyncio.sleep(self.price_interval)
                 
             except Exception as e:
-                logger.error(f"Error collecting price data: {e}")
-                await asyncio.sleep(5)
+                logger.debug(f"Price data collection error: {e}")
+                await asyncio.sleep(30)  # Wait longer on error
     
     async def _cache_latest_price(self, symbol: str, price_data: Dict):
         """Cache latest price in Redis"""
@@ -197,7 +216,7 @@ class DataFeedService:
                     
                     # Check if orderbook data is valid
                     if orderbook is None or not isinstance(orderbook, dict):
-                        logger.warning(f"No orderbook data received for {symbol}, skipping...")
+                        logger.debug(f"No orderbook data received for {symbol}, skipping...")
                         continue
                     
                     bids = orderbook.get("buy", [])
@@ -241,7 +260,7 @@ class DataFeedService:
                 await asyncio.sleep(self.orderbook_interval)
                 
             except Exception as e:
-                logger.error(f"Error collecting orderbook data: {e}")
+                logger.debug(f"Error collecting orderbook data: {e}")
                 await asyncio.sleep(5)
     
     async def _cache_latest_orderbook(self, symbol: str, orderbook_data: Dict):
@@ -313,7 +332,7 @@ class DataFeedService:
                 await asyncio.sleep(2)  # Check for new trades every 2 seconds
                 
             except Exception as e:
-                logger.error(f"Error collecting trade data: {e}")
+                logger.debug(f"Error collecting trade data: {e}")
                 await asyncio.sleep(5)
     
     # =============================================================================
