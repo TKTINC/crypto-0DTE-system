@@ -102,39 +102,39 @@ async def get_portfolio_status(db: Session = Depends(get_db)):
         #     
         # except Exception as delta_error:
         #     logger.warning(f"Delta Exchange portfolio fetch failed: {delta_error}, using mock data")
-            
-            # Fallback to enhanced mock data
-            positions = [
-                PositionResponse(
-                    symbol="BTCUSDT",
-                    size=0.1,
-                    value=11560.0,
-                    pnl=156.0,
-                    pnlPercent=1.37,
-                    entry_price=114000.0,
-                    current_price=115600.0
-                ),
-                PositionResponse(
-                    symbol="ETHUSDT", 
-                    size=2.5,
-                    value=9475.0,
-                    pnl=-125.0,
-                    pnlPercent=-1.30,
-                    entry_price=3840.0,
-                    current_price=3790.0
-                )
-            ]
-            
-            total_value = 25000.0  # Mock portfolio value
-            total_pnl = 31.0  # Net P&L
-            
-            return PortfolioStatusResponse(
-                total_value=total_value,
-                total_pnl=total_pnl,
-                total_pnl_percent=0.12,
-                positions=positions,
-                cash_balance=4000.0
+        
+        # Fallback to enhanced mock data
+        positions = [
+            PositionResponse(
+                symbol="BTCUSDT",
+                size=0.1,
+                value=11560.0,
+                pnl=156.0,
+                pnlPercent=1.37,
+                entry_price=114000.0,
+                current_price=115600.0
+            ),
+            PositionResponse(
+                symbol="ETHUSDT", 
+                size=2.5,
+                value=9475.0,
+                pnl=-125.0,
+                pnlPercent=-1.30,
+                entry_price=3840.0,
+                current_price=3790.0
             )
+        ]
+        
+        total_value = 25000.0  # Mock portfolio value
+        total_pnl = 31.0  # Net P&L
+        
+        return PortfolioStatusResponse(
+            total_value=total_value,
+            total_pnl=total_pnl,
+            total_pnl_percent=0.12,
+            positions=positions,
+            cash_balance=4000.0
+        )
             
     except Exception as e:
         logger.error(f"Portfolio status error: {e}")
