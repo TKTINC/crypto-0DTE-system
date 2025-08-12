@@ -50,57 +50,58 @@ class PortfolioSummaryResponse(BaseModel):
 async def get_portfolio_status(db: Session = Depends(get_db)):
     """Get current portfolio status and positions"""
     try:
-        # Try to get real portfolio data from Delta Exchange
-        try:
-            delta_connector = DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) 
-            # Get account balance and positions
-            balance_data = await delta_connector.get_account_balance()
-            positions_data = await delta_connector.get_positions()
-            
-            # Process real Delta Exchange data
-            positions = []
-            total_value = 0
-            total_pnl = 0
-            
-            for position in positions_data:
-                if position.get('size', 0) != 0:  # Only include non-zero positions
-                    symbol = position.get('product_symbol', 'UNKNOWN')
-                    size = float(position.get('size', 0))
-                    entry_price = float(position.get('entry_price', 0))
-                    current_price = float(position.get('mark_price', entry_price))
-                    value = abs(size) * current_price
-                    pnl = float(position.get('unrealized_pnl', 0))
-                    pnl_percent = (pnl / (abs(size) * entry_price)) * 100 if entry_price > 0 else 0
-                    
-                    positions.append(PositionResponse(
-                        symbol=symbol,
-                        size=size,
-                        value=value,
-                        pnl=pnl,
-                        pnlPercent=pnl_percent,
-                        entry_price=entry_price,
-                        current_price=current_price
-                    ))
-                    
-                    total_value += value
-                    total_pnl += pnl
-            
-            # Get cash balance
-            cash_balance = float(balance_data.get('available_balance', 0))
-            total_value += cash_balance
-            
-            total_pnl_percent = (total_pnl / (total_value - total_pnl)) * 100 if (total_value - total_pnl) > 0 else 0
-            
-            return PortfolioStatusResponse(
-                total_value=total_value,
-                total_pnl=total_pnl,
-                total_pnl_percent=total_pnl_percent,
-                positions=positions,
-                cash_balance=cash_balance
-            )
-            
-        except Exception as delta_error:
-            logger.warning(f"Delta Exchange portfolio fetch failed: {delta_error}, using mock data")
+        # Delta Exchange API calls DISABLED during startup phase
+        logger.debug("⏸️ Portfolio Delta Exchange API calls DISABLED - using mock data")
+        # try:
+        #     delta_connector = DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) 
+        #     # Get account balance and positions
+        #     balance_data = await delta_connector.get_account_balance()
+        #     positions_data = await delta_connector.get_positions()
+        #     
+        #     # Process real Delta Exchange data
+        #     positions = []
+        #     total_value = 0
+        #     total_pnl = 0
+        #     
+        #     for position in positions_data:
+        #         if position.get('size', 0) != 0:  # Only include non-zero positions
+        #             symbol = position.get('product_symbol', 'UNKNOWN')
+        #             size = float(position.get('size', 0))
+        #             entry_price = float(position.get('entry_price', 0))
+        #             current_price = float(position.get('mark_price', entry_price))
+        #             value = abs(size) * current_price
+        #             pnl = float(position.get('unrealized_pnl', 0))
+        #             pnl_percent = (pnl / (abs(size) * entry_price)) * 100 if entry_price > 0 else 0
+        #             
+        #             positions.append(PositionResponse(
+        #                 symbol=symbol,
+        #                 size=size,
+        #                 value=value,
+        #                 pnl=pnl,
+        #                 pnlPercent=pnl_percent,
+        #                 entry_price=entry_price,
+        #                 current_price=current_price
+        #             ))
+        #             
+        #             total_value += value
+        #             total_pnl += pnl
+        #     
+        #     # Get cash balance
+        #     cash_balance = float(balance_data.get('available_balance', 0))
+        #     total_value += cash_balance
+        #     
+        #     total_pnl_percent = (total_pnl / (total_value - total_pnl)) * 100 if (total_value - total_pnl) > 0 else 0
+        #     
+        #     return PortfolioStatusResponse(
+        #         total_value=total_value,
+        #         total_pnl=total_pnl,
+        #         total_pnl_percent=total_pnl_percent,
+        #         positions=positions,
+        #         cash_balance=cash_balance
+        #     )
+        #     
+        # except Exception as delta_error:
+        #     logger.warning(f"Delta Exchange portfolio fetch failed: {delta_error}, using mock data")
             
             # Fallback to enhanced mock data
             positions = [

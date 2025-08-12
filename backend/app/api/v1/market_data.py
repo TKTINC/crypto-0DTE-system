@@ -140,49 +140,50 @@ async def get_ohlcv_data_query(
         except Exception as cache_error:
             logger.debug(f"Redis cache check failed: {cache_error}")
         
-        # Try to get real data from Delta Exchange
-        try:
-            from app.services.exchanges.delta_exchange import DeltaExchangeConnector
-            from app.config import settings
-            
-            async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
-                # Convert symbol format (BTC-USDT -> BTCUSDT for Delta)
-                delta_symbol = symbol.replace('-', '')
-                
-                # Convert timeframe to Delta format
-                resolution_map = {
-                    "1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "1D"
-                }
-                resolution = resolution_map.get(timeframe, "60")
-                
-                # Get candles from Delta Exchange
-                candles = await delta.get_candles(
-                    symbol=delta_symbol,
-                    resolution=resolution
-                )
-                
-                if candles and len(candles) > 0:
-                    # Convert Delta Exchange format to our format
-                    ohlcv_data = []
-                    for candle in candles[-limit:]:  # Get last 'limit' candles
-                        ohlcv_data.append(OHLCVResponse(
-                            symbol=symbol,
-                            open=float(candle.get('open', 0)),
-                            high=float(candle.get('high', 0)),
-                            low=float(candle.get('low', 0)),
-                            close=float(candle.get('close', 0)),
-                            volume=float(candle.get('volume', 0)),
-                            timestamp=datetime.fromtimestamp(candle.get('time', 0) / 1000)
-                        ))
-                    
-                    return ohlcv_data
-                else:
-                    # Empty data from Delta Exchange, trigger fallback
-                    logger.warning(f"Delta Exchange returned empty data for {symbol}, using mock data")
-                    raise Exception("Empty data from Delta Exchange")
-                    
-        except Exception as delta_error:
-            logger.warning(f"Delta Exchange API failed: {delta_error}, falling back to mock data")
+        # Delta Exchange API calls DISABLED during startup phase
+        logger.debug("⏸️ Delta Exchange API calls DISABLED - using mock data")
+        # try:
+        #     from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+        #     from app.config import settings
+        #     
+        #     async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
+        #         # Convert symbol format (BTC-USDT -> BTCUSDT for Delta)
+        #         delta_symbol = symbol.replace('-', '')
+        #         
+        #         # Convert timeframe to Delta format
+        #         resolution_map = {
+        #             "1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "1D"
+        #         }
+        #         resolution = resolution_map.get(timeframe, "60")
+        #         
+        #         # Get candles from Delta Exchange
+        #         candles = await delta.get_candles(
+        #             symbol=delta_symbol,
+        #             resolution=resolution
+        #         )
+        #         
+        #         if candles and len(candles) > 0:
+        #             # Convert Delta Exchange format to our format
+        #             ohlcv_data = []
+        #             for candle in candles[-limit:]:  # Get last 'limit' candles
+        #                 ohlcv_data.append(OHLCVResponse(
+        #                     symbol=symbol,
+        #                     open=float(candle.get('open', 0)),
+        #                     high=float(candle.get('high', 0)),
+        #                     low=float(candle.get('low', 0)),
+        #                     close=float(candle.get('close', 0)),
+        #                     volume=float(candle.get('volume', 0)),
+        #                     timestamp=datetime.fromtimestamp(candle.get('time', 0) / 1000)
+        #                 ))
+        #             
+        #             return ohlcv_data
+        #         else:
+        #             # Empty data from Delta Exchange, trigger fallback
+        #             logger.warning(f"Delta Exchange returned empty data for {symbol}, using mock data")
+        #             raise Exception("Empty data from Delta Exchange")
+        #             
+        # except Exception as delta_error:
+        #     logger.warning(f"Delta Exchange API failed: {delta_error}, falling back to mock data")
         
         # Fallback to mock data for development
         interval_minutes = {
@@ -304,29 +305,30 @@ async def market_data_health():
 async def test_market_data_connection():
     """Test connection to market data sources"""
     try:
-        # Test Delta Exchange connection
-        try:
-            from app.services.exchanges.delta_exchange import DeltaExchangeConnector
-            from app.config import settings
+        # Delta Exchange connection test DISABLED during startup phase
+        logger.debug("⏸️ Delta Exchange connection test DISABLED - returning mock success")
+        # try:
+        #     from app.services.exchanges.delta_exchange import DeltaExchangeConnector
+        #     from app.config import settings
+        #     
+        #     async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
+        #         # Try to get a simple ticker to test connection
+        #         result = await delta.get_ticker("BTCUSDT")
+        #         
+        #         return {
+        #             "status": "connected",
+        #             "exchange": "Delta Exchange",
+        #             "test_result": "success",
+        #             "timestamp": datetime.utcnow()
+        #         }
+        #         
+        # except Exception as delta_error:
+        #     logger.warning(f"Delta Exchange connection test failed: {delta_error}")
             
-            async with DeltaExchangeConnector(paper_trading=settings.PAPER_TRADING) as delta:
-                # Try to get a simple ticker to test connection
-                result = await delta.get_ticker("BTCUSDT")
-                
-                return {
-                    "status": "connected",
-                    "exchange": "Delta Exchange",
-                    "test_result": "success",
-                    "timestamp": datetime.utcnow()
-                }
-                
-        except Exception as delta_error:
-            logger.warning(f"Delta Exchange connection test failed: {delta_error}")
-            
-            # Return mock success for development
-            return {
-                "status": "connected",
-                "exchange": "Mock Data (Development)",
+        # Return mock success for development
+        return {
+            "status": "connected",
+            "exchange": "Mock Data (Development)",
                 "test_result": "success",
                 "message": "Using mock data for development",
                 "timestamp": datetime.utcnow()
