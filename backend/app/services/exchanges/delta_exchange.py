@@ -744,49 +744,94 @@ class DeltaExchangeConnector:
             self.websocket = await websockets.connect(self.websocket_url)
             logger.info("Connected to Delta Exchange WebSocket")
             
-            # Try different authentication formats
+            # Try different authentication formats and API key field names
             auth_success = False
             signature_formats = ["http_api", "timestamp_only", "timestamp_key"]
+            api_key_fields = ["api-key", "apiKey", "api_key", "key", "ApiKey", "API_KEY", "access_key", "accessKey"]
+            auth_message_types = ["auth", "authenticate", "login"]
             
-            for format_type in signature_formats:
-                try:
-                    # Generate timestamp once for both signature and auth payload
-                    timestamp = str(int(time.time()))
+            for auth_type in auth_message_types:
+                for api_key_field in api_key_fields:
+                    for format_type in signature_formats:
+                        try:
+                            # Generate timestamp once for both signature and auth payload
+                            timestamp = str(int(time.time()))
+                            
+                            # Authenticate WebSocket with different field names and message types
+                            auth_payload = {
+                                api_key_field: self.api_key,
+                                "signature": self._generate_websocket_signature(timestamp, format_type),
+                                "timestamp": timestamp
+                            }
+                            
+                            # Only add passphrase if it's provided (Delta Exchange doesn't require it)
+                            if self.passphrase:
+                                auth_payload["passphrase"] = self.passphrase
+                            
+                            auth_message = {
+                                "type": auth_type,
+                                "payload": auth_payload
+                            }
+                            
+                            logger.info(f"Trying WebSocket auth: type='{auth_type}', field='{api_key_field}', format='{format_type}'")
+                            await self.websocket.send(json.dumps(auth_message))
+                            
+                            # Wait for response with timeout
+                            try:
+                                response = await asyncio.wait_for(self.websocket.recv(), timeout=5.0)
+                                auth_response = json.loads(response)
+                                
+                                # Check for various success indicators
+                                if (auth_response.get("type") == auth_type and auth_response.get("success")) or \
+                                   auth_response.get("status") == "success" or \
+                                   auth_response.get("authenticated") == True or \
+                                   "success" in str(auth_response).lower():
+                                    logger.info(f"WebSocket authentication successful: type='{auth_type}', field='{api_key_field}', format='{format_type}'")
+                                    auth_success = True
+                                    break
+                                else:
+                                    logger.debug(f"WebSocket auth failed: type='{auth_type}', field='{api_key_field}', format='{format_type}' -> {auth_response}")
+                                    
+                            except asyncio.TimeoutError:
+                                logger.debug(f"WebSocket auth timeout: type='{auth_type}', field='{api_key_field}', format='{format_type}'")
+                                continue
+                                
+                        except Exception as format_error:
+                            logger.debug(f"WebSocket auth error: type='{auth_type}', field='{api_key_field}', format='{format_type}' -> {format_error}")
+                            continue
                     
-                    # Authenticate WebSocket
-                    auth_payload = {
-                        "api-key": self.api_key,
-                        "signature": self._generate_websocket_signature(timestamp, format_type),
+                    if auth_success:
+                        break
+                
+                if auth_success:
+                    break
+            
+            if not auth_success:
+                # Try one more approach - direct payload without wrapper
+                try:
+                    logger.info("Trying direct authentication payload (no wrapper)")
+                    timestamp = str(int(time.time()))
+                    direct_auth = {
+                        "apiKey": self.api_key,
+                        "signature": self._generate_websocket_signature(timestamp, "http_api"),
                         "timestamp": timestamp
                     }
                     
-                    # Only add passphrase if it's provided (Delta Exchange doesn't require it)
-                    if self.passphrase:
-                        auth_payload["passphrase"] = self.passphrase
-                    
-                    auth_message = {
-                        "type": "auth",
-                        "payload": auth_payload
-                    }
-                    
-                    logger.info(f"Trying WebSocket authentication with format: {format_type}")
-                    await self.websocket.send(json.dumps(auth_message))
-                    response = await self.websocket.recv()
+                    await self.websocket.send(json.dumps(direct_auth))
+                    response = await asyncio.wait_for(self.websocket.recv(), timeout=5.0)
                     auth_response = json.loads(response)
                     
-                    if auth_response.get("type") == "auth" and auth_response.get("success"):
-                        logger.info(f"WebSocket authentication successful with format: {format_type}")
+                    if "success" in str(auth_response).lower() or not auth_response.get("error"):
+                        logger.info("WebSocket authentication successful with direct payload")
                         auth_success = True
-                        break
                     else:
-                        logger.warning(f"WebSocket authentication failed with format {format_type}: {auth_response}")
+                        logger.debug(f"Direct auth failed: {auth_response}")
                         
-                except Exception as format_error:
-                    logger.warning(f"WebSocket authentication error with format {format_type}: {format_error}")
-                    continue
+                except Exception as e:
+                    logger.debug(f"Direct auth error: {e}")
             
             if not auth_success:
-                raise DeltaExchangeError("WebSocket authentication failed with all signature formats")
+                raise DeltaExchangeError("WebSocket authentication failed with all methods")
                 
         except Exception as e:
             logger.error(f"WebSocket connection failed: {e}")
