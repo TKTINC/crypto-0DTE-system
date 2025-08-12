@@ -30,6 +30,7 @@ from app.services.autonomous_trading_orchestrator import AutonomousTradingOrches
 from app.services.trade_execution_engine import TradeExecutionEngine
 from app.services.position_manager import PositionManager
 from app.services.risk_manager import RiskManager
+from app.services.data_feed_service import DataFeedService
 
 from app.utils.logging_config import setup_logging
 
@@ -48,12 +49,13 @@ autonomous_orchestrator = None
 trade_execution_engine = None
 position_manager = None
 risk_manager = None
+data_feed_service = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
-    global autonomous_orchestrator, trade_execution_engine, position_manager, risk_manager
+    global autonomous_orchestrator, trade_execution_engine, position_manager, risk_manager, data_feed_service
     
     # Startup
     logger.info("Starting Crypto-0DTE-System...")
@@ -106,6 +108,15 @@ async def lifespan(app: FastAPI):
             logger.warning(f"⚠️ Trade Execution Engine initialization failed: {e}")
             trade_execution_engine = None
         
+        # Initialize Data Feed Service for real-time market data (non-blocking for API failures)
+        try:
+            data_feed_service = DataFeedService()
+            await data_feed_service.start()
+            logger.info("✅ Data Feed Service initialized - WebSocket connections active")
+        except Exception as e:
+            logger.warning(f"⚠️ Data Feed Service initialization failed: {e}")
+            data_feed_service = None
+        
         # Initialize Autonomous Trading Orchestrator (non-blocking for API failures)
         try:
             autonomous_orchestrator = AutonomousTradingOrchestrator(paper_trading=paper_trading)
@@ -150,6 +161,10 @@ async def lifespan(app: FastAPI):
         if risk_manager:
             await risk_manager.cleanup()
             logger.info("✅ Risk Manager stopped")
+        
+        if data_feed_service:
+            await data_feed_service.stop()
+            logger.info("✅ Data Feed Service stopped - WebSocket connections closed")
             
     except Exception as e:
         logger.error(f"Error shutting down autonomous services: {e}")
